@@ -10,10 +10,8 @@ working on the quantification of confocal measurements i reccomend one of the fo
 
 In both cases i would recommend setting up the nodejs-Web-GUI i made for this programm 
 
-Dependencies
-------------
 A short statement by the author, concerning licencing: 
-
+-------------------------------------------------------
 This codes is supposed to be free to use in a way that you can basically use it
 in any way you want, without any warranty from my side. I therefore chose the :ref:`licence-label`
 MIT Licence. Nevertheless, before using/redistributing this code in 
