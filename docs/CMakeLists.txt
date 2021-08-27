@@ -3,7 +3,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 # sets the project name
-project(VoxTrace++ VERSION 1.0)
+project(voxTrace VERSION 1.0)
 ######################################################################################## 
 # first we can indicate the documentation build as an option and set it to ON by default
 option(BUILD_DOC "Build documentation" ON)
@@ -12,8 +12,8 @@ option(BUILD_DOC "Build documentation" ON)
 find_package(Doxygen REQUIRED)
 if (DOXYGEN_FOUND)
 # set input and output files
-    set(DOXYGEN_IN ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in)     # ${CMAKE_CURRENT_SOURCE_DIR} = folder voxTrace++
-    set(DOXYGEN_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)       # ${CMAKE_CURRENT_SOURCE_DIR} = folder voxTrace++/build
+    set(DOXYGEN_IN ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in)     # ${CMAKE_CURRENT_SOURCE_DIR} = folder voxTrace
+    set(DOXYGEN_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)       # ${CMAKE_CURRENT_SOURCE_DIR} = folder voxTrace/build
     message(${CMAKE_CURRENT_SOURCE_DIR})
     message(${CMAKE_CURRENT_BINARY_DIR})
 

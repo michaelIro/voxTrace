@@ -23,7 +23,7 @@ depends on have different licences:
 
 
 ## Installation
-voxTrace++ can be installed/run in various ways on different systems. To optimize your general workflow when
+voxTrace can be installed/run in various ways on different systems. To optimize your general workflow when
 working on the quantification of confocal measurements i reccomend one of the following two ways:
 
     -   Install locally on Windows machine using WSL and Ubuntu 20.04. An advantage of this is that you can use 

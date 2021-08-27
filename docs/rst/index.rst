@@ -1,4 +1,4 @@
-VoxTrace++
+voxTrace
 ==========
 
 .. toctree::

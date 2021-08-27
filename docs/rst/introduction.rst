@@ -1,3 +1,3 @@
-What is VoxTrace++?
+What is voxTrace?
 ===================
-VoxTrace++ is a voxel based Monte-Carlo Ray tracing C++ code for quantitative confocal micro X-ray fluorescence analysis.
+voxTrace is a voxel based Monte-Carlo Ray tracing C++ code for quantitative confocal micro X-ray fluorescence analysis.
