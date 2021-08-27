@@ -1,5 +1,5 @@
 Class-Structure
-==============
+================
 .. doxygenclass:: Optimizer
    :members:
 
