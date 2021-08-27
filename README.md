@@ -1,7 +1,7 @@
-# voxTrace++
+# voxTrace
 A voxel based Monte-Carlo Ray tracing C++ code for quantitative confocal micro X-ray fluorescence analysis.
 
-voxTrace++ can be used 
+voxTrace can be used 
 
 ## Licencse
 A short statement by the author, concerning licencing: 
