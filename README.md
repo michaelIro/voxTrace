@@ -6,7 +6,7 @@ voxTrace can be used
 ## A short statement by the author, concerning licencing: 
 This codes is supposed to be free to use in a way that you can basically use it
 in any way you want, without any warranty from my side. I therefore chose the 
-MIT Licence (see below). Nevertheless, before using/redistributing this code in 
+MIT Licence (see [LICENSE](LICENSE)). Nevertheless, before using/redistributing this code in 
 a commercial way you should notice that some of the packages this code naturally 
 depends on have different licences:
 
