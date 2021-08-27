@@ -3,9 +3,7 @@ A voxel based Monte-Carlo Ray tracing C++ code for quantitative confocal micro X
 
 voxTrace can be used 
 
-## Licencse
-A short statement by the author, concerning licencing: 
-
+## A short statement by the author, concerning licencing: 
 This codes is supposed to be free to use in a way that you can basically use it
 in any way you want, without any warranty from my side. I therefore chose the 
 MIT Licence (see below). Nevertheless, before using/redistributing this code in 
