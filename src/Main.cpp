@@ -54,7 +54,7 @@ int main() {
 
 	// Simulation parameters
 	int n_threads = -1;			//amount of threads to use; -1 means use all available
-	int n_photons = 1000;		//simulate 30000 succesfully transmitted photons (excluding leak events)
+	int n_photons = 100000;		//simulate 30000 succesfully transmitted photons (excluding leak events)
 	bool leak_calc = false;		//choose to perform leak photon calculations or not. Leak calculations take significantly more time
 
 
