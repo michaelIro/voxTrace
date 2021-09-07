@@ -10,7 +10,7 @@
 /// \details A more detailed description goes here. 
 ///  
 
-#include "Optimizer.hpp"
+#include "OptimizerAPI.hpp"
 
 /*Empty constructor*/
-Optimizer::Optimizer(){}
+OptimizerAPI::OptimizerAPI(){}

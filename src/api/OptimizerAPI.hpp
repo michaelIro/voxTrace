@@ -1,11 +1,11 @@
 //!  API to global optimization library/libraries (ensmallen, OptimLib, GSL, ...)
-#ifndef Optimizer_H
-#define Optimizer_H
+#ifndef OptimizerAPI_H
+#define OptimizerAPI_H
 
-class Optimizer{
+class OptimizerAPI{
 
     public:
-        Optimizer();
+        OptimizerAPI();
 
 };
 

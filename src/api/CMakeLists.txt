@@ -14,7 +14,7 @@ set(CMAKE_CXX_STANDARD 20)
 add_library(XRayLibAPI XRayLibAPI.cpp)
 add_library(Shadow3API Shadow3API.cpp)
 add_library(PolyCapAPI PolyCapAPI.cpp)
-add_library(OptimizerAPI Optimizer.cpp)
+add_library(OptimizerAPI OptimizerAPI.cpp)
 #########################################################################################
 # XrayLib: a library for interactions of X-rays with matter => https://github.com/tschoonj/xraylib
 pkg_check_modules(XRAYLIB REQUIRED libxrl)
