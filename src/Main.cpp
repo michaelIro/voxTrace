@@ -1,22 +1,12 @@
-//!	Main file combining the other classes
-/*!
-  A more elaborate class description.
-*/
+//!	Main function
 #include <iostream>
 #include "api/XRayLibAPI.hpp"
 #include "api/Shadow3API.hpp"
 #include "api/PolyCapAPI.hpp"
 
-/// Main Function
 int main() {
 
-    //std::cout << "Hello World!" << std::endl;
-    //std::cout << AtomicWeight(17,NULL) << std::endl;
-
-    //for (int i=0; i<5; i++)
-    //    std::cout << *beam.rays+i << " " << std::endl;
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////
-    polycap_error *error = NULL;
+	polycap_error *error = NULL;
 	polycap_profile *profile;
 	polycap_description *description;
 	polycap_source *source;
@@ -54,7 +44,7 @@ int main() {
 
 	// Simulation parameters
 	int n_threads = -1;			//amount of threads to use; -1 means use all available
-	int n_photons = 100000;		//simulate 30000 succesfully transmitted photons (excluding leak events)
+	int n_photons = 1000000;		//simulate 30000 succesfully transmitted photons (excluding leak events)
 	bool leak_calc = false;		//choose to perform leak photon calculations or not. Leak calculations take significantly more time
 
 
@@ -69,23 +59,23 @@ int main() {
 	source = polycap_source_new(description, source_dist, source_rad_x, source_rad_y, source_div_x, source_div_y, source_shift_x, source_shift_y, source_polar, n_energies, energies, &error);
 	polycap_description_free(description); //We can free the description structure, as now it is contained in source
 
-    /////////////
+    /////////////////////////////////
 	//polycap_vector3 
 	//polycap_photon* myShadowPhoton = polycap_photon_new(description, )
-	polycap_rng *rng = polycap_rng_new();
-    polycap_photon *a = polycap_source_get_photon(source, rng, &error);
+	//polycap_rng *rng = polycap_rng_new();
+    //polycap_photon *a = polycap_source_get_photon(source, rng, &error);
     //polycap_photon_launch (a, n_energies, energies, weights, false, &error);
-	polycap_vector3 exitcoords = polycap_photon_get_exit_coords (a);
-	std::cout << exitcoords.x << std::endl;
-    ///////////
+	//polycap_vector3 exitcoords = polycap_photon_get_exit_coords (a);
+	//std::cout << exitcoords.x << std::endl;
+    //////////////////////////////////////////////////////
 
 	//calculate transmission efficiency curve
-	//efficiencies = polycap_source_get_transmission_efficiencies(source, n_threads, n_photons, leak_calc, NULL, &error);
+	efficiencies = polycap_source_get_transmission_efficiencies(source, n_threads, n_photons, leak_calc, NULL, &error);
 
-	//polycap_transmission_efficiencies_write_hdf5(efficiencies,"../test-data/pc-246.hdf5",NULL);
+	polycap_transmission_efficiencies_write_hdf5(efficiencies,"../test-data/pc-246.hdf5",NULL);
 
-	//double *efficiencies_arr = NULL;
-	//polycap_transmission_efficiencies_get_data(efficiencies, NULL, NULL, &efficiencies_arr, NULL);
+	double *efficiencies_arr = NULL;
+	polycap_transmission_efficiencies_get_data(efficiencies, NULL, NULL, &efficiencies_arr, NULL);
 
 	//print out efficiencies:
 	//for(i = 0 ; i < n_energies ; i++){
@@ -93,7 +83,7 @@ int main() {
 	//}
 
 	polycap_source_free(source);
-	//polycap_transmission_efficiencies_free(efficiencies);
+	polycap_transmission_efficiencies_free(efficiencies);
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
     return 0;
 }
