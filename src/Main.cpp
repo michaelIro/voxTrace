@@ -59,7 +59,7 @@ int main() {
 	source = polycap_source_new(description, source_dist, source_rad_x, source_rad_y, source_div_x, source_div_y, source_shift_x, source_shift_y, source_polar, n_energies, energies, &error);
 	polycap_description_free(description); //We can free the description structure, as now it is contained in source
 
-    /////////////////////////////////
+    ///////////////////////////////// Alternative Source
 	//polycap_vector3 
 	//polycap_photon* myShadowPhoton = polycap_photon_new(description, )
 	//polycap_rng *rng = polycap_rng_new();
@@ -68,7 +68,7 @@ int main() {
 	//polycap_vector3 exitcoords = polycap_photon_get_exit_coords (a);
 	//std::cout << exitcoords.x << std::endl;
     //////////////////////////////////////////////////////
-
+/*
 	//calculate transmission efficiency curve
 	efficiencies = polycap_source_get_transmission_efficiencies(source, n_threads, n_photons, leak_calc, NULL, &error);
 
@@ -83,7 +83,7 @@ int main() {
 	//}
 
 	polycap_source_free(source);
-	polycap_transmission_efficiencies_free(efficiencies);
+	polycap_transmission_efficiencies_free(efficiencies);*/
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
     return 0;
 }
