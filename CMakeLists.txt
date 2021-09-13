@@ -42,5 +42,5 @@ find_package(HDF5 REQUIRED)
 find_package(OpenACC REQUIRED)
 find_package(OpenMP REQUIRED)
 find_package(MPI REQUIRED)
-#find_package(CUDA REQUIRED)
+find_package(CUDA REQUIRED)
 ######################################################################################## end of finding libraries
