@@ -9,14 +9,14 @@
 #define Shadow3API_H
 
 #include <shadow_bind_cpp.hpp>
-#include <string>
+#include <armadillo>
 
 class Shadow3API{
 
     public:
         Shadow3API();
-        double* getBeam(std::string path);
-        
+        static arma::Mat<double> getBeam(int nRays);
+
 };
 
 #endif

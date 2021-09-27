@@ -1,7 +1,4 @@
 /*XRayLib API*/
-
-
-
 #include "XRayLibAPI.hpp"
 
 /*Empty constructor*/

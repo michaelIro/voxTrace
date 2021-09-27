@@ -12,7 +12,8 @@ class PolyCapAPI{
 
     public:
         PolyCapAPI();
-
+        void something();
+        void defineSource();
 };
 
 #endif

@@ -97,7 +97,7 @@ int main() {
     //plot.show();
 
     // Save the plot to a PDF file
-    plot.save("../test-data/example-sine-functions.pdf");
+    plot.save("../test-data/plots/example-sine-functions.pdf");
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
     polycap_error *error = NULL;
 	polycap_profile *profile;
