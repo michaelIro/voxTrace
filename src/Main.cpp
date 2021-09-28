@@ -9,10 +9,14 @@ int main() {
 	//arma::Mat<double> myBeam = Shadow3API::getBeam(7);
 	//myBeam.print();
 
-	//PolyCapAPI myPolycap;
-	arma::mat A;
-	A.load("../test-data/polycap/Primary.txt", arma::arma_ascii);
+	PolyCapAPI myPolycap;
+	myPolycap.defineSource();
+	myPolycap.traceSource();
+
+	arma::Mat<double> A;
+	A.load("../test-data/polycap/Primary.txt", arma::auto_detect);
 	A.print();
 
+	int a = K_SHELL;
     return 0;
 }

@@ -9,11 +9,17 @@
 #include <polycap.h>
 
 class PolyCapAPI{
+  private: 
+    polycap_error *error;
+	  polycap_profile *profile;
+    polycap_description *description;
+    polycap_source *source;
+	  polycap_transmission_efficiencies *efficiencies;
 
-    public:
-        PolyCapAPI();
-        void something();
-        void defineSource();
+  public:
+    PolyCapAPI();
+    void defineSource();
+    void traceSource();
 };
 
 #endif

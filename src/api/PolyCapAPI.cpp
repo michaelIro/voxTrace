@@ -1,17 +1,10 @@
 
 #include "PolyCapAPI.hpp"
 
-/*Empty constructor*/
+/* Empty constructor */
 PolyCapAPI::PolyCapAPI(){
 
-	polycap_error *error = NULL;
-	polycap_profile *profile;
-	polycap_description *description;
-	polycap_source *source;
-	polycap_transmission_efficiencies *efficiencies;
-
-	int i;
-    double** weights;
+	error = NULL;
 
 	// Optic parameters
 	double optic_length = 3.94;					//optic length in cm
@@ -28,29 +21,16 @@ PolyCapAPI::PolyCapAPI(){
 	double surface_rough = 5.;					//surface roughness in Angstrom
 	double n_capillaries = 200000.;				//number of capillaries in the optic
 
-
-
-	// Simulation parameters
-	int n_threads = -1;			//amount of threads to use; -1 means use all available
-	int n_photons = 1000000;		//simulate 30000 succesfully transmitted photons (excluding leak events)
-	bool leak_calc = false;		//choose to perform leak photon calculations or not. Leak calculations take significantly more time
-
-
 	//define optic profile shape
 	profile = polycap_profile_new(POLYCAP_PROFILE_ELLIPSOIDAL, optic_length, rad_ext_upstream, rad_ext_downstream, rad_int_upstream, rad_int_downstream, focal_dist_upstream, focal_dist_downstream, &error);
 
 	//define optic description
 	description = polycap_description_new(profile, surface_rough, n_capillaries, n_elem, iz, wi, density, &error);
-	polycap_profile_free(profile); //We can free the profile structure, as it is now contained in description
-
-
-
-
-
+	//polycap_profile_free(profile); //We can free the profile structure, as it is now contained in description
 }
 
+/* Blah */
 void PolyCapAPI::defineSource(){
-
 	// Photon source parameters
 	double source_dist = 6.0;					//distance between optic entrance and source along z-axis
 	double source_rad_x = 1.0;					//source radius in x, in cm
@@ -64,12 +44,34 @@ void PolyCapAPI::defineSource(){
 	double energies[7]={1,5,10,15,20,25,30};	//energies for which transmission efficiency should be calculated, in keV
 
 	//define photon source, including optic description
-	//source = polycap_source_new(description, source_dist, source_rad_x, source_rad_y, source_div_x, source_div_y, source_shift_x, source_shift_y, source_polar, n_energies, energies, &error);
+	source = polycap_source_new(description, source_dist, source_rad_x, source_rad_y, source_div_x, source_div_y, source_shift_x, source_shift_y, source_polar, n_energies, energies, &error);
 	//polycap_description_free(description); //We can free the description structure, as now it is contained in source
 }
 
+/* Blah */
+void PolyCapAPI::traceSource(){
+	int i;
+    double** weights;
 
-void PolyCapAPI::something(){
+
+	// Simulation parameters
+	int n_threads = -1;			//amount of threads to use; -1 means use all available
+	int n_photons = 1000000;		//simulate 30000 succesfully transmitted photons (excluding leak events)
+	bool leak_calc = false;		//choose to perform leak photon calculations or not. Leak calculations take significantly more time
+
+
+	//calculate transmission efficiency curve
+	efficiencies = polycap_source_get_transmission_efficiencies(source, n_threads, n_photons, leak_calc, NULL, &error);
+
+	polycap_transmission_efficiencies_write_hdf5(efficiencies,"../test-data/polycap/pc-246.hdf5",NULL);
+
+	double *efficiencies_arr = NULL;
+	polycap_transmission_efficiencies_get_data(efficiencies, NULL, NULL, &efficiencies_arr, NULL);
+
+	polycap_source_free(source);
+	polycap_transmission_efficiencies_free(efficiencies);
+}
+
         ///////////////////////////////// Alternative Source
 	//polycap_vector3 
 	//polycap_photon* myShadowPhoton = polycap_photon_new(description, )
@@ -79,23 +81,3 @@ void PolyCapAPI::something(){
 	//polycap_vector3 exitcoords = polycap_photon_get_exit_coords (a);
 	//std::cout << exitcoords.x << std::endl;
     //////////////////////////////////////////////////////
-/*
-	//calculate transmission efficiency curve
-	efficiencies = polycap_source_get_transmission_efficiencies(source, n_threads, n_photons, leak_calc, NULL, &error);
-
-	polycap_transmission_efficiencies_write_hdf5(efficiencies,"../test-data/pc-246.hdf5",NULL);
-
-	double *efficiencies_arr = NULL;
-	polycap_transmission_efficiencies_get_data(efficiencies, NULL, NULL, &efficiencies_arr, NULL);
-
-	//print out efficiencies:
-	//for(i = 0 ; i < n_energies ; i++){
-	//	printf("Energy: %lf keV, Transmission Efficiency: %lf percent.\n", energies[i], efficiencies_arr[i]*100.);
-	//}
-
-	polycap_source_free(source);
-	polycap_transmission_efficiencies_free(efficiencies);*/
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    int a=17;
-}
