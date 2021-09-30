@@ -72,7 +72,8 @@ void PolyCapAPI::traceSource(){
 	polycap_transmission_efficiencies_free(efficiencies);
 }
 
-        ///////////////////////////////// Alternative Source
+/* Blah */
+void PolyCapAPI::traceSinglePhoton(){
 	//polycap_vector3 
 	//polycap_photon* myShadowPhoton = polycap_photon_new(description, )
 	//polycap_rng *rng = polycap_rng_new();
@@ -81,3 +82,4 @@ void PolyCapAPI::traceSource(){
 	//polycap_vector3 exitcoords = polycap_photon_get_exit_coords (a);
 	//std::cout << exitcoords.x << std::endl;
     //////////////////////////////////////////////////////
+}

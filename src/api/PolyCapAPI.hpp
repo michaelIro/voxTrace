@@ -20,6 +20,7 @@ class PolyCapAPI{
     PolyCapAPI();
     void defineSource();
     void traceSource();
+    void traceSinglePhoton();
 };
 
 #endif
