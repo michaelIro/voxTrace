@@ -11,7 +11,8 @@ int main() {
 
 	PolyCapAPI myPolycap;
 	myPolycap.defineSource();
-	myPolycap.traceSource();
+	//myPolycap.traceSource();
+	myPolycap.traceSinglePhoton();
 
 	arma::Mat<double> A;
 	A.load("../test-data/polycap/Primary.txt", arma::auto_detect);
