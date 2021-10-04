@@ -74,7 +74,8 @@ void PolyCapAPI::traceSource(){
 
 /* Blah */
 void PolyCapAPI::traceSinglePhoton(){
-	//polycap_vector3 
+	polycap_vector3 testvec;
+	 
 	//polycap_photon* myShadowPhoton = polycap_photon_new(description, )
 	//polycap_rng *rng = polycap_rng_new();
     //polycap_photon *a = polycap_source_get_photon(source, rng, &error);
