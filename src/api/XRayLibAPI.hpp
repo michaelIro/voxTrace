@@ -31,7 +31,14 @@ class XRayLibAPI{
 
     public:
         XRayLibAPI();
-        //static double CS_Photo_Partial(29,K_SHELL,17.4,NULL);
+
+        static const char* AtomicNumberToSymbol(int z);
+        static double SymbolToAtomicNumber(const char* symbol);
+        static double AtomicWeight(int z);
+        static double ElementDensity(int z);
+        static double CS_Total(int z, double energy);
+        
+
 };
 
 #endif

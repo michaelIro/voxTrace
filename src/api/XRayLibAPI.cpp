@@ -3,3 +3,7 @@
 
 /*Empty constructor*/
 XRayLibAPI::XRayLibAPI(){}
+
+double XRayLibAPI::AtomicWeight(int z){
+    return 0;
+}
