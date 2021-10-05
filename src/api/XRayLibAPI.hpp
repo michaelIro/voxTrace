@@ -31,14 +31,11 @@ class XRayLibAPI{
 
     public:
         XRayLibAPI();
-
         static const char* AtomicNumberToSymbol(int z);
         static double SymbolToAtomicNumber(const char* symbol);
         static double AtomicWeight(int z);
         static double ElementDensity(int z);
         static double CS_Total(int z, double energy);
-        
-
 };
 
 #endif

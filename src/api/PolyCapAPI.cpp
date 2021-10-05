@@ -74,7 +74,41 @@ void PolyCapAPI::traceSource(){
 
 /* Blah */
 void PolyCapAPI::traceSinglePhoton(){
-	polycap_vector3 testvec;
+
+	polycap_vector3 start_coords;	
+	start_coords.x = 1.0;	
+	start_coords.y = 1.0;	
+	start_coords.z = 1.0;
+
+	polycap_vector3 start_direction;	
+	start_direction.x = 1.0;	
+	start_direction.y = 1.0;	
+	start_direction.z = 1.0;
+
+	polycap_vector3 start_electric_vector;	
+	start_electric_vector.x = 1.0;	
+	start_electric_vector.y = 1.0;	
+	start_electric_vector.z = 1.0;
+
+	polycap_photon* myPhoton;
+	myPhoton = polycap_photon_new(description, start_coords, start_direction, start_electric_vector, &error);
+
+	int n_energies = 7;							//number of discrete photon energies
+	double energies[7]={1,5,10,15,20,25,30};	//energies for which transmission efficiency should be calculated, in keV
+	//double** weights;
+
+	//int success = polycap_photon_launch(myPhoton, n_energies, energies, weights, true, &error);
+
+	polycap_vector3 exit_coords = polycap_photon_get_exit_coords(myPhoton);
+	polycap_vector3 exit_dir = polycap_photon_get_exit_direction(myPhoton);
+	polycap_vector3 exit_electric_vector = polycap_photon_get_exit_electric_vector(myPhoton);
+
+	polycap_photon_free(myPhoton);	
+
+
+	int ao=0;	
+
+	//polycap_vector3 testvec;
 	 
 	//polycap_photon* myShadowPhoton = polycap_photon_new(description, )
 	//polycap_rng *rng = polycap_rng_new();
