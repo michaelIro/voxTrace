@@ -9,6 +9,7 @@ Shadow3API::Shadow3API(){}
 arma::Mat<double> Shadow3API::getBeam(int nRays){
     
     Source src;
+    //OE     oe1;
     Beam beam;
     
     // load variables from start.00
@@ -20,6 +21,12 @@ arma::Mat<double> Shadow3API::getBeam(int nRays){
     // calculate source
     beam.genSource(&src);
 
+    // load start.01 into oe1
+    //oe1.load( (char*) "start.01");
+    
+    // traces OE1
+    //ray.traceOE(&oe1,1);
+
     // write rays to arma::mat
     arma::Mat<double> rays = arma::ones(src.NPOINT, src.NCOL);
     for(int i = 0; i < rays.n_rows; i++)
@@ -28,3 +35,4 @@ arma::Mat<double> Shadow3API::getBeam(int nRays){
 
     return rays;
 }
+

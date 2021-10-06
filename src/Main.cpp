@@ -6,8 +6,8 @@
 
 int main() {
 
-	//arma::Mat<double> myBeam = Shadow3API::getBeam(7);
-	//myBeam.print();
+	arma::Mat<double> myBeam = Shadow3API::getBeam(7);
+	myBeam.print();
 
 	PolyCapAPI myPolycap;
 	myPolycap.defineSource();
@@ -18,7 +18,7 @@ int main() {
 	A.load("../test-data/polycap/Primary.txt", arma::auto_detect);
 	A.print();
 
-	int a = K_SHELL;
+	XRayLibAPI::A(22);
 
     return 0;
 }

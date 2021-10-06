@@ -31,11 +31,22 @@ class XRayLibAPI{
 
     public:
         XRayLibAPI();
-        static const char* AtomicNumberToSymbol(int z);
-        static double SymbolToAtomicNumber(const char* symbol);
-        static double AtomicWeight(int z);
-        static double ElementDensity(int z);
-        static double CS_Total(int z, double energy);
+
+        static const char* AToSym(int z);
+        static double SymToA(const char* symbol);
+        static double A(int z);
+        static double Rho(int z);
+
+        static double CS_Tot(int z, double energy);
+        static double CS_Phot(int z, double energy);
+        static double CS_Rayl(int z, double energy);
+        
+        static double CS_FluorL(int z, int shell, double energy);
+        static double FluorY(int z, int shell);
+        static double AugY(int z, int shell);
+
+        static double LineE(int z, int line);
+
 };
 
 #endif

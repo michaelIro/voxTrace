@@ -4,6 +4,20 @@
 /*Empty constructor*/
 XRayLibAPI::XRayLibAPI(){}
 
-double XRayLibAPI::AtomicWeight(int z){
-    return 0;
+const char* XRayLibAPI::AToSym(int z){
+    return AtomicNumberToSymbol(z, NULL);
 }
+
+double XRayLibAPI::SymToA(const char* symbol){
+    return SymbolToAtomicNumber(symbol, NULL);
+}
+
+double XRayLibAPI::A(int z){
+    return AtomicWeight(z, NULL);
+}
+
+double XRayLibAPI::Rho(int z){
+    return ElementDensity(z, NULL);
+}
+
+

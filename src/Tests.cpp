@@ -186,29 +186,7 @@ int main() {
 
     arma::cout << "\nde: solution to Ackley test:\n" << xn << arma::endl;
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
-    Source src;
-    OE     oe1;
-    Beam   ray;
-    
-    // load variables from start.00
-    src.load( (char*) "../test-data/start.00");
 
-    std::cout << " Number of rays: " << src.NPOINT << std::endl;
-    src.NPOINT=100000;
-    std::cout << " Number of rays (modified): " << src.NPOINT << std::endl;
-
-    // calculate source
-    ray.genSource(&src);
-    ray.write( (char*) "../test-data/begin.dat");
-    
-    // load start.01 into oe1
-    //oe1.load( (char*) "start.01");
-    
-    // traces OE1
-    //ray.traceOE(&oe1,1);
-
-    // write file star.01
-    //ray.write( (char*) "star.01");
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
     cout	<<	"Cu - sigmai-K "	<<	CS_Photo_Partial(29,K_SHELL,17.4,NULL)	<<	endl;
