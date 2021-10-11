@@ -9,8 +9,8 @@
 
 
 */
-#ifndef PolyCap_H
-#define PolyCap_H
+#ifndef PolyCapAPI_H
+#define PolyCapAPI_H
 
 #include <polycap.h>
 

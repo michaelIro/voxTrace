@@ -20,4 +20,6 @@ double XRayLibAPI::Rho(int z){
     return ElementDensity(z, NULL);
 }
 
-
+void XRayLibAPI::test(){
+    double a = CS_Photo_Partial(29,K_SHELL,17.4,NULL);
+}

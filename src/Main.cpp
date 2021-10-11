@@ -1,8 +1,11 @@
 //!	Main function
 #include <iostream>
-#include "api/XRayLibAPI.hpp"
-#include "api/Shadow3API.hpp"
+
+#include "api/OptimizerAPI.hpp"
+#include "api/PlotAPI.hpp"
 #include "api/PolyCapAPI.hpp"
+#include "api/Shadow3API.hpp"
+#include "api/XRayLibAPI.hpp"
 
 int main() {
 

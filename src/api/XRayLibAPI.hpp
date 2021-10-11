@@ -47,6 +47,8 @@ class XRayLibAPI{
 
         static double LineE(int z, int line);
 
+        static void test();
+
 };
 
 #endif

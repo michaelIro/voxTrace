@@ -13,6 +13,7 @@ set(CMAKE_CXX_STANDARD 20)
 #########################################################################################
 add_library(XRayLibAPI XRayLibAPI.cpp)
 add_library(Shadow3API Shadow3API.cpp)
+add_library(PlotAPI PlotAPI.cpp)
 add_library(PolyCapAPI PolyCapAPI.cpp)
 add_library(OptimizerAPI OptimizerAPI.cpp)
 #########################################################################################
@@ -33,6 +34,13 @@ find_library(SHADOW_LIBRARY libshadow3.a)
 target_include_directories(Shadow3API PUBLIC ${SHADOW_INCLUDE_DIR}/src ${SHADOW_INCLUDE_DIR}/src/c ${SHADOW_INCLUDE_DIR}/src/def)
 target_link_libraries(Shadow3API ${SHADOW_CPP_LIBRARY} ${SHADOW_C_LIBRARY} ${SHADOW_LIBRARY})
 target_link_libraries(Shadow3API gfortran)
+#########################################################################################
+# SciPlot: a C++ scientific plotiing library powerd by gnupolot (MIT License)
+find_package(sciplot)
+if (SCIPLOT_FOUND)
+  include_directories(${SCIPLOT_INCLUDE_DIRS})
+  target_link_libraries (PlotAPI ${SCIPLOT_LIBRARIES})
+endif (SCIPLOT_FOUND)
 #########################################################################################
 # PolyCap: a C library to calculate X-ray transmission through polycapillaries => https://github.com/PieterTack/polycap
 pkg_check_modules(POLYCAP REQUIRED libpolycap)
