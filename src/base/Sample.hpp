@@ -6,10 +6,9 @@
 #include <iostream>
 #include <vector>
 
-#include "./ChemElement.h"
-#include "./Voxel.h"
-#include "./Spectrum.h"
-#include "../io/Scan.h"
+#include "./ChemElement.hpp"
+#include "./Voxel.hpp"
+#include "../io/Scan.hpp"
 
 
 using namespace std;

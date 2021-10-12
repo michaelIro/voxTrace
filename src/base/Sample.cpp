@@ -1,6 +1,6 @@
 /*Sample*/
 
-#include "Sample.h"
+#include "Sample.hpp"
 
 using namespace std;
 

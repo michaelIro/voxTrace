@@ -1,6 +1,6 @@
 /*Voxel*/
 
-#include "Voxel.h"
+#include "Voxel.hpp"
 
 using namespace std;
 

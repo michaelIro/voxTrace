@@ -12,10 +12,11 @@ set(CMAKE_CXX_STANDARD 20)
 add_executable(Tests src/Tests.cpp)
 add_executable(Main src/Main.cpp)
 #########################################################################################
-target_link_libraries(Main XRayLibAPI Shadow3API PlotAPI PolyCapAPI OptimizerAPI)
-target_link_libraries(Tests XRayLibAPI Shadow3API PlotAPI PolyCapAPI OptimizerAPI)
+target_link_libraries(Main XRayLibAPI Shadow3API PlotAPI PolyCapAPI OptimizerAPI vt.base)
+target_link_libraries(Tests XRayLibAPI Shadow3API PlotAPI PolyCapAPI OptimizerAPI vt.base)
 #########################################################################################
 add_subdirectory(src/api)
+add_subdirectory(src/base)
 add_subdirectory(docs)
 ######################################################################################### find installed libraries
 # Armadillo: a C++ library for linear algebra & scientific computing (Apache 2.0 license)

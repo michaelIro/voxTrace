@@ -11,3 +11,6 @@ Class-Structure
 
 .. doxygenclass:: XRayLibAPI
    :members:
+
+.. doxygenclass:: Main
+   :members:

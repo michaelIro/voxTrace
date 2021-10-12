@@ -4,8 +4,8 @@
 /**Voxel*/
 
 #include <iostream>
-#include "./Material.h"
-#include "./Spectrum.h"
+#include "./Material.hpp"
+#include "./Ray.hpp"
 
 using namespace std;
 
@@ -30,7 +30,6 @@ class Voxel{
 
 		Material getMaterial() const;
 		Voxel* getNN(int i) const;
-		//Spectrum getSpectrum() const;		
 
 		double intersect(Ray* ray, int* nextVoxel, double *tIn);
 

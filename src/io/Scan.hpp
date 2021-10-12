@@ -13,9 +13,9 @@
 //#include <armadillo>
 //#include <algorithm>    // std::next_permutation, std::sort
 
-#include "../base/Material.h"
-#include "../base/ChemElement.h"
-#include "../setup/Sensitivity.h"
+#include "../base/Material.hpp"
+#include "../base/ChemElement.hpp"
+//#include "../setup/Sensitivity.h"
 
 
 using namespace std;
@@ -51,7 +51,7 @@ class Scan{
 
 		void readSpectra(filesystem::path speFolderPath);
 
-		void intensities2Materials(Sensitivity sensitivity);
+		//void intensities2Materials(Sensitivity sensitivity);
 		
 		//void readIntensities();
 		//vector<string> getSpeFileNames() const;

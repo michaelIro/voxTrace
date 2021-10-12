@@ -7,8 +7,8 @@
 #include <map>
 #include <vector>
 #include <math.h>
-#include "xraylib.h"
 
+#include "../api/XRayLibAPI.hpp"
 
 using namespace std;
 

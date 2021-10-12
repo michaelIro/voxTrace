@@ -10,11 +10,11 @@
 #include <list>
 #include <limits>
 
-#include "xraylib.h"
-#include "../base/Ray.h"
-#include "../base/Sample.h"
-#include "../setup/Source.h"
-//#include "IUPAC.h"
+#include "../api/XRayLibAPI.hpp"
+
+#include "../base/Ray.hpp"
+#include "../base/Sample.hpp"
+#include "../setup/Source.hpp"
 
 
 using namespace std;
@@ -29,14 +29,10 @@ class Tracer {
   		Tracer();
 		Tracer(Source source, Sample sample);
 
-
 		void start();
+
 		/*Trace the Path of a single ray.*/
 		Ray* traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample *sample);
-
-
-
 };
 
 #endif
-

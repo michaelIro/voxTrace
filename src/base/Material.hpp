@@ -8,7 +8,7 @@
 #include <map>
 #include <vector>
 
-#include "../base/ChemElement.h"
+#include "../base/ChemElement.hpp"
 
 using namespace std;
 

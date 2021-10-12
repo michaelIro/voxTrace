@@ -1,6 +1,6 @@
 /*Scan*/
 
-#include "Scan.h"
+#include "Scan.hpp"
 
 using namespace std;
 
@@ -412,6 +412,7 @@ vector<double> Scan::getLengths() const {
 	return lengths_;
 }
 
+/*
 void Scan::intensities2Materials(Sensitivity sensitivity){
 	vector<vector<vector<Material>>> myMaterials__;
 	for(size_t i =0; i < intensities_.size(); i++){
@@ -435,7 +436,7 @@ void Scan::intensities2Materials(Sensitivity sensitivity){
 	
 
 }
-
+*/
 void Scan::print() const {
 
 	for(size_t i = 0; i<spes_.size(); i++){
