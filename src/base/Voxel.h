@@ -17,7 +17,7 @@ class Voxel{
 		Material mat_;
 		Voxel *nn_[27];
 
-  public:
+  	public:
 		Voxel();
 		Voxel(double x0, double y0, double z0, double x1, double y1, double z1, Material mat);
 
