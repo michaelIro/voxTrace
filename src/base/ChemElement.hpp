@@ -6,10 +6,9 @@
 #include <iostream>
 #include <map>
 #include <vector>
-//#include <list>
 #include <math.h>
 #include "xraylib.h"
-//#include "IUPAC.h"
+
 
 using namespace std;
 
