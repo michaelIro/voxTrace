@@ -9,31 +9,31 @@ ChemElement::ChemElement(){}
 
 /*Constructor using Atomic number Z*/
 ChemElement::ChemElement(const int& z){
-	z_=z;
-	symbol_=AtomicNumberToSymbol(z_, NULL);
-	a_=AtomicWeight(z_,NULL);
-	rho_ = ElementDensity(z_,NULL);
+	z_ =		z;
+	symbol_ =	XRayLibAPI::ZToSym(z_);
+	a_ =		XRayLibAPI::A(z_);
+	rho_ = 		XRayLibAPI::Rho(z_);
 }
 
 /*Constructor using Element Symbol used in Periodic Table*/
 ChemElement::ChemElement(const char *symbol){
-	z_=SymbolToAtomicNumber(symbol, NULL);
-	symbol_=symbol;
-	a_=AtomicWeight(z_,NULL);
-	rho_ = ElementDensity(z_,NULL);
+	z_=			XRayLibAPI::SymToZ(symbol);
+	symbol_ =	symbol;
+	a_ =		XRayLibAPI::A(z_);
+	rho_ = 		XRayLibAPI::Rho(z_);
 }
 
 /*Getter-Functions for member variables*/
-double ChemElement::getA() const {return a_;}
-int ChemElement::getZ() const {return z_;}
-double ChemElement::getRho() const {return rho_;}
-const char* ChemElement::getSymbol() const {return symbol_;}
+double ChemElement::A() const {return a_;}
+int ChemElement::Z() const {return z_;}
+double ChemElement::Rho() const {return rho_;}
+const char* ChemElement::Sym() const {return symbol_;}
 
 /*Feed symbol to ostream / Overload comparison operators*/
-ostream& operator<<(std::ostream& os, const ChemElement& el){return os<<el.getSymbol();}
-bool operator<(const ChemElement& el1, const ChemElement& el2){return (el1.getZ() < el2.getZ());}
-bool operator>(const ChemElement& el1, const ChemElement& el2){return (el1.getZ() > el2.getZ());}
-bool operator==(const ChemElement& el1, const ChemElement& el2){return (el1.getZ() == el2.getZ());}
+ostream& operator<<(std::ostream& os, const ChemElement& el){return os<<el.Sym();}
+bool operator<(const ChemElement& el1, const ChemElement& el2){return (el1.Z() < el2.Z());}
+bool operator>(const ChemElement& el1, const ChemElement& el2){return (el1.Z() > el2.Z());}
+bool operator==(const ChemElement& el1, const ChemElement& el2){return (el1.Z() == el2.Z());}
 
 //Simple DB-Access functions
 /*returns total Mass attenuation coefficient [cm²/g]*/
@@ -43,8 +43,7 @@ double ChemElement::getAugerYield(int shell) const {return AugerYield(z_,shell, 
 double ChemElement::getFluorescenceCrossSection(int shell, double energy) const {return CS_FluorLine(z_,shell,energy, NULL);}
 
 double ChemElement::getLineEnergy(int line) const {
-	int lineInput = line*-1-1; //see xraylib and IUPAC
-	return LineEnergy(z_,lineInput, NULL);
+	return XRayLibAPI::LineE(z_,line*-1-1); //see xraylib and IUPAC for *-1-1
 }
 
 /*Gives back The type of Interaction*/

@@ -13,7 +13,7 @@
 
 int main() {
 
-	arma::Mat<double> myBeam = Shadow3API::getBeam(7);
+	arma::Mat<double> myBeam = Shadow3API::getBeamFromSource(7,(char*) "../test-data/shadow3/start.00");
 	myBeam.print();
 
 	PolyCapAPI myPolycap;
@@ -21,21 +21,25 @@ int main() {
 	//myPolycap.traceSource();
 	myPolycap.traceSinglePhoton();
 
-	arma::Mat<double> A;
-	A.load("../test-data/polycap/Primary.txt", arma::auto_detect);
-	A.print();
+	//arma::Mat<double> A;
+	//A.load("../test-data/polycap/Primary.txt", arma::auto_detect);
+	//A.print();
 
-	XRayLibAPI::A(22);
+	int a = XRayLibAPI::A(22);
 
 	vector<vector<vector<Material>>> myMat;
-	
+
 	map<int,double> cuMatMap{{29,1.0}};
+
+	//arma::field<Material> myMaterials(11,11,11); TODO: change vec<vec<vec>> to field
+		
 	for(int i = 0; i < 11; i++){
 		vector<vector<Material>> myMat1;
 		for(int j = 0; j < 11; j++){
 			vector<Material> myMat2;
 			for(int k = 0; k < 11; k++){
 				myMat2.push_back(Material(cuMatMap,8.96));
+				//myMaterials(i,j,k) = Material(cuMatMap,8.96);
 			}
 			myMat1.push_back(myMat2);
 		}
@@ -46,6 +50,9 @@ int main() {
 	myElements.push_back(ChemElement(29));
 
 	Sample sample_ (0.,0.,0.,150.,150.,150.,15.,15.,15.,myMat,myElements);
+
+	//Tracer tracer_(source_, sample_);
+	//tracer_.start();
 
     return 0;
 }

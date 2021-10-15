@@ -1,5 +1,5 @@
-Class-Structure
-================
+APIs to external Software
+=========================
 .. doxygenclass:: OptimizerAPI
    :members:
 
@@ -12,5 +12,5 @@ Class-Structure
 .. doxygenclass:: XRayLibAPI
    :members:
 
-.. doxygenclass:: Main
+.. doxygenclass:: PlotAPI
    :members:

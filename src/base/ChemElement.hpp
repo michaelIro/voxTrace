@@ -25,10 +25,10 @@ class ChemElement {
 		ChemElement(const int& z);
 		
 		/*Member-Getter*/
-		double getA() const;
-		int getZ() const;
-		double getRho() const;	
-		const char* getSymbol() const;
+		double A() const;
+		int Z() const;
+		double Rho() const;	
+		const char* Sym() const;
 
 		/*Simple DB-Access*/
 		double getMuMass(double energy) const;

@@ -9,4 +9,4 @@ project(voxTrace VERSION 1.0)
 set(CMAKE_CXX_STANDARD 20)
 #########################################################################################
 add_library(vt.base ChemElement.cpp Material.cpp Ray.cpp Voxel.cpp Sample.cpp)
-target_link_libraries(vt.base XRayLibAPI)
+target_link_libraries(vt.base XRayLibAPI Shadow3API PlotAPI PolyCapAPI OptimizerAPI)

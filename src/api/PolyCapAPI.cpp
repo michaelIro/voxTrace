@@ -22,11 +22,12 @@ PolyCapAPI::PolyCapAPI(){
 	double n_capillaries = 200000.;				//number of capillaries in the optic
 
 	//define optic profile shape
+	polycap_profile *profile;
 	profile = polycap_profile_new(POLYCAP_PROFILE_ELLIPSOIDAL, optic_length, rad_ext_upstream, rad_ext_downstream, rad_int_upstream, rad_int_downstream, focal_dist_upstream, focal_dist_downstream, &error);
 
 	//define optic description
 	description = polycap_description_new(profile, surface_rough, n_capillaries, n_elem, iz, wi, density, &error);
-	//polycap_profile_free(profile); //We can free the profile structure, as it is now contained in description
+	polycap_profile_free(profile); //We can free the profile structure, as it is now contained in description
 }
 
 /* Blah */

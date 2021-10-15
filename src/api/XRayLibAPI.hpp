@@ -1,7 +1,9 @@
-//! API to XrayLib, a library for interactions of X-rays with matter 
 /*!
-  XrayLib is a library for interactions of X-rays with matter, published by Tom Schoonjans.
-  Documentation is available @ https://github.com/tschoonj/xraylib/wiki and repositories can be found @ https://github.com/tschoonj/xraylib.
+  API to XrayLib, a library for interactions of X-rays with matter, published by Tom Schoonjans.
+
+  Documentation is available @ https://github.com/tschoonj/xraylib/wiki 
+  
+  Repositories can be found @ https://github.com/tschoonj/xraylib
 
   Copyright (c) 2009, Tom Schoonjans
   All rights reserved.
@@ -32,14 +34,14 @@ class XRayLibAPI{
     public:
         XRayLibAPI();
 
-        static const char* AToSym(int z);
-        static double SymToA(const char* symbol);
+        static const char* ZToSym(int z);
+        static double SymToZ(const char* symbol);
         static double A(int z);
         static double Rho(int z);
 
         static double CS_Tot(int z, double energy);
         static double CS_Phot(int z, double energy);
-        static double CS_Rayl(int z, double energy);
+        static double CS_Ray(int z, double energy);
         
         static double CS_FluorL(int z, int shell, double energy);
         static double FluorY(int z, int shell);

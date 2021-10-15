@@ -9,7 +9,7 @@ Tracer::Tracer(){}
 Tracer::Tracer(Source source, Sample sample){
 	cout<<"START: voxTrace - Tracer()"<<endl;
 
-	srand(time(NULL)); 		// TODO: is this the correct place
+	srand(time(NULL)); 		// TODO: is this the correct place 
 
 	list<Ray> tracedRays;
 	int i = 0;

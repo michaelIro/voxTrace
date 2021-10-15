@@ -52,7 +52,7 @@ void Material::setRho(double rho){rho_=rho;}
 string Material::getName(vector<ChemElement> elements) const {
 	string name;
 	for(auto const& it: wi_){
-		name.append(elements[it.first].getSymbol());
+		name.append(elements[it.first].Sym());
 		name.append(std::to_string(it.second));
 	}
 	return name;

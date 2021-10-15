@@ -1,13 +1,11 @@
 /*!
-  API to PolyCap, a C library to calculate X-ray transmission through polycapillaries 
-
-  PolyCap is a C library to calculate X-ray transmission through polycapillaries, published by Pieter Tack, Tom Schoonjans and Laszlo Vincze.
+API to PolyCap, a C library to calculate X-ray transmission through polycapillaries, published by Pieter Tack, Tom Schoonjans and Laszlo Vincze.
   
-  Documentation: https://pietertack.github.io/polycap/ \n
-  Repositories: https://github.com/PieterTack/polycap
-  (August-2021)
+  Documentation is available @  https://pietertack.github.io/polycap
+  
+  Repositories can be found @ https://github.com/PieterTack/polycap
 
-
+  For more general usage this Interface also implements an Interface to Rays generated/traced with the Shadow3 code.
 */
 #ifndef PolyCapAPI_H
 #define PolyCapAPI_H
@@ -17,7 +15,7 @@
 class PolyCapAPI{
   private: 
     polycap_error *error;
-	  polycap_profile *profile;
+
     polycap_description *description;
     polycap_source *source;
 	  polycap_transmission_efficiencies *efficiencies;
