@@ -46,6 +46,13 @@ void PolyCapAPI::defineSource(){
 
 	//define photon source, including optic description
 	source = polycap_source_new(description, source_dist, source_rad_x, source_rad_y, source_div_x, source_div_y, source_shift_x, source_shift_y, source_polar, n_energies, energies, &error);
+	
+	//Test photon
+	polycap_rng *rng;
+	rng = polycap_rng_new();
+	polycap_photon* pTest = polycap_source_get_photon(source, rng, NULL);
+	polycap_photon* p2 = *pTest;
+	double a=1.2;
 	//polycap_description_free(description); //We can free the description structure, as now it is contained in source
 }
 
