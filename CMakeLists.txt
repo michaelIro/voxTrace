@@ -40,6 +40,8 @@ find_package(OpenMP REQUIRED)
 target_link_libraries(Main OpenMP::OpenMP_CXX)
 target_link_libraries(Main OpenMP::OpenMP_C)
 
+target_compile_options(Main PRIVATE -Wall ${OpenMP_CXX_FLAGS} ${OpenMP_C_FLAGS})
+
 #find_package(MPI REQUIRED)
 #find_package(CUDA REQUIRED)
 ######################################################################################## end of finding libraries

@@ -126,7 +126,7 @@ vector<int>  ChemElement::getTransitionList(int shell){
 	return shell_lines_[shell];
 }
 
-/*XXX: Maybe Integral to unprecise*/
+/*TODO: Maybe Integral to unprecise*/
 double ChemElement::getThetaCompt(double energy, double randomN){
 		int stepsize = 200;
 	int arraysize = (int) (M_PI/(1./((double)stepsize)))+1;

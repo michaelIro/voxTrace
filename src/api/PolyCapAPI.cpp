@@ -12,7 +12,7 @@ PolyCapAPI::PolyCapAPI(){
 	double rad_ext_downstream = 0.215;			//external radius downstream, at exit window, in cm
 	double rad_int_upstream = 0.000805; 		//single capillary radius, at optic entrance, in cm
 	double rad_int_downstream = 0.000234; 		//single capillary radius, at optic exit, in cm
-	double focal_dist_upstream = 10000000000000.0; 	//focal distance on entrance window side, in cm
+	double focal_dist_upstream = 1000000.0; 	//focal distance on entrance window side, in cm
 	double focal_dist_downstream = 0.51; 		//focal distance on exit window side, in cm
 	int n_elem = 2;								//amount of elements in optic material
 	int iz[2]={8,14};							//polycapillary optic material composition: atomic numbers and corresponding weight percentages
@@ -34,16 +34,16 @@ PolyCapAPI::PolyCapAPI(){
 void PolyCapAPI::defineSource(){
 
 	// Photon source parameters TODO: IO for clean looking .txt File for these parameters (should be adaptable without recompiling)
-	double source_dist = 6.0;					//distance between optic entrance and source along z-axis
-	double source_rad_x = 1.0;					//source radius in x, in cm
-	double source_rad_y = 1.0;					//source radius in y, in cm
-	double source_div_x = 0.000471239;			//source divergence in x, in rad
-	double source_div_y = 0.01;					//source divergence in y, in rad
+	double source_dist = 100.0;				//distance between optic entrance and source along z-axis
+	double source_rad_x = 0.75;					//source radius in x, in cm
+	double source_rad_y = 0.75;					//source radius in y, in cm
+	double source_div_x = 0.0;					//source divergence in x, in rad
+	double source_div_y = 0.0;					//source divergence in y, in rad
 	double source_shift_x = 0.;					//source shift in x compared to optic central axis, in cm
 	double source_shift_y = 0.;					//source shift in y compared to optic central axis, in cm
 	double source_polar = 0.5;					//source polarisation factor
 	int n_energies = 7;							//number of discrete photon energies
-	double energies[7]={1,5,10,15,20,25,30};	//energies for which transmission efficiency should be calculated, in keV
+	double energies[7]={6.5,8,10,12,14,17.5,20};	//energies for which transmission efficiency should be calculated, in keV
 
 	//define photon source, including optic description
 	source = polycap_source_new(description, source_dist, source_rad_x, source_rad_y, source_div_x, source_div_y, source_shift_x, source_shift_y, source_polar, n_energies, energies, &error);
@@ -57,7 +57,7 @@ void PolyCapAPI::traceSource(){
 
 	// Simulation parameters
 	int n_threads = -1;			//amount of threads to use; -1 means use all available
-	int n_photons = 1000;		//simulate 30000 succesfully transmitted photons (excluding leak events)
+	int n_photons = 100000;		//simulate 30000 succesfully transmitted photons (excluding leak events)
 	bool leak_calc = false;		//choose to perform leak photon calculations or not. Leak calculations take significantly more time
 
 	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
@@ -95,11 +95,11 @@ void PolyCapAPI::traceSinglePhoton(arma::Mat<double> shadowBeam){
 	arma::Mat<double> polycapBeamBefore = arma::ones(10, 9);
 	arma::Mat<double> polycapBeamAfter = arma::ones(10, 9);
 	
-    for(int i = 0; i < 10; i++){
+    for(int i = 0; i < 7; i++){
 		polycap_photon  *polyCapPhot;
 		polyCapPhot = polycap_source_get_photon(source, rng, NULL);
 
-		polycapBeamBefore(i,0) = polyCapPhot->start_coords.x; 
+		/*polycapBeamBefore(i,0) = polyCapPhot->start_coords.x; 
 		polycapBeamBefore(i,1) = polyCapPhot->start_coords.y; 
 		polycapBeamBefore(i,2) = polyCapPhot->start_coords.z; 
 		polycapBeamBefore(i,3) = polyCapPhot->start_direction.x; 
@@ -127,9 +127,9 @@ void PolyCapAPI::traceSinglePhoton(arma::Mat<double> shadowBeam){
 		polycapBeamAfter(i,5) = polyCapPhot->start_direction.z; 
 		polycapBeamAfter(i,6) = polyCapPhot->start_electric_vector.x; 
 		polycapBeamAfter(i,7) = polyCapPhot->start_electric_vector.y; 
-		polycapBeamAfter(i,8) = polyCapPhot->start_electric_vector.z; 
+		polycapBeamAfter(i,8) = polyCapPhot->start_electric_vector.z; */
 
-		//int success = polycap_photon_launch(polyCapPhot, polyCapPhot->n_energies, polyCapPhot->energies, polyCapPhot->weight, true, &error);
+	//int success = polycap_photon_launch(polyCapPhot, polyCapPhot->n_energies, polyCapPhot->energies, polyCapPhot->weight, true, &error);
 
 		polycap_vector3 exit_coords = polycap_photon_get_exit_coords(polyCapPhot);
 		polycap_vector3 exit_dir = polycap_photon_get_exit_direction(polyCapPhot);

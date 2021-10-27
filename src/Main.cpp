@@ -15,12 +15,12 @@
 
 int main() {
 
-	//arma::Mat<double> myBeam = Shadow3API::getBeamFromSource(7,(char*) "../test-data/shadow3/start.00");
+	arma::Mat<double> myBeam = Shadow3API::getBeamFromSource(7,(char*) "../test-data/shadow3/start.00");
 
 	PolyCapAPI myPolycap;
 	myPolycap.defineSource();
-	myPolycap.traceSource();
-	//myPolycap.traceSinglePhoton(myBeam);
+	//myPolycap.traceSource();
+	myPolycap.traceSinglePhoton(myBeam);
 
 	//arma::Mat<double> A;
 	//A.load("../test-data/polycap/Primary.txt", arma::auto_detect);
