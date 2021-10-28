@@ -35,12 +35,6 @@ find_package(HDF5 REQUIRED)
 #find_package(LAPACK REQUIRED)
 #find_package(OpenACC REQUIRED)
 
-find_package(OpenMP REQUIRED)
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
-target_link_libraries(Main OpenMP::OpenMP_CXX)
-target_link_libraries(Main OpenMP::OpenMP_C)
-
-target_compile_options(Main PRIVATE -Wall ${OpenMP_CXX_FLAGS} ${OpenMP_C_FLAGS})
 
 #find_package(MPI REQUIRED)
 #find_package(CUDA REQUIRED)

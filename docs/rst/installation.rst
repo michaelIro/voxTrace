@@ -15,8 +15,6 @@ MIT Licence. Nevertheless, before using/redistributing this code in
 a commercial way you should notice that some of the packages this code naturally 
 depends on have different licences:
 
-Level3
-~~~~~~~~~~~~~~~~~~
 * Armadillo: a C++ library for linear algebra & scientific computing                                (Apache 2.0 License)
 * OptimLib: a lightweight C++ library of numerical optimization methods for nonlinear functions.    (Apache 2.0 License)
 * Shadow3: an open source ray tracing code for modeling optical systems                             (MIT Licence)
@@ -27,3 +25,7 @@ Level3
 
 * Ensmallen: a flexible C++ library for efficient numerical optimization                            (3-clause BSD licence)
 * GSL - GNU Scientific Library                                                                      (mostly GNU General Public Licence)
+
+Level3
+~~~~~~~~~~~~~~~~~~
+Some Text

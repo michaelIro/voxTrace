@@ -15,18 +15,20 @@
 
 int main() {
 
-	arma::Mat<double> myBeam = Shadow3API::getBeamFromSource(7,(char*) "../test-data/shadow3/start.00");
+	arma::Mat<double> myBeam = Shadow3API::getBeamFromSource(1000,(char*) "../test-data/shadow3/start.00");
 
 	PolyCapAPI myPolycap;
 	myPolycap.defineSource();
 	//myPolycap.traceSource();
 	myPolycap.traceSinglePhoton(myBeam);
 
+	//OptimizerAPI myOptimizer;
+
 	//arma::Mat<double> A;
 	//A.load("../test-data/polycap/Primary.txt", arma::auto_detect);
 	//A.print();
 
-	int a = XRayLibAPI::A(22);
+	//int a = XRayLibAPI::A(22);
 
 	vector<vector<vector<Material>>> myMat;
 

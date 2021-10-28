@@ -47,6 +47,13 @@ pkg_check_modules(POLYCAP REQUIRED libpolycap)
 target_link_libraries(PolyCapAPI ${POLYCAP_LIBRARIES})
 target_include_directories(PolyCapAPI PUBLIC ${POLYCAP_INCLUDE_DIRS})
 target_compile_options(PolyCapAPI PUBLIC ${XPOLYCAP_CFLAGS_OTHER})
+
+find_package(OpenMP REQUIRED)
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
+target_link_libraries(PolyCapAPI  OpenMP::OpenMP_CXX)
+target_link_libraries(PolyCapAPI  OpenMP::OpenMP_C)
+
+target_compile_options(PolyCapAPI PRIVATE ${OpenMP_CXX_FLAGS} ${OpenMP_C_FLAGS})
 #########################################################################################
 # Ensmallen: a flexible C++ library for efficient numerical optimization (3-clause BSD licence)
 find_package(Ensmallen REQUIRED)

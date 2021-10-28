@@ -24,9 +24,9 @@ int polycap_photon_within_pc_boundary(double polycap_radius, polycap_vector3 pho
 #ifndef PolyCapAPI_H
 #define PolyCapAPI_H
 
-//#include <polycap.h>
 #include <armadillo>
 
+//#include <polycap.h>
 #include <polycap-private.h>
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
@@ -42,9 +42,12 @@ class PolyCapAPI{
 
   public:
     PolyCapAPI();
+    
     void defineSource();
     void traceSource();
+
     void traceSinglePhoton(arma::Mat<double> shadowBeam);
+
     polycap_transmission_efficiencies* polycap_shadow_source_get_transmission_efficiencies(polycap_source *source, int max_threads, int n_photons, bool leak_calc, polycap_progress_monitor *progress_monitor, polycap_error **error);
 };
 

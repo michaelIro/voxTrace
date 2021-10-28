@@ -31,8 +31,6 @@ OptimizerAPI::OptimizerAPI(){
     double y0 = gsl_sf_bessel_J0 (x0);
     printf ("J0(%g) = %.18e\n", x0, y0);
  ///////////////////////////////////////////////////////////////////////////////////////////////////////
- // initial values:
-    
     arma::vec xn = arma::ones(2,1) + 1.0;
 
     std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
@@ -50,6 +48,9 @@ OptimizerAPI::OptimizerAPI(){
     }
 
     arma::cout << "\nde: solution to Ackley test:\n" << xn << arma::endl;
-     ///////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////
+    //ens::RosenbrockFunction f;
+    ens::DE optimizer(200, 1000, 0.6, 0.8, 1e-5);
+    //optimizer.Optimize(ackley_fn,xn);
 }
 

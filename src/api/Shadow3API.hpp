@@ -7,6 +7,7 @@
   
   For ease of use / a better workflow a GUI is available, as Shadow3 is part of the OASYS (OrAnge SYnchrotron Suite) project, an open-source Graphical 
   Environment for optics simulation softwares used in synchrotron facilities, based on Orange 3. Installation instructions can be found @ http://ftp.esrf.eu/pub/scisoft/Oasys/readme.html. 
+  However the C++-API, which voxTrace depends on, is not auomatically built/installed with this installation process 
 */
 #ifndef Shadow3API_H
 #define Shadow3API_H

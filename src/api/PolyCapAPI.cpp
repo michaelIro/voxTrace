@@ -41,7 +41,7 @@ void PolyCapAPI::defineSource(){
 	double source_div_y = 0.0;					//source divergence in y, in rad
 	double source_shift_x = 0.;					//source shift in x compared to optic central axis, in cm
 	double source_shift_y = 0.;					//source shift in y compared to optic central axis, in cm
-	double source_polar = 0.5;					//source polarisation factor
+	double source_polar = 1.0;					//source polarisation factor
 	int n_energies = 7;							//number of discrete photon energies
 	double energies[7]={6.5,8,10,12,14,17.5,20};	//energies for which transmission efficiency should be calculated, in keV
 
@@ -63,15 +63,18 @@ void PolyCapAPI::traceSource(){
 	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
 	//calculate transmission efficiency curve
-	//std::cout << "Original" << std::endl;
-	//efficiencies = polycap_source_get_transmission_efficiencies(source, n_threads, n_photons, leak_calc, NULL, &error);
-	//std::cout << std::endl;
+	std::cout << "Original" << std::endl;
+	efficiencies = polycap_source_get_transmission_efficiencies(source, n_threads, n_photons, leak_calc, NULL, &error);
+	std::cout << std::endl;
+	std::chrono::steady_clock::time_point end1 = std::chrono::steady_clock::now();
 
 	std::cout << "Modified" << std::endl;
 	efficiencies = polycap_shadow_source_get_transmission_efficiencies(source, n_threads, n_photons, leak_calc, NULL, &error);
+	std::cout << std::endl;
+	std::chrono::steady_clock::time_point end2 = std::chrono::steady_clock::now();
 
-	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-	std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "[µs]" << std::endl;
+	std::cout << "Original Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end1 - begin).count() << "[µs]"  << std::endl;
+	std::cout << "Modified Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end2 - end1).count() << "[µs]" << std::endl;
 
 	polycap_transmission_efficiencies_write_hdf5(efficiencies,"../test-data/polycap/pc-246.hdf5",NULL);
 
@@ -85,112 +88,134 @@ void PolyCapAPI::traceSource(){
 /* Blah */
 void PolyCapAPI::traceSinglePhoton(arma::Mat<double> shadowBeam){
 
+	int succesfully_traced = 0;
+	int absorbed = 0;
+	int no_in = 0;
+	int wall_hit =0;
+	int err =0;
 
 	//Test photon
 	polycap_rng *rng;
 	rng = polycap_rng_new();
-	std::cout << "Shadow 3 - Beam: " << std::endl;
-	shadowBeam.print();
+	int n_energies = 1;							//number of discrete photon energies
 
-	arma::Mat<double> polycapBeamBefore = arma::ones(10, 9);
-	arma::Mat<double> polycapBeamAfter = arma::ones(10, 9);
+
+	//std::cout << "Shadow 3 - Beam: " << std::endl;
+	//shadowBeam.print();
+
+	arma::Mat<double> polycapBeamBefore = arma::ones(shadowBeam.n_rows,9);
+	arma::Mat<double> polycapBeamAfter = arma::ones(shadowBeam.n_rows,9);
+	arma::Mat<double> polycapBeamTraced = arma::ones(shadowBeam.n_rows,10);
 	
-    for(int i = 0; i < 7; i++){
+    for(int i = 0; i < shadowBeam.n_rows; i++){
 		polycap_photon  *polyCapPhot;
 		polyCapPhot = polycap_source_get_photon(source, rng, NULL);
 
 		/*polycapBeamBefore(i,0) = polyCapPhot->start_coords.x; 
-		polycapBeamBefore(i,1) = polyCapPhot->start_coords.y; 
+		polycapBeamBefore(i,1) = polyCapPhot->start_coords.y;			
 		polycapBeamBefore(i,2) = polyCapPhot->start_coords.z; 
+
 		polycapBeamBefore(i,3) = polyCapPhot->start_direction.x; 
-		polycapBeamBefore(i,4) = polyCapPhot->start_direction.y; 
+		polycapBeamBefore(i,4) = polyCapPhot->start_direction.y; 		 
 		polycapBeamBefore(i,5) = polyCapPhot->start_direction.z; 
+
 		polycapBeamBefore(i,6) = polyCapPhot->start_electric_vector.x; 
-		polycapBeamBefore(i,7) = polyCapPhot->start_electric_vector.y; 
-		polycapBeamBefore(i,8) = polyCapPhot->start_electric_vector.z; 
+		polycapBeamBefore(i,7) = polyCapPhot->start_electric_vector.y; 		
+		polycapBeamBefore(i,8) = polyCapPhot->start_electric_vector.z;*/
 
-		polyCapPhot->start_coords.x = shadowBeam(i,0); 
-		polyCapPhot->start_coords.y = shadowBeam(i,1); 
-		polyCapPhot->start_coords.z = shadowBeam(i,2); 
-		polyCapPhot->start_direction.x = shadowBeam(i,0); 
-		polyCapPhot->start_direction.y = shadowBeam(i,1); 
-		polyCapPhot->start_direction.z = shadowBeam(i,2); 
-		polyCapPhot->start_electric_vector.x = shadowBeam(i,0); 
-		polyCapPhot->start_electric_vector.y = shadowBeam(i,1); 
-		polyCapPhot->start_electric_vector.z = shadowBeam(i,2); 
+		/*polyCapPhot->start_coords.x = shadowBeam(i,0); 
+		polyCapPhot->start_coords.y = shadowBeam(i,2); 							// Switch Coordinate System:  y-shadow = z-polycap  
+		polyCapPhot->start_coords.z = shadowBeam(i,1); 
 
-		polycapBeamAfter(i,0) = polyCapPhot->start_coords.x; 
+		polyCapPhot->start_direction.x = shadowBeam(i,3); 
+		polyCapPhot->start_direction.y = shadowBeam(i,5); 
+		polyCapPhot->start_direction.z = shadowBeam(i,4); 
+
+		polyCapPhot->start_electric_vector.x = shadowBeam(i,6); 
+		polyCapPhot->start_electric_vector.y = shadowBeam(i,8); 
+		polyCapPhot->start_electric_vector.z = shadowBeam(i,7); */
+
+		/*polycapBeamAfter(i,0) = polyCapPhot->start_coords.x; 
 		polycapBeamAfter(i,1) = polyCapPhot->start_coords.y; 
 		polycapBeamAfter(i,2) = polyCapPhot->start_coords.z; 
+
 		polycapBeamAfter(i,3) = polyCapPhot->start_direction.x; 
 		polycapBeamAfter(i,4) = polyCapPhot->start_direction.y; 
 		polycapBeamAfter(i,5) = polyCapPhot->start_direction.z; 
+		
 		polycapBeamAfter(i,6) = polyCapPhot->start_electric_vector.x; 
 		polycapBeamAfter(i,7) = polyCapPhot->start_electric_vector.y; 
 		polycapBeamAfter(i,8) = polyCapPhot->start_electric_vector.z; */
 
-	//int success = polycap_photon_launch(polyCapPhot, polyCapPhot->n_energies, polyCapPhot->energies, polyCapPhot->weight, true, &error);
+
+		double energies[1]={shadowBeam(i,11)};	//energies for which transmission efficiency should be calculated, in keV
+		double *weights_temp;
+
+		error = NULL;
+
+		int success = polycap_photon_launch(polyCapPhot, n_energies, energies, &weights_temp, true, &error);
+
+
+		polycapBeamTraced(i,0) = polyCapPhot->exit_coords.x; 
+		polycapBeamTraced(i,1) = polyCapPhot->exit_coords.y; 
+		polycapBeamTraced(i,2) = polyCapPhot->exit_coords.z; 
+
+		polycapBeamTraced(i,3) = polyCapPhot->exit_direction.x; 
+		polycapBeamTraced(i,4) = polyCapPhot->exit_direction.y; 
+		polycapBeamTraced(i,5) = polyCapPhot->exit_direction.z; 
+
+		polycapBeamTraced(i,6) = polyCapPhot->exit_electric_vector.x; 
+		polycapBeamTraced(i,7) = polyCapPhot->exit_electric_vector.y; 
+		polycapBeamTraced(i,8) = polyCapPhot->exit_electric_vector.z; 
+		polycapBeamTraced(i,9) = (double) success; 
 
 		polycap_vector3 exit_coords = polycap_photon_get_exit_coords(polyCapPhot);
 		polycap_vector3 exit_dir = polycap_photon_get_exit_direction(polyCapPhot);
 		polycap_vector3 exit_electric_vector = polycap_photon_get_exit_electric_vector(polyCapPhot);
 
-		polycap_photon_free(polyCapPhot);	
+		if(success == 0)
+			absorbed++;
+		if(success == 1)
+			succesfully_traced++;
+		if(success == 2)
+			wall_hit++;
+		if(success == -1)
+			err++;
+		if(success == -2)
+			no_in++;
 
+			//if iesc == 0 here a new photon should be simulated/started as the photon was absorbed within it.
+			//if iesc == 1 check whether photon is in PC exit window as photon reached end of PC
+			//if iesc == 2 a new photon should be simulated/started as the photon hit the walls -> can still leak
+			//if iesc == -2 a new photon should be simulated/started as the photon missed the optic entrance window
+			//if iesc == -1 some error occured
+
+		polycap_photon_free(polyCapPhot);	
+		free(weights_temp);
 
 	}
  
-	std::cout << "Polycap - Beam Before: " << std::endl;
-	polycapBeamBefore.print();
+	//std::cout << "Polycap - Beam Before: " << std::endl;
+	//polycapBeamBefore.print();
 
-	std::cout << "Polycap - Beam After: " << std::endl;
-	polycapBeamAfter.print();
+	//std::cout << "Polycap - Beam After: " << std::endl;
+	//polycapBeamAfter.print();
 
+	//std::cout << "Polycap - Beam Traced: " << std::endl;
+	//polycapBeamTraced.print();
 
-	int n_energies = 7;							//number of discrete photon energies
-	double energies[7]={1,5,10,15,20,25,30};	//energies for which transmission efficiency should be calculated, in keV
-	//double** weights;
-
-
-
-
-	//polycap_vector3 testvec;
-	 
-	//polycap_photon* myShadowPhoton = polycap_photon_new(description, )
-	//polycap_rng *rng = polycap_rng_new();
-    //polycap_photon *a = polycap_source_get_photon(source, rng, &error);
-    //polycap_photon_launch (a, n_energies, energies, weights, false, &error);
-	//polycap_vector3 exitcoords = polycap_photon_get_exit_coords (a);
-	//std::cout << exitcoords.x << std::endl;
-
-	/*	//polycap_vector3 temp_vect;
-	//temp_vect.x = pTest->exit_coords.x;
-	//pTest->exit_coords.y= 1.2345;
-
-	polycap_vector3 start_coords;	
-	start_coords.x = 1.0;	
-	start_coords.y = 1.0;	
-	start_coords.z = 1.0;
-
-	polycap_vector3 start_direction;	
-	start_direction.x = 1.0;	
-	start_direction.y = 1.0;	
-	start_direction.z = 1.0;
-
-	polycap_vector3 start_electric_vector;	
-	start_electric_vector.x = 1.0;	
-	start_electric_vector.y = 1.0;	
-	start_electric_vector.z = 1.0;
-
-	polycap_photon* myPhoton;
-	myPhoton = polycap_photon_new(description, start_coords, start_direction, start_electric_vector, &error);*/
-    //////////////////////////////////////////////////////
+	std::cout << "Succesfully Traced Photons: " << succesfully_traced << std::endl;
+	std::cout << "Absorbed Photons: " << absorbed << std::endl;
+	std::cout << "Photons that hit Wall: " << wall_hit << std::endl;
+	std::cout << "Photons that miss entry: " << no_in << std::endl;
+	std::cout << "Error: " << err << std::endl;
 }
 
 
-// for a given array of energies, and a full polycap_description, get the transmission efficiencies.
-polycap_transmission_efficiencies* PolyCapAPI::polycap_shadow_source_get_transmission_efficiencies(polycap_source *source, int max_threads, int n_photons, bool leak_calc, polycap_progress_monitor *progress_monitor, polycap_error **error)
-{
+/* 	This is a modified copy of the function polycap_source_get_transmission_efficiencies from polycap code. 
+	"For a given array of energies, and a full polycap_description, get the transmission efficiencies."
+	Can be adapted for further information about inner-capillary processes. TODO: Adapt this further */
+polycap_transmission_efficiencies* PolyCapAPI::polycap_shadow_source_get_transmission_efficiencies(polycap_source *source, int max_threads, int n_photons, bool leak_calc, polycap_progress_monitor *progress_monitor, polycap_error **error){
 	int i;
 	int64_t sum_iexit=0, sum_irefl=0, sum_not_entered=0, sum_not_transmitted=0;
 	int64_t *iexit_temp, *not_entered_temp, *not_transmitted_temp;
@@ -594,11 +619,11 @@ polycap_transmission_efficiencies* PolyCapAPI::polycap_shadow_source_get_transmi
 			}
 		} while(iesc == 0 || iesc == 2 || iesc == -2 || iesc == -1); //TODO: make this function exit if polycap_photon_launch returned -1... Currently, if returned -1 due to memory shortage technically one would end up in infinite loop
 
-		//if(thread_id == 0 && (double)i/((double)n_photons/(double)max_threads/10.) >= 1.){
-			//printf("%d%% Complete\t%" PRId64 " reflections\tLast reflection at z=%f, d_travel=%f\n",((j*100)/(n_photons/max_threads)),photon->i_refl,photon->exit_coords.z, photon->d_travel);
-			//i=0;
-		//}
-		//i++;//counter just to follow % completed
+		if(thread_id == 0 && (double)i/((double)n_photons/(double)max_threads/10.) >= 1.){
+			printf("%d%% Complete\t%" PRId64 " reflections\tLast reflection at z=%f, d_travel=%f\n",((j*100)/(n_photons/max_threads)),photon->i_refl,photon->exit_coords.z, photon->d_travel);
+			i=0;
+		}
+		i++;//counter just to follow % completed
 
 		//save photon->weight in thread unique array
 		for(k=0; k<source->n_energies; k++){
