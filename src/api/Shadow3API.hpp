@@ -16,11 +16,18 @@
 #include <armadillo>
 
 class Shadow3API{
+    private:
+      Source source_;
+      Beam beam_;
 
     public:
-        Shadow3API();
-        static arma::Mat<double> getBeamFromSource(int nRays, char* path);
-        static arma::Mat<double> getBeamFromOE(int nRays, char* path);
+      Shadow3API();
+      Shadow3API(char* path);
+
+      arma::vec getSingleRay();
+
+      static arma::Mat<double> getBeamFromSource(int nRays, char* path);
+      static arma::Mat<double> getBeamFromOE(int nRays, char* path);
 
 };
 

@@ -54,6 +54,8 @@ target_link_libraries(PolyCapAPI  OpenMP::OpenMP_CXX)
 target_link_libraries(PolyCapAPI  OpenMP::OpenMP_C)
 
 target_compile_options(PolyCapAPI PRIVATE ${OpenMP_CXX_FLAGS} ${OpenMP_C_FLAGS})
+
+target_link_libraries(PolyCapAPI Shadow3API)
 #########################################################################################
 # Ensmallen: a flexible C++ library for efficient numerical optimization (3-clause BSD licence)
 find_package(Ensmallen REQUIRED)

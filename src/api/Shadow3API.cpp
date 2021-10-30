@@ -4,6 +4,22 @@
 /* Empty constructor */
 Shadow3API::Shadow3API(){}
 
+/* Empty constructor */
+Shadow3API::Shadow3API(char* path){
+    // load variables from start.00
+    source_.load(path);
+    source_.NPOINT=1;       
+}
+
+
+arma::vec Shadow3API::getSingleRay(){
+    beam_.genSource(&source_);
+    arma::vec ray_ = arma::ones(source_.NCOL);
+    for(int j = 0; j < ray_.n_cols; j++)
+            ray_(j) = (*(beam_.rays+j));
+    return ray_;
+}
+
 /** Generates X-Rays from a Shadow3-Source 
  * @param nRays Number of Rays to be generated
  * @param path Path to start.00 File (Shadow3)

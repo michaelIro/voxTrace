@@ -34,9 +34,9 @@ PolyCapAPI::PolyCapAPI(){
 void PolyCapAPI::defineSource(){
 
 	// Photon source parameters TODO: IO for clean looking .txt File for these parameters (should be adaptable without recompiling)
-	double source_dist = 100.0;				//distance between optic entrance and source along z-axis
-	double source_rad_x = 0.75;					//source radius in x, in cm
-	double source_rad_y = 0.75;					//source radius in y, in cm
+	double source_dist = 10.0;				//distance between optic entrance and source along z-axis
+	double source_rad_x = 0.325;					//source radius in x, in cm
+	double source_rad_y = 0.325;					//source radius in y, in cm
 	double source_div_x = 0.0;					//source divergence in x, in rad
 	double source_div_y = 0.0;					//source divergence in y, in rad
 	double source_shift_x = 0.;					//source shift in x compared to optic central axis, in cm
@@ -103,10 +103,12 @@ void PolyCapAPI::traceSinglePhoton(arma::Mat<double> shadowBeam){
 	//std::cout << "Shadow 3 - Beam: " << std::endl;
 	//shadowBeam.print();
 
+
 	arma::Mat<double> polycapBeamBefore = arma::ones(shadowBeam.n_rows,9);
 	arma::Mat<double> polycapBeamAfter = arma::ones(shadowBeam.n_rows,9);
 	arma::Mat<double> polycapBeamTraced = arma::ones(shadowBeam.n_rows,10);
 	
+	#pragma omp parallel for
     for(int i = 0; i < shadowBeam.n_rows; i++){
 		polycap_photon  *polyCapPhot;
 		polyCapPhot = polycap_source_get_photon(source, rng, NULL);
@@ -148,12 +150,12 @@ void PolyCapAPI::traceSinglePhoton(arma::Mat<double> shadowBeam){
 		polycapBeamAfter(i,8) = polyCapPhot->start_electric_vector.z; */
 
 
-		double energies[1]={shadowBeam(i,11)};	//energies for which transmission efficiency should be calculated, in keV
+		double energies[1]={shadowBeam(i,10)*HC/(2*M_PI)};	//energies for which transmission efficiency should be calculated, in keV
 		double *weights_temp;
 
-		error = NULL;
+		polycap_error *myError = NULL;
 
-		int success = polycap_photon_launch(polyCapPhot, n_energies, energies, &weights_temp, true, &error);
+		int success = polycap_photon_launch(polyCapPhot, n_energies, energies, &weights_temp, true, &myError);
 
 
 		polycapBeamTraced(i,0) = polyCapPhot->exit_coords.x; 
@@ -482,6 +484,10 @@ polycap_transmission_efficiencies* PolyCapAPI::polycap_shadow_source_get_transmi
 		do{
 			// Create photon structure
 			photon = polycap_source_get_photon(source, rng, NULL);
+			//std::cout << std::filesystem::current_path() << std::endl;
+			//#pragma omp critical
+			//	arma::Mat<double> myBeam = Shadow3API::getBeamFromSource(1,(char*) "../test-data/shadow3/start.00"); // FIXME: Ugly solution
+
 			// Launch photon
 			iesc = polycap_photon_launch(photon, source->n_energies, source->energies, &weights_temp, leak_calc, NULL);
 			//if iesc == 0 here a new photon should be simulated/started as the photon was absorbed within it.

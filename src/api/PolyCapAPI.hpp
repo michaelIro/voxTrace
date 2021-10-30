@@ -31,7 +31,11 @@ int polycap_photon_within_pc_boundary(double polycap_radius, polycap_vector3 pho
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 #include <omp.h>
+
 #include <chrono>
+#include <filesystem>
+
+#include "./Shadow3API.hpp"
 
 class PolyCapAPI{
   private: 
