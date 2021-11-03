@@ -44,10 +44,11 @@ class PolyCapAPI{
     polycap_source *source;
 	  polycap_transmission_efficiencies *efficiencies;
 
+    void defineSource();
+
   public:
     PolyCapAPI();
     
-    void defineSource();
     void traceSource();
 
     void traceSinglePhoton(arma::Mat<double> shadowBeam);

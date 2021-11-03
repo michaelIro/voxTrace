@@ -8,11 +8,11 @@ PolyCapAPI::PolyCapAPI(){
 
 	// Optic parameters TODO: IO for clean looking .txt File for these parameters (should be adaptable without recompiling)
 	double optic_length = 3.94;					//optic length in cm
-	double rad_ext_upstream = 0.74;				//external radius upstream, at entrance window, in cm
-	double rad_ext_downstream = 0.215;			//external radius downstream, at exit window, in cm
-	double rad_int_upstream = 0.000805; 		//single capillary radius, at optic entrance, in cm
-	double rad_int_downstream = 0.000234; 		//single capillary radius, at optic exit, in cm
-	double focal_dist_upstream = 1000000.0; 	//focal distance on entrance window side, in cm
+	double rad_ext_upstream = 0.37;				//external radius upstream, at entrance window, in cm
+	double rad_ext_downstream = 0.1075;			//external radius downstream, at exit window, in cm
+	double rad_int_upstream = 0.0004025; 		//single capillary radius, at optic entrance, in cm
+	double rad_int_downstream = 0.000117; 		//single capillary radius, at optic exit, in cm
+	double focal_dist_upstream = 100000000.0; 	//focal distance on entrance window side, in cm
 	double focal_dist_downstream = 0.51; 		//focal distance on exit window side, in cm
 	int n_elem = 2;								//amount of elements in optic material
 	int iz[2]={8,14};							//polycapillary optic material composition: atomic numbers and corresponding weight percentages
@@ -27,22 +27,24 @@ PolyCapAPI::PolyCapAPI(){
 
 	//define optic description
 	description = polycap_description_new(profile, surface_rough, n_capillaries, n_elem, iz, wi, density, &error);
-	polycap_profile_free(profile); //We can free the profile structure, as it is now contained in description
+	polycap_profile_free(profile); 				//We can free the profile structure, as it is now contained in description
+
+	defineSource();
 }
 
 /* Define PolyCap X-Ray-Source */
 void PolyCapAPI::defineSource(){
 
 	// Photon source parameters TODO: IO for clean looking .txt File for these parameters (should be adaptable without recompiling)
-	double source_dist = 10.0;				//distance between optic entrance and source along z-axis
+	double source_dist = 10.0;						//distance between optic entrance and source along z-axis
 	double source_rad_x = 0.325;					//source radius in x, in cm
 	double source_rad_y = 0.325;					//source radius in y, in cm
-	double source_div_x = 0.0;					//source divergence in x, in rad
-	double source_div_y = 0.0;					//source divergence in y, in rad
-	double source_shift_x = 0.;					//source shift in x compared to optic central axis, in cm
-	double source_shift_y = 0.;					//source shift in y compared to optic central axis, in cm
-	double source_polar = 1.0;					//source polarisation factor
-	int n_energies = 7;							//number of discrete photon energies
+	double source_div_x = 0.0;						//source divergence in x, in rad
+	double source_div_y = 0.0;						//source divergence in y, in rad
+	double source_shift_x = 0.;						//source shift in x compared to optic central axis, in cm
+	double source_shift_y = 0.;						//source shift in y compared to optic central axis, in cm
+	double source_polar = 1.0;						//source polarisation factor
+	int n_energies = 7;								//number of discrete photon energies
 	double energies[7]={6.5,8,10,12,14,17.5,20};	//energies for which transmission efficiency should be calculated, in keV
 
 	//define photon source, including optic description

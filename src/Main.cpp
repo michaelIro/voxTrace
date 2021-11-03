@@ -15,20 +15,17 @@
 
 int main() {
 
-	arma::Mat<double> myBeam = Shadow3API::getBeamFromSource(10000,(char*) "../test-data/shadow3/start.00");
-
+	Shadow3API myShadowSource((char*) "../test-data/shadow3/start.00");
+	arma::Mat<double> myShadowBeam = myShadowSource.getBeamFromSource(10000);
+	arma::Mat<double> myShadowBeam2 = myShadowSource.getBeamFromSource(10000);
+	//arma::Mat<double> myBeam = Shadow3API::getBeamFromSource(10000,(char*) "../test-data/shadow3/start.00");
+	//for(int i = 0; i < 10; i++)
+	//	myShadowSource.getSingleRay().print();
+	//_________________________________________________________________________________
 	PolyCapAPI myPolycap;
-	myPolycap.defineSource();
 	myPolycap.traceSource();
 	//myPolycap.traceSinglePhoton(myBeam);
-
-	Shadow3API myShadowSource((char*) "../test-data/shadow3/start.00");
-
-	for(int i = 0; i < 10; i++){
-		myShadowSource.getSingleRay().print();
-	}
-		
-
+	//_________________________________________________________________________________
 
 	//OptimizerAPI myOptimizer;
 
@@ -37,7 +34,7 @@ int main() {
 	//A.print();
 
 	//int a = XRayLibAPI::A(22);
-
+	//_________________________________________________________________________________
 	vector<vector<vector<Material>>> myMat;
 
 	map<int,double> cuMatMap{{29,1.0}};

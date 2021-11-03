@@ -4,15 +4,15 @@
 /* Empty constructor */
 Shadow3API::Shadow3API(){}
 
-/* Empty constructor */
+/* Constructor loading start.00 File from given Path to define Source. */
 Shadow3API::Shadow3API(char* path){
     // load variables from start.00
-    source_.load(path);
-    source_.NPOINT=1;       
+    source_.load(path);     
 }
 
-
+/* Empty constructor */
 arma::vec Shadow3API::getSingleRay(){
+    source_.NPOINT=1;  
     beam_.genSource(&source_);
     arma::vec ray_ = arma::ones(source_.NCOL);
     for(int j = 0; j < ray_.n_cols; j++)
@@ -20,12 +20,28 @@ arma::vec Shadow3API::getSingleRay(){
     return ray_;
 }
 
+arma::Mat<double> Shadow3API::getBeamFromSource(int nRays){
+    // overwrite number of rays
+    source_.NPOINT=nRays;
+
+    // calculate source
+    beam_.genSource(&source_);
+
+    // write rays to arma::mat
+    arma::Mat<double> rays = arma::ones(source_.NPOINT, source_.NCOL);
+    for(int i = 0; i < rays.n_rows; i++)
+        for(int j = 0; j < rays.n_cols; j++)
+            rays(i,j) = (*(beam_.rays+i*18+j));
+
+    return rays;
+}
+
 /** Generates X-Rays from a Shadow3-Source 
  * @param nRays Number of Rays to be generated
  * @param path Path to start.00 File (Shadow3)
  * @return arma::Mat<double> with Rays generated from start.00 File
  */
-arma::Mat<double> Shadow3API::getBeamFromSource(int nRays, char* path){
+/*arma::Mat<double> Shadow3API::getBeamFromSource(int nRays, char* path){
     
     Source src;
     Beam beam;
@@ -46,14 +62,14 @@ arma::Mat<double> Shadow3API::getBeamFromSource(int nRays, char* path){
             rays(i,j) = (*(beam.rays+i*18+j));
 
     return rays;
-}
+}*/
 
 /** Generates X-Rays from a Shadow3-Source and traces them through Shadow3-Optical-Elements 
  * @param nRays Number of Rays to be generated and traced
  * @param path Path to start.** Files (Shadow3)
  * @return arma::Mat<double> with Rays generated from start.** Files
  */
-arma::Mat<double> Shadow3API::getBeamFromOE(int nRays, char* path){
+/*arma::Mat<double> Shadow3API::getBeamFromOE(int nRays, char* path){
     
     Source src;
     Beam beam;
@@ -82,5 +98,5 @@ arma::Mat<double> Shadow3API::getBeamFromOE(int nRays, char* path){
             rays(i,j) = (*(beam.rays+i*18+j));
 
     return rays;
-}
+}*/
 

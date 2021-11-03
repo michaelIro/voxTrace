@@ -26,8 +26,10 @@ class Shadow3API{
 
       arma::vec getSingleRay();
 
-      static arma::Mat<double> getBeamFromSource(int nRays, char* path);
-      static arma::Mat<double> getBeamFromOE(int nRays, char* path);
+      arma::Mat<double> getBeamFromSource(int nRays);
+
+      //static arma::Mat<double> getBeamFromSource(int nRays, char* path);
+      //static arma::Mat<double> getBeamFromOE(int nRays, char* path);
 
 };
 
