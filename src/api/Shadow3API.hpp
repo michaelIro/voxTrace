@@ -15,16 +15,20 @@
 #include <shadow_bind_cpp.hpp>
 #include <armadillo>
 
+#include <filesystem>
+//#include <list>
+
 class Shadow3API{
     private:
       Source source_;
+      //std::list<OE> optical_elements_;
       Beam beam_;
 
     public:
       Shadow3API();
       Shadow3API(char* path);
 
-      arma::vec getSingleRay();
+      arma::rowvec getSingleRay();
 
       arma::Mat<double> getBeamFromSource(int nRays);
 

@@ -14,17 +14,25 @@
 
 
 int main() {
+	//_________________________________________________________________________________
+	Shadow3API myShadowSource((char*) "../test-data/shadow3");
+	arma::Mat<double> myShadowBeam = myShadowSource.getBeamFromSource(10); //15000000
 
-	Shadow3API myShadowSource((char*) "../test-data/shadow3/start.00");
-	arma::Mat<double> myShadowBeam = myShadowSource.getBeamFromSource(10000);
-	arma::Mat<double> myShadowBeam2 = myShadowSource.getBeamFromSource(10000);
 	//arma::Mat<double> myBeam = Shadow3API::getBeamFromSource(10000,(char*) "../test-data/shadow3/start.00");
 	//for(int i = 0; i < 10; i++)
 	//	myShadowSource.getSingleRay().print();
+
 	//_________________________________________________________________________________
 	PolyCapAPI myPolycap;
-	myPolycap.traceSource();
-	//myPolycap.traceSinglePhoton(myBeam);
+	//myPolycap.compareBeams(myShadowBeam);
+	myPolycap.traceSource(myShadowBeam);
+	//myPolycap.traceSinglePhoton(myShadowBeam);
+	
+	/*myShadowSource.getSingleRay().print();
+	std::cout << std::endl;
+	myShadowSource.getSingleRay().print();
+	std::cout << std::endl;
+	myShadowSource.getSingleRay().print();*/
 	//_________________________________________________________________________________
 
 	//OptimizerAPI myOptimizer;

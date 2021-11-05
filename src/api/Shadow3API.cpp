@@ -6,16 +6,26 @@ Shadow3API::Shadow3API(){}
 
 /* Constructor loading start.00 File from given Path to define Source. */
 Shadow3API::Shadow3API(char* path){
-    // load variables from start.00
-    source_.load(path);     
+    for (const auto & entry : filesystem::directory_iterator(path)){
+        if(entry.path().filename() == "start.00")
+            source_.load((char *) entry.path().c_str());             // load variables from start.00
+        // TODO: Load optical elements     
+        //OE     oe1;                   //TODO:: Load and trace OEs
+
+    // load start.01 into oe1
+    //oe1.load( (char*) "start.01");
+    
+    // traces OE1
+    //ray.traceOE(&oe1,1);
+    }   
 }
 
 /* Empty constructor */
-arma::vec Shadow3API::getSingleRay(){
+arma::rowvec Shadow3API::getSingleRay(){
     source_.NPOINT=1;  
     beam_.genSource(&source_);
-    arma::vec ray_ = arma::ones(source_.NCOL);
-    for(int j = 0; j < ray_.n_cols; j++)
+    arma::rowvec ray_(source_.NCOL);
+    for(int j = 0; j < ray_.n_elem; j++)
             ray_(j) = (*(beam_.rays+j));
     return ray_;
 }
@@ -83,13 +93,7 @@ arma::Mat<double> Shadow3API::getBeamFromSource(int nRays){
     // calculate source
     beam.genSource(&src);
 
-    //OE     oe1;                   //TODO:: Load and trace OEs
 
-    // load start.01 into oe1
-    //oe1.load( (char*) "start.01");
-    
-    // traces OE1
-    //ray.traceOE(&oe1,1);
 
     // write rays to arma::mat
     arma::Mat<double> rays = arma::ones(src.NPOINT, src.NCOL);
