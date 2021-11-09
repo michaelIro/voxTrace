@@ -7,19 +7,19 @@ PolyCapAPI::PolyCapAPI(){
 	error = NULL;
 
 	// Optic parameters TODO: IO for clean looking .txt File for these parameters (should be adaptable without recompiling)
-	double optic_length = 4.03;					//optic length in cm
-	double rad_ext_upstream = 0.3175;				//external radius upstream, at entrance window, in cm
-	double rad_ext_downstream = 0.095;			//external radius downstream, at exit window, in cm
-	double rad_int_upstream = 0.000325; 		//single capillary radius, at optic entrance, in cm
-	double rad_int_downstream = 0.0000975; 		//single capillary radius, at optic exit, in cm
+	double optic_length = 3.94;					//optic length in cm
+	double rad_ext_upstream = 0.37;				//external radius upstream, at entrance window, in cm
+	double rad_ext_downstream = 0.1075;			//external radius downstream, at exit window, in cm
+	double rad_int_upstream = 0.0004025; 		//single capillary radius, at optic entrance, in cm
+	double rad_int_downstream = 0.000117; 		//single capillary radius, at optic exit, in cm
 	double focal_dist_upstream = 100000000.0; 	//focal distance on entrance window side, in cm
-	double focal_dist_downstream = 0.49; 		//focal distance on exit window side, in cm
+	double focal_dist_downstream = 0.51; 		//focal distance on exit window side, in cm
 	int n_elem = 2;								//amount of elements in optic material
 	int iz[2]={8,14};							//polycapillary optic material composition: atomic numbers and corresponding weight percentages
 	double wi[2]={53.0,47.0};					//SiO2
 	double density = 2.23;						//optic material density, in g/cm^3 
 	double surface_rough = 5.;					//surface roughness in Angstrom
-	double n_capillaries = 240000.;				//number of capillaries in the optic
+	double n_capillaries = 200000.;				//number of capillaries in the optic
 
 	//define optic profile shape
 	polycap_profile *profile;
@@ -37,8 +37,8 @@ void PolyCapAPI::defineSource(){
 
 	// Photon source parameters TODO: IO for clean looking .txt File for these parameters (should be adaptable without recompiling)
 	double source_dist = 10.0;						//distance between optic entrance and source along z-axis
-	double source_rad_x = 0.3175;						//source radius in x, in cm
-	double source_rad_y = 0.3175;						//source radius in y, in cm
+	double source_rad_x = 0.37;						//source radius in x, in cm
+	double source_rad_y = 0.37;						//source radius in y, in cm
 	double source_div_x = 0.0;						//source divergence in x, in rad
 	double source_div_y = 0.0;						//source divergence in y, in rad
 	double source_shift_x = 0.;						//source shift in x compared to optic central axis, in cm
@@ -59,7 +59,7 @@ void PolyCapAPI::traceSource(arma::Mat<double> shadowBeam){
 
 	// Simulation parameters
 	int n_threads = -1;			//amount of threads to use; -1 means use all available
-	int n_photons = 100000000;		//simulate 30000 succesfully transmitted photons (excluding leak events)
+	int n_photons = 1000000;		//simulate 30000 succesfully transmitted photons (excluding leak events)
 	bool leak_calc = false;		//choose to perform leak photon calculations or not. Leak calculations take significantly more time
 
 	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
@@ -78,7 +78,7 @@ void PolyCapAPI::traceSource(arma::Mat<double> shadowBeam){
 	std::cout << "Original Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end1 - begin).count() << "[µs]"  << std::endl;
 	std::cout << "Modified Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end2 - end1).count() << "[µs]" << std::endl;
 
-	polycap_transmission_efficiencies_write_hdf5(efficiencies,"../test-data/polycap/pc-236.hdf5",NULL);
+	polycap_transmission_efficiencies_write_hdf5(efficiencies,"../test-data/polycap/pc-246-1000000.hdf5",NULL);
 
 	double *efficiencies_arr = NULL;
 	polycap_transmission_efficiencies_get_data(efficiencies, NULL, NULL, &efficiencies_arr, NULL);

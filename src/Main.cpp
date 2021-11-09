@@ -45,7 +45,7 @@ int main() {
 	//_________________________________________________________________________________
 	vector<vector<vector<Material>>> myMat;
 
-	map<int,double> cuMatMap{{29,1.0}};
+	map<int,double> bronze{{29,0.7},{50,0.2},{82,0.1}};
 
 	//arma::field<Material> myMaterials(11,11,11); TODO: change vec<vec<vec>> to field
 		
@@ -54,7 +54,7 @@ int main() {
 		for(int j = 0; j < 11; j++){
 			vector<Material> myMat2;
 			for(int k = 0; k < 11; k++){
-				myMat2.push_back(Material(cuMatMap,8.96));
+				myMat2.push_back(Material(bronze,8.96));
 				//myMaterials(i,j,k) = Material(cuMatMap,8.96);
 			}
 			myMat1.push_back(myMat2);
@@ -64,6 +64,8 @@ int main() {
 
 	vector<ChemElement> myElements;
 	myElements.push_back(ChemElement(29));
+	myElements.push_back(ChemElement(50));
+	myElements.push_back(ChemElement(82));
 
 	Sample sample_ (0.,0.,0.,150.,150.,150.,15.,15.,15.,myMat,myElements);
 
