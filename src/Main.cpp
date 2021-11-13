@@ -10,8 +10,8 @@
 #include "base/ChemElement.hpp"
 #include "base/Material.hpp"
 #include "base/Sample.hpp"
-
-
+#include "base/XRSource.hpp"
+#include "tracer/Tracer.hpp"
 
 int main() {
 	//_________________________________________________________________________________
@@ -69,6 +69,7 @@ int main() {
 
 	Sample sample_ (0.,0.,0.,150.,150.,150.,15.,15.,15.,myMat,myElements);
 
+	//XRSource source_;
 	//Tracer tracer_(source_, sample_);
 	//tracer_.start();
 

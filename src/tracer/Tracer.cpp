@@ -1,12 +1,12 @@
 /**Tracer*/
 
-#include "Tracer.h"
+#include "Tracer.hpp"
 
 using namespace std;
 
 Tracer::Tracer(){}
 
-Tracer::Tracer(Source source, Sample sample){
+Tracer::Tracer(XRSource source, Sample sample){
 	cout<<"START: voxTrace - Tracer()"<<endl;
 
 	srand(time(NULL)); 		// TODO: is this the correct place 

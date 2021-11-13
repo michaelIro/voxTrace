@@ -65,18 +65,20 @@ void PolyCapAPI::traceSource(arma::Mat<double> shadowBeam){
 	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
 	//calculate transmission efficiency curve
-	std::cout << "Original" << std::endl;
-	efficiencies = polycap_source_get_transmission_efficiencies(source, n_threads, n_photons, leak_calc, NULL, &error);
+	//std::cout << "Original" << std::endl;
+	//efficiencies = polycap_source_get_transmission_efficiencies(source, n_threads, n_photons, leak_calc, NULL, &error);
 	//std::cout << std::endl;
 	std::chrono::steady_clock::time_point end1 = std::chrono::steady_clock::now();
 
 	//std::cout << "Modified" << std::endl;
-	//efficiencies = polycap_shadow_source_get_transmission_efficiencies(source, n_threads, n_photons, leak_calc, NULL, &error, shadowBeam);
-	//std::cout << std::endl;
+	efficiencies = polycap_shadow_source_get_transmission_efficiencies(source, n_threads, n_photons, leak_calc, NULL, &error, shadowBeam);
+	std::cout << std::endl;
 	std::chrono::steady_clock::time_point end2 = std::chrono::steady_clock::now();
 
 	std::cout << "Original Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end1 - begin).count() << "[µs]"  << std::endl;
 	std::cout << "Modified Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end2 - end1).count() << "[µs]" << std::endl;
+
+	std::cout << efficiencies->images->i_exit << std::endl;
 
 	polycap_transmission_efficiencies_write_hdf5(efficiencies,"../test-data/polycap/pc-246-1000000.hdf5",NULL);
 

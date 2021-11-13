@@ -14,7 +14,7 @@
 
 #include "../base/Ray.hpp"
 #include "../base/Sample.hpp"
-#include "../setup/Source.hpp"
+#include "../base/XRSource.hpp"
 
 
 using namespace std;
@@ -27,7 +27,7 @@ class Tracer {
 		
 	public:
   		Tracer();
-		Tracer(Source source, Sample sample);
+		Tracer(XRSource source, Sample sample);
 
 		void start();
 
