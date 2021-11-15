@@ -14,26 +14,24 @@
 #include "tracer/Tracer.hpp"
 
 int main() {
-	//_________________________________________________________________________________
+/***********************************************************************************/
 	Shadow3API myShadowSource((char*) "../test-data/shadow3");
-	arma::Mat<double> myShadowBeam = myShadowSource.getBeamFromSource(10); //15000000
+	arma::Mat<double> myShadowBeam = myShadowSource.getBeamFromSource(100000); //15000000
 
-	//arma::Mat<double> myBeam = Shadow3API::getBeamFromSource(10000,(char*) "../test-data/shadow3/start.00");
-	//for(int i = 0; i < 10; i++)
-	//	myShadowSource.getSingleRay().print();
+	/*arma::Mat<double> myBeam = Shadow3API::getBeamFromSource(10000,(char*) "../test-data/shadow3/start.00");
+	for(int i = 0; i < 10; i++)
+		myShadowSource.getSingleRay().print();*/
 
-	//_________________________________________________________________________________
+/***********************************************************************************/
 	PolyCapAPI myPolycap;
+	int counter=0;
 	//myPolycap.compareBeams(myShadowBeam);
-	myPolycap.traceSource(myShadowBeam);
+	list<Ray> myPolyCapBeam = myPolycap.traceSource(myShadowBeam);
+	//for (std::list<Ray>::iterator it = myPolyCapBeam.begin(); it != myPolyCapBeam.end(); ++it){
+    //	(*it).print(counter++);
+	//}
 	//myPolycap.traceSinglePhoton(myShadowBeam);
-	
-	/*myShadowSource.getSingleRay().print();
-	std::cout << std::endl;
-	myShadowSource.getSingleRay().print();
-	std::cout << std::endl;
-	myShadowSource.getSingleRay().print();*/
-	//_________________________________________________________________________________
+/***********************************************************************************/
 
 	//OptimizerAPI myOptimizer;
 
@@ -42,7 +40,7 @@ int main() {
 	//A.print();
 
 	//int a = XRayLibAPI::A(22);
-	//_________________________________________________________________________________
+/***********************************************************************************/
 	vector<vector<vector<Material>>> myMat;
 
 	map<int,double> bronze{{29,0.7},{50,0.2},{82,0.1}};
@@ -69,9 +67,9 @@ int main() {
 
 	Sample sample_ (0.,0.,0.,150.,150.,150.,15.,15.,15.,myMat,myElements);
 
-	//XRSource source_;
-	//Tracer tracer_(source_, sample_);
-	//tracer_.start();
+	XRSource source_(myPolyCapBeam,0.);
+	Tracer tracer_(source_, sample_);
+	tracer_.start();
 
     return 0;
 }

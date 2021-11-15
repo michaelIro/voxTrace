@@ -37,6 +37,9 @@ int polycap_photon_within_pc_boundary(double polycap_radius, polycap_vector3 pho
 
 #include "./Shadow3API.hpp"
 
+#include <list>
+#include "../base/Ray.hpp"
+
 class PolyCapAPI{
   private: 
     polycap_error *error;
@@ -49,7 +52,7 @@ class PolyCapAPI{
   public:
     PolyCapAPI();
     
-    void traceSource(arma::Mat<double> shadowBeam);
+    list<Ray> traceSource(arma::Mat<double> shadowBeam);
     void overwritePhoton(arma::rowvec shadowRay, polycap_photon *photon);
     void compareBeams(arma::Mat<double> shadowBeam);
 

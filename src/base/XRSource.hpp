@@ -13,12 +13,12 @@ using namespace std;
 class XRSource{
 
 	private:
-		double* position_;
+		double position_;
 		list<Ray> rayList_;
 
 	public:
   		XRSource();
-		XRSource(Shadow3API shadowSource);
+		XRSource(list<Ray> beam, double position);
 		//XRSource(string path, double rayNum, double workingDistance, double spotSize);
 		//XRSource(XRSource zeroSource, double x, double y, double z);
 

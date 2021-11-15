@@ -149,15 +149,15 @@ Sample::Sample(double x, double y, double z, double xL, double yL, double zL, do
 	}
 }
 
-double 	Sample::getXPos() const {return x_;}
-double 	Sample::getYPos() const {return y_;}
-double 	Sample::getZPos() const {return z_;}
-double 	Sample::getXLen() const {return xL_;}
-double 	Sample::getYLen() const {return yL_;}
-double 	Sample::getZLen() const {return zL_;}
-double 	Sample::getXLenVox() const {return xLV_;}
-double 	Sample::getYLenVox() const {return yLV_;}
-double 	Sample::getZLenVox() const {return zLV_;}
+double Sample::getXPos() const {return x_;}
+double Sample::getYPos() const {return y_;}
+double Sample::getZPos() const {return z_;}
+double Sample::getXLen() const {return xL_;}
+double Sample::getYLen() const {return yL_;}
+double Sample::getZLen() const {return zL_;}
+double Sample::getXLenVox() const {return xLV_;}
+double Sample::getYLenVox() const {return yLV_;}
+double Sample::getZLenVox() const {return zLV_;}
 int Sample::getXN() const {return xN_;}
 int Sample::getYN() const {return yN_;}
 int Sample::getZN() const {return zN_;}
@@ -248,7 +248,8 @@ Voxel* Sample::findStartVoxel(Ray *ray){
 		y_in = (*ray).getStartY() + t*(*ray).getDirY();
 		z_in = (*ray).getStartZ() + t*(*ray).getDirZ();
 	}
-	//cout<<"2Ray-Start: "<<x_in<<" "<<y_in<<" "<<z_in <<endl;
+
+	cout<<"2Ray-Start: "<<x_in<<" "<<y_in<<" "<<z_in <<endl;
 				
 	return getVoxel(x_in,y_in,z_in);
 }

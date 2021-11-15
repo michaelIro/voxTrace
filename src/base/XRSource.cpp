@@ -10,10 +10,10 @@ XRSource::XRSource(){
 	arma::Mat<double> myShadowBeam = myShadowSource.getBeamFromSource(10); 
 }
 
-XRSource::XRSource(Shadow3API shadowSource){
+XRSource::XRSource(list<Ray> beam, double position){
 
-	Shadow3API myShadowSource((char*) "../test-data/shadow3");
-	arma::Mat<double> myShadowBeam = myShadowSource.getBeamFromSource(10); 
+	rayList_= beam;
+	position_=position;
 }
 /*
 XRSource::XRSource(string path, double rayNum, double workingDistance, double spotSize){

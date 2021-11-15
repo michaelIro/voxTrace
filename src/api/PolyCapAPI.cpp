@@ -53,13 +53,13 @@ void PolyCapAPI::defineSource(){
 }
 
 /* Polycap pre-defined Tracer */
-void PolyCapAPI::traceSource(arma::Mat<double> shadowBeam){
+list<Ray> PolyCapAPI::traceSource(arma::Mat<double> shadowBeam){
 	int i;
     double** weights;
 
 	// Simulation parameters
 	int n_threads = -1;			//amount of threads to use; -1 means use all available
-	int n_photons = 1000000;		//simulate 30000 succesfully transmitted photons (excluding leak events)
+	int n_photons = 20;		//simulate 30000 succesfully transmitted photons (excluding leak events)
 	bool leak_calc = false;		//choose to perform leak photon calculations or not. Leak calculations take significantly more time
 
 	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
@@ -78,15 +78,36 @@ void PolyCapAPI::traceSource(arma::Mat<double> shadowBeam){
 	std::cout << "Original Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end1 - begin).count() << "[µs]"  << std::endl;
 	std::cout << "Modified Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end2 - end1).count() << "[µs]" << std::endl;
 
-	std::cout << efficiencies->images->i_exit << std::endl;
+	list<Ray> polycapBeam;
+	
+	int rayCounter = 0;
+	for( int i = 0; i < efficiencies->images->i_exit; i++ ){
+		if( efficiencies->images->exit_coord_weights[i] >0){
+			Ray ray_(efficiencies->images->pc_exit_coords[0][i],0.,efficiencies->images->pc_exit_coords[1][i],
+				efficiencies->images->pc_exit_dir[0][i],efficiencies->images->pc_exit_dir[2][i],efficiencies->images->pc_exit_dir[1][i],
+				 0., 0., 0., false, 17.4, rayCounter++, 3.94, 0.0, 0.0,  0., 0., 0.);
+			polycapBeam.push_back(ray_);
+/*
+			std::cout << efficiencies->images->pc_exit_coords[0][i] << " ";
+			std::cout << efficiencies->images->pc_exit_coords[1][i] << " ";
+			std::cout << efficiencies->images->pc_exit_coords[2][i] << std::endl;
 
-	polycap_transmission_efficiencies_write_hdf5(efficiencies,"../test-data/polycap/pc-246-1000000.hdf5",NULL);
+			std::cout << efficiencies->images->pc_exit_dir[0][i] << " ";
+			std::cout << efficiencies->images->pc_exit_dir[1][i] << " ";
+			std::cout << efficiencies->images->pc_exit_dir[2][i] << std::endl << std::endl; */
+		}
+	}
+
+
+	polycap_transmission_efficiencies_write_hdf5(efficiencies,"../test-data/polycap/pc-246.hdf5",NULL);
 
 	double *efficiencies_arr = NULL;
 	polycap_transmission_efficiencies_get_data(efficiencies, NULL, NULL, &efficiencies_arr, NULL);
 
 	polycap_source_free(source);
 	polycap_transmission_efficiencies_free(efficiencies);
+
+	return polycapBeam;
 }
 
 void PolyCapAPI::overwritePhoton(arma::rowvec shadowRay, polycap_photon *photon){
