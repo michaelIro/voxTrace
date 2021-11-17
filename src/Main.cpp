@@ -17,7 +17,7 @@ int main() {
 /***********************************************************************************/
 
 	Shadow3API myShadowSource((char*) "../test-data/shadow3");
-	arma::Mat<double> myShadowBeam = myShadowSource.getBeam(10000); //15000000
+	arma::Mat<double> myShadowBeam = myShadowSource.getBeam(10000000); //15000000
 
 	/*arma::Mat<double> myBeam = Shadow3API::getBeamFromSource(10000,(char*) "../test-data/shadow3/start.00");
 	for(int i = 0; i < 10; i++)
@@ -28,7 +28,7 @@ int main() {
 	PolyCapAPI myPolycap;
 	int counter=0;
 	//myPolycap.compareBeams(myShadowBeam);
-	vector<Ray> myPolyCapBeam = myPolycap.traceSource(myShadowBeam,1000);
+	vector<Ray> myPolyCapBeam = myPolycap.traceSource(myShadowBeam,100000);
 
 	//for (std::list<Ray>::iterator it = myPolyCapBeam.begin(); it != myPolyCapBeam.end(); ++it){
     //	(*it).print(counter++);
