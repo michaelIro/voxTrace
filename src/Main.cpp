@@ -15,22 +15,27 @@
 
 int main() {
 /***********************************************************************************/
+
 	Shadow3API myShadowSource((char*) "../test-data/shadow3");
-	arma::Mat<double> myShadowBeam = myShadowSource.getBeamFromSource(100000); //15000000
+	arma::Mat<double> myShadowBeam = myShadowSource.getBeam(10000); //15000000
 
 	/*arma::Mat<double> myBeam = Shadow3API::getBeamFromSource(10000,(char*) "../test-data/shadow3/start.00");
 	for(int i = 0; i < 10; i++)
 		myShadowSource.getSingleRay().print();*/
 
 /***********************************************************************************/
+
 	PolyCapAPI myPolycap;
 	int counter=0;
 	//myPolycap.compareBeams(myShadowBeam);
-	list<Ray> myPolyCapBeam = myPolycap.traceSource(myShadowBeam);
+	vector<Ray> myPolyCapBeam = myPolycap.traceSource(myShadowBeam,1000);
+
 	//for (std::list<Ray>::iterator it = myPolyCapBeam.begin(); it != myPolyCapBeam.end(); ++it){
     //	(*it).print(counter++);
 	//}
+
 	//myPolycap.traceSinglePhoton(myShadowBeam);
+
 /***********************************************************************************/
 
 	//OptimizerAPI myOptimizer;
@@ -40,7 +45,9 @@ int main() {
 	//A.print();
 
 	//int a = XRayLibAPI::A(22);
-/***********************************************************************************/
+
+/*********************************************************************************
+
 	vector<vector<vector<Material>>> myMat;
 
 	map<int,double> bronze{{29,0.7},{50,0.2},{82,0.1}};
@@ -67,9 +74,9 @@ int main() {
 
 	Sample sample_ (0.,0.,0.,150.,150.,150.,15.,15.,15.,myMat,myElements);
 
-	XRSource source_(myPolyCapBeam,0.);
+	XRSource source_(myPolyCapBeam,0.,0.51,16.0);
 	Tracer tracer_(source_, sample_);
-	tracer_.start();
+	tracer_.start();**/
 
     return 0;
 }

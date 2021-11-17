@@ -30,8 +30,22 @@ PolyCapAPI::PolyCapAPI(){
 	polycap_profile_free(profile); 				//We can free the profile structure, as it is now contained in description
 
 	defineSource();
+
+	//defineCap((char*) "../test-data/polycap/Primary.txt");
 }
 
+/* Define PolyCap X-Ray-Source */
+void PolyCapAPI::defineCap(char* path){
+	std::ifstream inFile;
+	std::string x;
+	inFile.open(path);
+
+	std::getline(inFile, x);
+	std::string::size_type sz;
+	double length= std::stod(x.substr(0,x.find_first_of(";")),&sz); 
+	std::cout << length << std::endl;
+
+}
 /* Define PolyCap X-Ray-Source */
 void PolyCapAPI::defineSource(){
 
@@ -44,22 +58,21 @@ void PolyCapAPI::defineSource(){
 	double source_shift_x = 0.;						//source shift in x compared to optic central axis, in cm
 	double source_shift_y = 0.;						//source shift in y compared to optic central axis, in cm
 	double source_polar = 1.0;						//source polarisation factor
-	int n_energies = 7;								//number of discrete photon energies
-	double energies[7]={6.5,8,10,12,14,17.5,20};	//energies for which transmission efficiency should be calculated, in keV
+	int n_energies = 1;								//number of discrete photon energies
+	double energies[1]={1.0};						//energies for which transmission efficiency should be calculated, in keV
 
 	//define photon source, including optic description
 	source = polycap_source_new(description, source_dist, source_rad_x, source_rad_y, source_div_x, source_div_y, source_shift_x, source_shift_y, source_polar, n_energies, energies, &error);
-	//polycap_description_free(description); //We can free the description structure, as now it is contained in source
 }
 
 /* Polycap pre-defined Tracer */
-list<Ray> PolyCapAPI::traceSource(arma::Mat<double> shadowBeam){
+vector<Ray> PolyCapAPI::traceSource(arma::Mat<double> shadowBeam, int nPhotons){
 	int i;
     double** weights;
 
 	// Simulation parameters
 	int n_threads = -1;			//amount of threads to use; -1 means use all available
-	int n_photons = 20;		//simulate 30000 succesfully transmitted photons (excluding leak events)
+	int n_photons = nPhotons;		//simulate 30000 succesfully transmitted photons (excluding leak events)
 	bool leak_calc = false;		//choose to perform leak photon calculations or not. Leak calculations take significantly more time
 
 	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
@@ -78,7 +91,7 @@ list<Ray> PolyCapAPI::traceSource(arma::Mat<double> shadowBeam){
 	std::cout << "Original Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end1 - begin).count() << "[µs]"  << std::endl;
 	std::cout << "Modified Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end2 - end1).count() << "[µs]" << std::endl;
 
-	list<Ray> polycapBeam;
+	vector<Ray> polycapBeam;
 	
 	int rayCounter = 0;
 	for( int i = 0; i < efficiencies->images->i_exit; i++ ){

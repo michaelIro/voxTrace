@@ -4,9 +4,7 @@
 
 using namespace std;
 
-
-
-//Sample::Sample(){ }
+Sample::Sample(){ }
 
 /*Sample::Sample(const Sample &sample, double *problem){
 	x_ = sample.x_;
@@ -170,7 +168,7 @@ Voxel* Sample::getVoxel(double x, double y, double z){
 	int xSteps = (int) floor(x/xLV_);
 	int ySteps = (int) floor(y/yLV_);
 	int zSteps = (int) floor(z/zLV_);
-	if((xSteps <= xN_)&&(zSteps <= zN_)&&(zSteps <= zN_))
+	if(((xSteps <= xN_)&&(zSteps <= zN_)&&(zSteps <= zN_)) && ((xSteps >= 0)&&(zSteps >= 0)&&(zSteps >= 0)))
 		temp = &voxels_[xSteps][ySteps][zSteps];
 
 	return temp;
@@ -249,7 +247,7 @@ Voxel* Sample::findStartVoxel(Ray *ray){
 		z_in = (*ray).getStartZ() + t*(*ray).getDirZ();
 	}
 
-	cout<<"2Ray-Start: "<<x_in<<" "<<y_in<<" "<<z_in <<endl;
+	//cout<<"2Ray-Start: "<<x_in<<" "<<y_in<<" "<<z_in <<endl;
 				
 	return getVoxel(x_in,y_in,z_in);
 }

@@ -5,8 +5,8 @@
 Shadow3API::Shadow3API(){}
 
 /** Constructor loading start.00 File from given Path to define Source.
-* @param path Path to start.00 File (Shadow3)
-* @return Shadow3API
+* @param path Path to folder that contains at least a start.00 file defining the source and possibly start.** files defining th eoptical elements. (Shadow3)
+* @return Shadow3API-Object
 */
 Shadow3API::Shadow3API(char* path){
     for (const auto & entry : filesystem::directory_iterator(path)){
@@ -27,7 +27,7 @@ Shadow3API::Shadow3API(char* path){
  * @param nRays Number of Rays to be generated
  * @return arma::Mat<double> with Rays generated from Source
  */
-arma::Mat<double> Shadow3API::getBeamFromSource(int nRays){
+arma::Mat<double> Shadow3API::getBeam(int nRays){
     // overwrite number of rays
     src_.NPOINT=nRays;
 

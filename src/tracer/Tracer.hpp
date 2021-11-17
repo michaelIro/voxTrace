@@ -10,6 +10,8 @@
 #include <list>
 #include <limits>
 
+#include <omp.h>
+
 #include "../api/XRayLibAPI.hpp"
 
 #include "../base/Ray.hpp"
@@ -32,7 +34,7 @@ class Tracer {
 		void start();
 
 		/*Trace the Path of a single ray.*/
-		Ray* traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample *sample);
+		Ray* traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample *sample, int ia);
 };
 
 #endif

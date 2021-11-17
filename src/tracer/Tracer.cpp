@@ -9,35 +9,39 @@ Tracer::Tracer(){}
 Tracer::Tracer(XRSource source, Sample sample){
 	cout<<"START: voxTrace - Tracer()"<<endl;
 
-	srand(time(NULL)); 		// TODO: is this the correct place 
+	srand(time(NULL)); 		// TODO: is this the correct place? 
 
-	list<Ray> tracedRays;
+	vector<Ray> tracedRays;
 	int i = 0;
+	int ia=0;
 
 	int size = source.getRayList().size();
 	
 	for (auto ray : source.getRayList()) {
-    	ray.print(i++);
+    	//ray.print(i++);
 		Ray*	currentRay = &ray;
 		Voxel* 	currentVoxel = sample.findStartVoxel(currentRay);
 		int 	nextVoxel = 13;	
 
-		tracedRays.push_back(*traceForward(currentRay, currentVoxel,&nextVoxel, &sample));	
+		tracedRays.push_back(*traceForward(currentRay, currentVoxel,&nextVoxel, &sample,ia));	
 	}
 
 
 	cout<<"END: voxTrace - Tracer()"<<endl;
 
-	cout<<"START: RESULTING RAYS"<<endl;
+	/*cout<<"START: RESULTING RAYS"<<endl;
 	i=0;
 	for(auto ray: tracedRays){
 		ray.print(i++);
 	}
-	cout<<"END: RESULTING RAYS"<<endl;
+
+	cout<<"END: RESULTING RAYS"<<endl;*/
+
+	std::cout << "#Interactions: "<< ia << std::endl;
 }
 
 /*********************************/
-Ray* Tracer::traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample *sample){
+Ray* Tracer::traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample *sample, int ia){
 
 
 	double tIn;
@@ -48,11 +52,11 @@ Ray* Tracer::traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample 
 
 
 
-	cout << "  Coordinates: " << (*currentVoxel).getX0()<<" "<<(*currentVoxel).getY0()<<" "<<(*currentVoxel).getY0()<<endl;
-	cout << "  Next Voxel: " << (*nextVoxel) << endl;
-	cout << "  Intersection length: " << intersectionLength << "µm" << endl;
-	cout << "  Linear attenuation coefficient: " << muLin << endl;
-	cout << "  Interaction Probability: " << (1.-exp(-muLin*intersectionLength))*100 << "%" << endl<<endl;
+	//cout << "  Coordinates: " << (*currentVoxel).getX0()<<" "<<(*currentVoxel).getY0()<<" "<<(*currentVoxel).getY0()<<endl;
+	//cout << "  Next Voxel: " << (*nextVoxel) << endl;
+	//cout << "  Intersection length: " << intersectionLength << "µm" << endl;
+	//cout << "  Linear attenuation coefficient: " << muLin << endl;
+	//cout << "  Interaction Probability: " << (1.-exp(-muLin*intersectionLength))*100 << "%" << endl<<endl;
 	//(*currentVoxel).print();
 
 	/*Interaction in this Voxel?*/
@@ -114,6 +118,7 @@ Ray* Tracer::traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample 
 				(*ray).setIANum((*ray).getIANum()+1);
 				(*ray).setIAFlag(true);
 			}
+			ia++;
 		}
 		else if(interactionType == 1){
 			cout<<"\t Rayleigh-Scattering"<<endl; 			//TODO: Polarized -Unpolarized
@@ -136,6 +141,7 @@ Ray* Tracer::traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample 
 			(*ray).setStartCoordinates(xNew,yNew,zNew);
 			(*ray).setIANum((*ray).getIANum()+1);
 			(*ray).setIAFlag(true);
+			ia++;
 		}
 		else if(interactionType == 2){
 			cout<<"\t Compton-Scattering"<<endl;
@@ -158,6 +164,7 @@ Ray* Tracer::traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample 
 			(*ray).setStartCoordinates(xNew,yNew,zNew);
 			(*ray).setIANum((*ray).getIANum()+1);
 			(*ray).setIAFlag(true);
+			ia++;
 		}
 	}
 	else{
@@ -170,7 +177,7 @@ Ray* Tracer::traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample 
 
 	//cout<<"Flag"<<(*ray).getFlag()<<endl;
 	if((*ray).getFlag())
-		return traceForward(ray, currentVoxel,nextVoxel,sample);
+		return traceForward(ray, currentVoxel,nextVoxel,sample,ia);
 	else 
 		return ray;
 }
