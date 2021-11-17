@@ -14,7 +14,7 @@ Tracer::Tracer(XRSource source, Sample sample){
 	list<Ray> tracedRays;
 	int i = 0;
 
-	int sitze = source.getRayList().size();
+	int size = source.getRayList().size();
 	
 	for (auto ray : source.getRayList()) {
     	ray.print(i++);
