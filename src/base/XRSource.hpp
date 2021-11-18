@@ -18,7 +18,7 @@ class XRSource{
 
 	public:
   		XRSource();
-		XRSource(vector<Ray> beam, double position, double workingDistance, double spotSize);
+		XRSource(vector<Ray> beam, double x0, double y0, double d, double alpha, double beta);
 		XRSource(XRSource zeroSource, double x, double y, double z);
 
 		vector<Ray> getRayList() const;

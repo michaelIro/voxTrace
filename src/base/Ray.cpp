@@ -4,10 +4,10 @@
 
 using namespace std;
 
-/*Empty constructor*/
+/** Empty constructor */
 Ray::Ray(){}
 
-/*Copy constructor*/
+/** Copy constructor */
 Ray::Ray(const Ray& ray){
 	startX_ = ray.getStartX();
 	startY_ = ray.getStartY();
@@ -32,7 +32,7 @@ Ray::Ray(const Ray& ray){
 	iaFlag_ =ray.getIAFlag();
 }
 
-/*Coordinate Transofrmation*/
+/** Coordinate Transofrmation */
 Ray::Ray(const Ray& ray, double x, double y, double z, double phi, double theta){
 
 	startX_ = ray.getStartX() - x;
