@@ -31,7 +31,7 @@ PolyCapAPI::PolyCapAPI(){
 
 	defineSource();
 
-	defineCap((char*) "../test-data/polycap/pc-246-descr.txt");
+	//defineCap((char*) "../test-data/polycap/pc-246-descr.txt");
 }
 
 /* Define PolyCap X-Ray-Source */
