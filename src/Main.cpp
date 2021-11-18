@@ -40,6 +40,7 @@ int main() {
 
 /***********************************************************************************/
 
+	//some test comment
 	//OptimizerAPI myOptimizer;
 
 	//arma::Mat<double> A;
