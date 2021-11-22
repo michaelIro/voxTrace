@@ -14,19 +14,26 @@ XRSource::XRSource(vector<Ray> beam, double x0, double y0, double d, double alph
 	//position_=position;
 	vector<Ray> rList_;
 
+	alpha = alpha /180*M_PI;
+	beta = beta /180*M_PI;
+	
 	double x0_ = x0 - d * cos(alpha) * sin(beta);
 	double y0_ = y0 - d * cos(alpha) * cos(beta);
 	double z0_ = -d * sin(alpha);
 
 	int i=0;
 	for (Ray ray : beam) {
-		double xd_ = cos(beta)*ray.getDirX()-sin(alpha)*ray.getDirY();
-		double yd_ = cos(alpha) * ( sin(beta)*ray.getDirX() - cos(beta)*ray.getDirY() ) - sin(alpha)*ray.getDirZ();
-		double zd_ = sin(alpha) * ( sin(beta)*ray.getDirX() - cos(beta)*ray.getDirY() ) - cos(alpha)*ray.getDirZ();
+		//double xd_ = cos(beta)*ray.getDirX() - sin(beta) * (cos(alpha)*ray.getDirY()-sin(alpha)*ray.getDirZ());
+		//double yd_ = sin(beta)*ray.getDirX() - cos(beta) * (cos(alpha)*ray.getDirY()-sin(alpha)*ray.getDirZ());
+		//double zd_ = sin(alpha)*ray.getDirY() - cos(alpha)*ray.getDirZ();
+
+		double xd_ = 0.;
+		double yd_ = 1.;
+		double zd_ = 1.;
 
 
 
-		rList_.push_back(*(new Ray(x0_*10000,y0_*10000,z0_*10000,xd_*10000,yd_*10000,zd_*10000, 0.,0.,0., false, 17.4,i,0.,0.,0.,0.,0.,0.)));
+		rList_.push_back(*(new Ray(x0_,y0_,z0_,xd_,yd_,zd_, 0.,0.,0., false, 17.4,i,0.,0.,0.,0.,0.,0.)));
 		//ray.print(-i);
 		rList_.back().print(i++);
 	}

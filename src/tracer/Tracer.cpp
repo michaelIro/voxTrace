@@ -169,7 +169,7 @@ Ray* Tracer::traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample 
 	}
 	else{
 		/*No interaction happening in this Voxel.*/
-		cout<<"No Interaction"<<endl;
+		//cout<<"No Interaction"<<endl;
 		currentVoxel =  (*currentVoxel).getNN(*nextVoxel);
 		if((*sample).isOOB(currentVoxel)) 
 			(*ray).setFlag(false);
