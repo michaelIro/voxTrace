@@ -51,6 +51,7 @@ class XRayLibAPI{
 
         static void test();
 
+
 };
 
 #endif

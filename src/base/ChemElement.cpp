@@ -9,16 +9,16 @@ ChemElement::ChemElement(){}
 
 /*Constructor using Atomic number Z*/
 ChemElement::ChemElement(const int& z){
-	z_ =		z;
-	symbol_ =	XRayLibAPI::ZToSym(z_);
-	a_ =		XRayLibAPI::A(z_);
-	rho_ = 		XRayLibAPI::Rho(z_);
+	z_ =	z;
+	sym_ =	XRayLibAPI::ZToSym(z_);
+	a_ =	XRayLibAPI::A(z_);
+	rho_ = 	XRayLibAPI::Rho(z_);
 }
 
 /*Constructor using Element Symbol used in Periodic Table*/
 ChemElement::ChemElement(const char *symbol){
 	z_=			XRayLibAPI::SymToZ(symbol);
-	symbol_ =	symbol;
+	sym_ =		symbol;
 	a_ =		XRayLibAPI::A(z_);
 	rho_ = 		XRayLibAPI::Rho(z_);
 }
@@ -27,7 +27,7 @@ ChemElement::ChemElement(const char *symbol){
 double ChemElement::A() const {return a_;}
 int ChemElement::Z() const {return z_;}
 double ChemElement::Rho() const {return rho_;}
-const char* ChemElement::Sym() const {return symbol_;}
+const char* ChemElement::Sym() const {return sym_;}
 
 /*Feed symbol to ostream / Overload comparison operators*/
 ostream& operator<<(std::ostream& os, const ChemElement& el){return os<<el.Sym();}
@@ -35,11 +35,11 @@ bool operator<(const ChemElement& el1, const ChemElement& el2){return (el1.Z() <
 bool operator>(const ChemElement& el1, const ChemElement& el2){return (el1.Z() > el2.Z());}
 bool operator==(const ChemElement& el1, const ChemElement& el2){return (el1.Z() == el2.Z());}
 
-//Simple DB-Access functions
+//Simple DB-Access functions TODO: Check if this "double link" for DB access function slows down considerably
 /*returns total Mass attenuation coefficient [cm²/g]*/
-double ChemElement::getMuMass(double energy) const { return CS_Total(z_,energy,NULL);}
-double ChemElement::getFluorescenceYield(int  shell) const {return FluorYield(z_,shell, NULL);}
-double ChemElement::getAugerYield(int shell) const {return AugerYield(z_,shell, NULL);}
+double ChemElement::getMuMass(double energy) const { return XRayLibAPI::CS_Tot(z_,energy);}
+double ChemElement::getFluorescenceYield(int  shell) const {return XRayLibAPI::FluorY(z_,shell);}
+double ChemElement::getAugerYield(int shell) const {return XRayLibAPI::AugY(z_,shell);}
 double ChemElement::getFluorescenceCrossSection(int shell, double energy) const {return CS_FluorLine(z_,shell,energy, NULL);}
 
 double ChemElement::getLineEnergy(int line) const {
@@ -49,9 +49,9 @@ double ChemElement::getLineEnergy(int line) const {
 /*Gives back The type of Interaction*/
 int ChemElement::getInteractionType(double energy, double randomN) const{
 	
-	double tot = CS_Total(z_,energy,NULL);
-	double phot = CS_Photo(z_,energy,NULL) / tot;
-	double photRayleigh = (CS_Photo(z_,energy,NULL) + CS_Rayl(z_,energy,NULL)) / tot;
+	double tot = XRayLibAPI::CS_Tot(z_,energy);
+	double phot = XRayLibAPI::CS_Phot(z_,energy) / tot;
+	double photRayleigh = (XRayLibAPI::CS_Phot(z_,energy) + XRayLibAPI::CS_Ray(z_,energy)) / tot;
 
 	if(randomN <= phot) return 0;
 	else if(randomN <= photRayleigh) return 1;

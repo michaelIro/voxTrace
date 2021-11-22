@@ -34,7 +34,7 @@ class Tracer {
 		void start();
 
 		/*Trace the Path of a single ray.*/
-		Ray* traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample *sample, int ia);
+		Ray* traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample* sample, int* ia);
 };
 
 #endif

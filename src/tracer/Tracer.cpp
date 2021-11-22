@@ -23,7 +23,7 @@ Tracer::Tracer(XRSource source, Sample sample){
 		Voxel* 	currentVoxel = sample.findStartVoxel(currentRay);
 		int 	nextVoxel = 13;	
 
-		tracedRays.push_back(*traceForward(currentRay, currentVoxel,&nextVoxel, &sample,ia));	
+		tracedRays.push_back(*traceForward(currentRay, currentVoxel,&nextVoxel, &sample,&ia));	
 	}
 
 
@@ -41,7 +41,7 @@ Tracer::Tracer(XRSource source, Sample sample){
 }
 
 /*********************************/
-Ray* Tracer::traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample *sample, int ia){
+Ray* Tracer::traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample *sample, int* ia){
 
 
 	double tIn;
@@ -61,12 +61,13 @@ Ray* Tracer::traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample 
 
 	/*Interaction in this Voxel?*/
 	if(exp(-muLin*intersectionLength) < randomN){
-					cout << "Interaction"<<endl;
+		cout << "Interaction"<<endl;
+		(*ia)++;
 
 		/*Selection of chemical Element to interact with*/			
 		ChemElement interactingElement = (*currentVoxel).getMaterial().getInteractingElement(rayEnergy,randomN,(*sample).getElements());
 
-		cout<<"\t Interacting Element: "<<interactingElement<<endl;
+		//cout<<"\t Interacting Element: "<<interactingElement<<endl;
 		//cout<<"  Next: "<<(*nextVoxel).getXPos0()<<" "<<(*nextVoxel).getYPos0()<<" "<<(*nextVoxel).getYPos0()<<endl;
 
 		/*Selection of interaction type*/
@@ -118,7 +119,6 @@ Ray* Tracer::traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample 
 				(*ray).setIANum((*ray).getIANum()+1);
 				(*ray).setIAFlag(true);
 			}
-			ia++;
 		}
 		else if(interactionType == 1){
 			cout<<"\t Rayleigh-Scattering"<<endl; 			//TODO: Polarized -Unpolarized
@@ -141,7 +141,6 @@ Ray* Tracer::traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample 
 			(*ray).setStartCoordinates(xNew,yNew,zNew);
 			(*ray).setIANum((*ray).getIANum()+1);
 			(*ray).setIAFlag(true);
-			ia++;
 		}
 		else if(interactionType == 2){
 			cout<<"\t Compton-Scattering"<<endl;
@@ -164,7 +163,6 @@ Ray* Tracer::traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample 
 			(*ray).setStartCoordinates(xNew,yNew,zNew);
 			(*ray).setIANum((*ray).getIANum()+1);
 			(*ray).setIAFlag(true);
-			ia++;
 		}
 	}
 	else{

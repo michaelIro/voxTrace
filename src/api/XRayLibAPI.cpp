@@ -32,6 +32,14 @@ double XRayLibAPI::CS_Ray(int z, double energy){
     return CS_Rayl(z, energy, NULL);
 }
 
+double XRayLibAPI::FluorY(int z, int shell){
+    return FluorYield(z,shell,NULL);
+}
+
+double XRayLibAPI::AugY(int z, int shell){
+    return AugerYield(z,shell,NULL);
+}
+
 double XRayLibAPI::LineE(int z, int line){
     return LineEnergy(z, line, NULL);
 }

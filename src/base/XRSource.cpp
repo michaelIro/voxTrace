@@ -17,9 +17,14 @@ XRSource::XRSource(vector<Ray> beam, double x0, double y0, double d, double alph
 	alpha = alpha /180*M_PI;
 	beta = beta /180*M_PI;
 	
-	double x0_ = x0 - d * cos(alpha) * sin(beta);
-	double y0_ = y0 - d * cos(alpha) * cos(beta);
-	double z0_ = -d * sin(alpha);
+	//double x0_ = x0 - d * cos(alpha) * sin(beta);
+	//double y0_ = y0 - d * cos(alpha) * cos(beta);
+	//double z0_ = -d * sin(alpha);
+
+	
+	double x0_ = 0;
+	double y0_ = 0;
+	double z0_ = 0;
 
 	int i=0;
 	for (Ray ray : beam) {

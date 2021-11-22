@@ -14,7 +14,7 @@ using namespace std;
 
 class ChemElement {
 	private:
-		const char* symbol_;	// Chemical Symbol
+		const char* sym_;		// Chemical Symbol
 		int z_;					// Atomic number
 		double a_;				// Atomic Mass number [g/mol]
 		double rho_;			// Density at room temperature [g/cm³]
