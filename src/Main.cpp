@@ -32,9 +32,9 @@ int main() {
 	//myPolycap.compareBeams(myShadowBeam);
 	vector<Ray> myPolyCapBeam = myPolycap.traceSource(myShadowBeam,1000);
 
-	for (auto it: myPolyCapBeam){
-    	it.print(counter++);
-	}
+	//for (auto it: myPolyCapBeam)
+    //	it.print(counter++);
+	
 
 	//myPolycap.traceSinglePhoton(myShadowBeam);
 
@@ -79,7 +79,8 @@ int main() {
 
 	XRSource source_(myPolyCapBeam, 75.0, 75.0, 5100, 45.0, 0.0);
 	
-	std::cout << "Something happening here"<< std::endl;
+	/*std::cout << "Something happening here"<< std::endl;*/
+	counter = 0;
 	for (auto it: source_.getRayList())
     	it.print(counter++);
 	
