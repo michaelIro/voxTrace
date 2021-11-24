@@ -40,7 +40,7 @@ bool operator==(const ChemElement& el1, const ChemElement& el2){return (el1.Z() 
 double ChemElement::getMuMass(double energy) const { return XRayLibAPI::CS_Tot(z_,energy);}
 double ChemElement::getFluorescenceYield(int  shell) const {return XRayLibAPI::FluorY(z_,shell);}
 double ChemElement::getAugerYield(int shell) const {return XRayLibAPI::AugY(z_,shell);}
-double ChemElement::getFluorescenceCrossSection(int shell, double energy) const {return CS_FluorLine(z_,shell,energy, NULL);}
+double ChemElement::getFluorescenceCrossSection(int shell, double energy) const {return XRayLibAPI::CS_FluorL(z_,shell,energy);}
 
 double ChemElement::getLineEnergy(int line) const {
 	return XRayLibAPI::LineE(z_,line*-1-1); //see xraylib and IUPAC for *-1-1
@@ -64,10 +64,10 @@ int ChemElement::getExcitedShell(double energy, double randomN){
 	int myShell_;
 	double temp_= 0.;
 	double sum_ = 0.;
-	double cs_tot = CS_Photo(z_, energy, NULL) ;
+	double cs_tot = XRayLibAPI::CS_Phot(z_,energy);
 
 	for(myShell_ = 0; myShell_ < 31; myShell_++){
-		temp_= CS_Photo_Partial(z_, myShell_, energy, NULL) / cs_tot;
+		temp_= XRayLibAPI::CS_Phot_Part(z_, myShell_, energy) / cs_tot;
 		if(temp_ == 0.) break;
 		else{
 			sum_ += temp_;

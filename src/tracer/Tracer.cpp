@@ -7,23 +7,27 @@ using namespace std;
 Tracer::Tracer(){}
 
 Tracer::Tracer(XRSource source, Sample sample){
+
 	cout<<"START: voxTrace - Tracer()"<<endl;
 
 	srand(time(NULL)); 		// TODO: is this the correct place? 
 
-	vector<Ray> tracedRays;
+	vector<Ray> tracedRays(source.getRayList().size());
 	int i = 0;
 	int ia=0;
 
 	int size = source.getRayList().size();
 	
-	for (auto ray : source.getRayList()) {
+	for (Ray ray: source.getRayList()) {
     	//ray.print(i++);
 		Ray*	currentRay = &ray;
+		std::cout<<"HERE 13"<<std::endl;
 		Voxel* 	currentVoxel = sample.findStartVoxel(currentRay);
-		int 	nextVoxel = 13;	
-
-		tracedRays.push_back(*traceForward(currentRay, currentVoxel,&nextVoxel, &sample,&ia));	
+		std::cout<<"HERE 14"<<std::endl;
+		int nextVoxel = 13;	
+		Ray* aNewRay= traceForward(currentRay, currentVoxel,&nextVoxel, &sample,&ia);
+		std::cout<<"HERE 12"<<std::endl;
+		//tracedRays[i++]=(*aNewRay);	
 	}
 
 
@@ -43,11 +47,12 @@ Tracer::Tracer(XRSource source, Sample sample){
 /*********************************/
 Ray* Tracer::traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample *sample, int* ia){
 
-
+	if(sample->isOOB(currentVoxel))
+		return ray;
+		
 	double tIn;
 	double rayEnergy = (*ray).getEnergyKeV();	
-	double muLin = 12;
-	//(*currentVoxel).getMaterial().getMuLin(rayEnergy, (*sample).getElements());
+	double muLin = (*currentVoxel).getMaterial().getMuLin(rayEnergy, (*sample).getElements());
 	double intersectionLength = (*currentVoxel).intersect(ray,nextVoxel,&tIn);
 	double randomN = ((double) rand()) / ((double) RAND_MAX);
 
@@ -73,10 +78,10 @@ Ray* Tracer::traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample 
 
 		/*Selection of interaction type*/
 		int interactionType = interactingElement.getInteractionType(rayEnergy,randomN);
-		//cout<<"Interaction Type: ";//<<interactionType<<endl;
+		cout<<"Interaction Type: "<<interactionType<<endl;
 
 		if(interactionType == 0){ 
-			cout<<"\t Photo-Absorption"<<endl;
+			//cout<<"\t Photo-Absorption"<<endl;
 
 			int myShell = interactingElement.getExcitedShell(rayEnergy,randomN);
 			cout<<"\t Excited Shell: "<< myShell << " \n";
@@ -84,7 +89,7 @@ Ray* Tracer::traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample 
 			randomN = ((double) rand()) / ((double) RAND_MAX);
 			if(randomN > interactingElement.getFluorescenceYield(myShell)){
 				cout<<"\t Auger-Effect: ";
-				cout<<interactingElement.getAugerYield(myShell)<<endl;
+				//cout<<interactingElement.getAugerYield(myShell)<<endl;
 				(*ray).setIANum((*ray).getIANum()+1);
 				(*ray).setIAFlag(true);
 				(*ray).setFlag(false);
@@ -109,20 +114,24 @@ Ray* Tracer::traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample 
 				double xNew = (*ray).getStartX()+(*ray).getDirX()*l;
 				double yNew = (*ray).getStartY()+(*ray).getDirY()*l;
 				double zNew = (*ray).getStartZ()+(*ray).getDirZ()*l;
-				cout<< "OLD COORDINATES:"<<(*ray).getStartX()<< " "<<(*ray).getStartY()<<" "<<(*ray).getStartZ()<<endl;
-				cout<< "OLD DIRECTION:"<<(*ray).getDirX()<< " "<<(*ray).getDirY()<<" "<<(*ray).getDirZ()<<endl;
-				cout<< "NEW COORDINATES:"<<xNew<< " "<<yNew<<" "<<zNew<<endl;
+				
+				//cout<< "OLD COORDINATES:"<<(*ray).getStartX()<< " "<<(*ray).getStartY()<<" "<<(*ray).getStartZ()<<endl;
+				//cout<< "OLD DIRECTION:"<<(*ray).getDirX()<< " "<<(*ray).getDirY()<<" "<<(*ray).getDirZ()<<endl;
+				//cout<< "NEW COORDINATES:"<<xNew<< " "<<yNew<<" "<<zNew<<endl;
 
-							(*ray).rotate(phi,theta);
-
+				(*ray).rotate(phi,theta);
+								cout << "HERE 1" << endl;
 				(*ray).setStartCoordinates(xNew,yNew,zNew);
+								cout << "HERE 2" << endl;
 				(*ray).setEnergy(interactingElement.getLineEnergy(myLine));
+												cout << "HERE 3" << endl;
 				(*ray).setIANum((*ray).getIANum()+1);
+												cout << "HERE 4" << endl;
 				(*ray).setIAFlag(true);
 			}
 		}
 		else if(interactionType == 1){
-			cout<<"\t Rayleigh-Scattering"<<endl; 			//TODO: Polarized -Unpolarized
+			//cout<<"\t Rayleigh-Scattering"<<endl; 			//TODO: Polarized -Unpolarized
 
 			randomN = ((double) rand()) / ((double) RAND_MAX);
 			double phi = 2*M_PI*randomN;
@@ -130,7 +139,7 @@ Ray* Tracer::traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample 
 			randomN = ((double) rand()) / ((double) RAND_MAX);
 			double theta = interactingElement.getThetaRayl(rayEnergy,randomN);	
 	
-			cout<<"\t Theta: "<<theta<<endl;
+			//cout<<"\t Theta: "<<theta<<endl;
 			(*ray).rotate(phi,theta);
 
 			randomN = ((double) rand()) / ((double) RAND_MAX);
@@ -144,7 +153,7 @@ Ray* Tracer::traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample 
 			(*ray).setIAFlag(true);
 		}
 		else if(interactionType == 2){
-			cout<<"\t Compton-Scattering"<<endl;
+			//cout<<"\t Compton-Scattering"<<endl;
 
 			randomN = ((double) rand()) / ((double) RAND_MAX);
 			double phi = 2*M_PI*randomN;
@@ -152,7 +161,7 @@ Ray* Tracer::traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample 
 			randomN = ((double) rand()) / ((double) RAND_MAX);
 			double theta = interactingElement.getThetaCompt(rayEnergy,randomN);	
 
-			cout<<"\t Theta: "<<theta<<endl;
+			//cout<<"\t Theta: "<<theta<<endl;
 			(*ray).rotate(phi,theta);
 
 			randomN = ((double) rand()) / ((double) RAND_MAX);
@@ -173,12 +182,17 @@ Ray* Tracer::traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample 
 		if((*sample).isOOB(currentVoxel)) 
 			(*ray).setFlag(false);
 	}
-
+											cout << "HERE 5" << endl;
 	//cout<<"Flag"<<(*ray).getFlag()<<endl;
-	if((*ray).getFlag())
+	if((*ray).getFlag()){
+		cout << "HERE 6" << endl;
 		return traceForward(ray, currentVoxel,nextVoxel,sample,ia);
-	else 
+	}
+	else {
+		cout << "HERE 67" << endl;
 		return ray;
+	}
+												
 }
 /*********************************/
 void Tracer::start(){

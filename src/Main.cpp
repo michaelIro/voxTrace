@@ -17,26 +17,20 @@ int main() {
 /***********************************************************************************/
 
 	Shadow3API myShadowSource((char*) "../test-data/shadow3");
-	arma::Mat<double> myShadowBeam = myShadowSource.getBeam(100000); //15000000
-
-	
-
-	/*arma::Mat<double> myBeam = Shadow3API::getBeamFromSource(10000,(char*) "../test-data/shadow3/start.00");
-	for(int i = 0; i < 10; i++)
-		myShadowSource.getSingleRay().print();*/
+	arma::Mat<double> myShadowBeam = myShadowSource.getBeam(100000); //15000000	
+	//std::cout << "Shadow-Beam: " << std::endl;
+	//myShadowBeam.print();
 
 /***********************************************************************************/
 
 	PolyCapAPI myPolycap;
-	int counter=0;
 	//myPolycap.compareBeams(myShadowBeam);
 	vector<Ray> myPolyCapBeam = myPolycap.traceSource(myShadowBeam,1000);
 
+	int counter=0;
+
 	//for (auto it: myPolyCapBeam)
     //	it.print(counter++);
-	
-
-	//myPolycap.traceSinglePhoton(myShadowBeam);
 
 /***********************************************************************************/
 
@@ -77,13 +71,8 @@ int main() {
 
 	Sample sample_ (0.,0.,0.,150.,150.,150.,15.,15.,15.,myMat,myElements);
 
-	XRSource source_(myPolyCapBeam, 75.0, 75.0, 5100, 45.0, 0.0);
-	
-	/*std::cout << "Something happening here"<< std::endl;*/
-	counter = 0;
-	for (auto it: source_.getRayList())
-    	it.print(counter++);
-	
+	XRSource source_(myPolyCapBeam, 75.0, 75.0, 5100, 45.0);
+	//source_.print();
 
 	Tracer tracer_(source_, sample_);
 	tracer_.start();

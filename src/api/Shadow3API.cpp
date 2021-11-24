@@ -5,7 +5,7 @@
 Shadow3API::Shadow3API(){}
 
 /** Constructor loading start.00 File from given Path to define Source.
-* @param path Path to folder that contains at least a start.00 file defining the source and possibly start.** files defining th eoptical elements. (Shadow3)
+* @param path Path to folder that contains at least a start.00 file defining the source and possibly start.** files defining the optical elements. (Shadow3)
 * @return Shadow3API-Object
 */
 Shadow3API::Shadow3API(char* path){
@@ -47,14 +47,4 @@ arma::Mat<double> Shadow3API::getBeam(int nRays){
             rays(i,j) = (*(beam_.rays+i*18+j));
 
     return rays;
-}
-
-/* Empty constructor */
-arma::rowvec Shadow3API::getSingleRay(){
-    src_.NPOINT=1;  
-    beam_.genSource(&src_);
-    arma::rowvec ray_(src_.NCOL);
-    for(int j = 0; j < ray_.n_elem; j++)
-            ray_(j) = (*(beam_.rays+j));
-    return ray_;
 }

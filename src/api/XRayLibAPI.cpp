@@ -32,6 +32,14 @@ double XRayLibAPI::CS_Ray(int z, double energy){
     return CS_Rayl(z, energy, NULL);
 }
 
+double XRayLibAPI::CS_Phot_Part(int z, int shell, double energy){
+    return CS_Photo_Partial(z, shell, energy, NULL); 
+}
+
+double XRayLibAPI::CS_FluorL(int z, int shell, double energy){
+    return CS_FluorLine(z,shell, energy,NULL);
+}
+
 double XRayLibAPI::FluorY(int z, int shell){
     return FluorYield(z,shell,NULL);
 }

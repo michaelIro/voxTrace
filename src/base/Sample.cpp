@@ -168,7 +168,7 @@ Voxel* Sample::getVoxel(double x, double y, double z){
 	int xSteps = (int) floor(x/xLV_);
 	int ySteps = (int) floor(y/yLV_);
 	int zSteps = (int) floor(z/zLV_);
-	if(((xSteps <= xN_)&&(zSteps <= zN_)&&(zSteps <= zN_)) && ((xSteps >= 0)&&(zSteps >= 0)&&(zSteps >= 0)))
+	if(((xSteps < xN_)&&(zSteps < zN_)&&(zSteps < zN_)) && ((xSteps >= 0)&&(zSteps >= 0)&&(zSteps >= 0)))
 		temp = &voxels_[xSteps][ySteps][zSteps];
 
 	return temp;

@@ -34,16 +34,20 @@ class XRayLibAPI{
     public:
         XRayLibAPI();
 
+        // Periodic Table 
         static const char* ZToSym(int z);
         static double SymToZ(const char* symbol);
         static double A(int z);
         static double Rho(int z);
 
+        // X-ray - Cross-sections
         static double CS_Tot(int z, double energy);
         static double CS_Phot(int z, double energy);
         static double CS_Ray(int z, double energy);
-        
+        static double CS_Phot_Part(int z, int shell, double energy); 
         static double CS_FluorL(int z, int shell, double energy);
+        
+        // Fluorescence- / Auger- Yield
         static double FluorY(int z, int shell);
         static double AugY(int z, int shell);
 

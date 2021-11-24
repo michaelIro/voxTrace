@@ -182,7 +182,7 @@ double Voxel::intersect(Ray* ray, int* nextVoxel, double *tIn){
 	}
 	
 	*tIn = t0_max;
-	return (t1_min-t0_max);
+	return -(t1_min-t0_max); // TODO: direction  
 }
 /*********************************/
 
