@@ -10,7 +10,7 @@
 #include "base/ChemElement.hpp"
 #include "base/Material.hpp"
 #include "base/Sample.hpp"
-#include "base/XRSource.hpp"
+#include "base/XRBeam.hpp"
 #include "tracer/Tracer.hpp"
 
 int main() {
@@ -18,6 +18,8 @@ int main() {
 
 	Shadow3API myShadowSource((char*) "../test-data/shadow3");
 	arma::Mat<double> myShadowBeam = myShadowSource.getBeam(100000); //15000000	
+
+	myShadowBeam.save("../test-data/shadowBeam.csv", arma::csv_ascii);
 	//std::cout << "Shadow-Beam: " << std::endl;
 	//myShadowBeam.print();
 
@@ -68,14 +70,18 @@ int main() {
 	myElements.push_back(ChemElement(29));
 	myElements.push_back(ChemElement(50));
 	myElements.push_back(ChemElement(82));
+/***********************************************************************************/
 
 	Sample sample_ (0.,0.,0.,150.,150.,150.,15.,15.,15.,myMat,myElements);
+	//sample_.print();
 
-	XRSource source_(myPolyCapBeam, 75.0, 75.0, 5100, 45.0);
-	//source_.print();
+	XRBeam source_(myPolyCapBeam, 75.0, 75.0, 0.51, 45.0);
+	source_.print();
 
 	Tracer tracer_(source_, sample_);
 	tracer_.start();
+
+	XRBeam fluorescence_(tracer_.getBeam(), 75.0, 75.0, 0.51, 45.0);
 
     return 0;
 }
