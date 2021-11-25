@@ -16,7 +16,7 @@
 
 #include "../base/Ray.hpp"
 #include "../base/Sample.hpp"
-#include "../base/XRSource.hpp"
+#include "../base/XRBeam.hpp"
 
 
 using namespace std;
@@ -24,17 +24,19 @@ using namespace std;
 class Tracer {
 
 	private:
-		//Source source_;
-		//Sample sample_;
+		XRBeam source_;
+		Sample sample_;
+		std::vector<Ray> beam_;
 		
 	public:
   		Tracer();
-		Tracer(XRSource source, Sample sample);
+		Tracer(XRBeam source, Sample sample);
 
 		void start();
 
 		/*Trace the Path of a single ray.*/
 		Ray* traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample* sample, int* ia);
+		std::vector<Ray> getBeam();
 };
 
 #endif

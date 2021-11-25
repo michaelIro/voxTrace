@@ -13,7 +13,6 @@ class Voxel{
 	private:
 		double x0_,y0_,z0_;
 		double x1_,y1_,z1_;
-		//Spectrum spe_;
 		Material mat_;
 		Voxel *nn_[27];
 

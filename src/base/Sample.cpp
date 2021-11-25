@@ -203,6 +203,8 @@ double* Sample::sample2problem(){
 	return problem;
 }
 */
+
+
 void Sample::print(){
 	cout.precision(1);
 	cout<<scientific;
@@ -216,40 +218,33 @@ void Sample::print(){
 				//cout<<endl;
 				voxels_[i][j][k].getMaterial().print();
 			}
-				
-
 }
 
+/** Find the Voxel which is touched first by the ray.
+* @param ray  
+* @return Voxel* Pointer to Voxel of first Interaction
+*/
 Voxel* Sample::findStartVoxel(Ray *ray){
 
 	double x_in = (*ray).getStartX();
 	double y_in = (*ray).getStartY();
 	double z_in = (*ray).getStartZ();
 
-	//cout<<"Start:"<<x_in<<y_in<<z_in<<endl;
-	//cout<<"Start-Sample:"<<getZPos()<<endl;
-
-	/*Check if its primary ray*/
-	if((*ray).getStartX() < getXPos()){
-		double t = ( getXPos()-(*ray).getStartX() ) / (*ray).getDirX();
-		
-		//cout<<t <<endl;
+	// Check if the ray is a primary ray -> If so, calculate coordinates of Voxel which is touched first by the ray from the top. 
+	if((*ray).getStartZ() < getZPos()){
+		double t = ( getZPos()-(*ray).getStartZ() ) / (*ray).getDirZ();
 		x_in += t*(*ray).getDirX();
 		y_in += t*(*ray).getDirY();
 		z_in += t*(*ray).getDirZ();
 	}
-	//cout<<"1Ray-Start: "<<x_in<<" "<<y_in<<" "<<z_in <<endl;
+
+	// Check if ray hits the sample from the top direction -> If not, calculate coordinates of Voxel which is touched first by the ray from the side. 
 	if( (x_in<0.) || (y_in<0.) || (z_in<0.) ){
 		double t = ( getYPos()-(*ray).getStartY() ) / (*ray).getDirY();
-
 		x_in = (*ray).getStartX() + t*(*ray).getDirX();
 		y_in = (*ray).getStartY() + t*(*ray).getDirY();
 		z_in = (*ray).getStartZ() + t*(*ray).getDirZ();
 	}
-
-	//cout<<"2Ray-Start: "<<x_in<<" "<<y_in<<" "<<z_in <<endl;
 				
 	return getVoxel(x_in,y_in,z_in);
 }
-/*********************************/
-

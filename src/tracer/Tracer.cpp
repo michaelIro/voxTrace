@@ -6,31 +6,35 @@ using namespace std;
 
 Tracer::Tracer(){}
 
-Tracer::Tracer(XRSource source, Sample sample){
+Tracer::Tracer(XRBeam source, Sample sample){
+	source_=source;
+	sample_=sample;
+}
 
+void Tracer::start(){
 	cout<<"START: voxTrace - Tracer()"<<endl;
 
 	srand(time(NULL)); 		// TODO: is this the correct place? 
 
-	vector<Ray> tracedRays(source.getRayList().size());
+	vector<Ray> tracedRays(source_.getRayList().size());
 	int i = 0;
 	int ia=0;
 
-	int size = source.getRayList().size();
+	int size = source_.getRayList().size();
 	
-	for (Ray ray: source.getRayList()) {
+	for (Ray ray: source_.getRayList()) {
     	//ray.print(i++);
 		Ray*	currentRay = &ray;
-		std::cout<<"HERE 13"<<std::endl;
-		Voxel* 	currentVoxel = sample.findStartVoxel(currentRay);
-		std::cout<<"HERE 14"<<std::endl;
+		//std::cout<<"HERE 13"<<std::endl;
+		Voxel* 	currentVoxel = sample_.findStartVoxel(currentRay);
+		//std::cout<<"HERE 14"<<std::endl;
 		int nextVoxel = 13;	
-		Ray* aNewRay= traceForward(currentRay, currentVoxel,&nextVoxel, &sample,&ia);
-		std::cout<<"HERE 12"<<std::endl;
-		//tracedRays[i++]=(*aNewRay);	
+		Ray* aNewRay= traceForward(currentRay, currentVoxel,&nextVoxel, &sample_,&ia);
+		//std::cout<<"HERE 12"<<std::endl;
+		tracedRays[i++]=(*aNewRay);	
 	}
 
-
+	beam_ = tracedRays;
 	cout<<"END: voxTrace - Tracer()"<<endl;
 
 	/*cout<<"START: RESULTING RAYS"<<endl;
@@ -41,12 +45,13 @@ Tracer::Tracer(XRSource source, Sample sample){
 
 	cout<<"END: RESULTING RAYS"<<endl;*/
 
-	std::cout << "#Interactions: "<< ia << std::endl;
+	std::cout << "#Interactions: "<< ia << std::endl;	
 }
 
 /*********************************/
 Ray* Tracer::traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample *sample, int* ia){
 
+	// Check if ray is already out of bounds of sample -> If so, no interaction is possible -> return ray.
 	if(sample->isOOB(currentVoxel))
 		return ray;
 		
@@ -58,11 +63,11 @@ Ray* Tracer::traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample 
 
 
 
-	//cout << "  Coordinates: " << (*currentVoxel).getX0()<<" "<<(*currentVoxel).getY0()<<" "<<(*currentVoxel).getY0()<<endl;
-	//cout << "  Next Voxel: " << (*nextVoxel) << endl;
-	//cout << "  Intersection length: " << intersectionLength << "µm" << endl;
-	//cout << "  Linear attenuation coefficient: " << muLin << endl;
-	//cout << "  Interaction Probability: " << (1.-exp(-muLin*intersectionLength))*100 << "%" << endl<<endl;
+	cout << "  Coordinates: " << (*currentVoxel).getX0()<<" "<<(*currentVoxel).getY0()<<" "<<(*currentVoxel).getY0()<<endl;
+	cout << "  Next Voxel: " << (*nextVoxel) << endl;
+	cout << "  Intersection length: " << intersectionLength << "µm" << endl;
+	cout << "  Linear attenuation coefficient: " << muLin << endl;
+	cout << "  Interaction Probability: " << (1.-exp(-muLin*intersectionLength))*100 << "%" << endl<<endl;
 	//(*currentVoxel).print();
 
 	/*Interaction in this Voxel?*/
@@ -194,7 +199,9 @@ Ray* Tracer::traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample 
 	}
 												
 }
-/*********************************/
-void Tracer::start(){
 
+std::vector<Ray> Tracer::getBeam(){
+	return beam_;
 }
+/*********************************/
+

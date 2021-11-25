@@ -1,14 +1,15 @@
 /**Source*/
 
-#include "XRSource.hpp"
+#include "XRBeam.hpp"
 
 using namespace std;
 
 /* Empty constructor */
-XRSource::XRSource(){}
+XRBeam::XRBeam(){}
+
 
 /* Constructor */
-XRSource::XRSource(vector<Ray> beam, double x0, double y0, double d, double alpha){
+XRBeam::XRBeam(vector<Ray> beam, double x0, double y0, double d, double alpha){
 
 	//rayList_= beam;
 	//position_=position;
@@ -36,7 +37,7 @@ XRSource::XRSource(vector<Ray> beam, double x0, double y0, double d, double alph
 }
 
 
-XRSource::XRSource(XRSource zeroSource, double x, double y, double z){
+XRBeam::XRBeam(XRBeam zeroSource, double x, double y, double z){
 	for(auto ray: zeroSource.getRayList()){
 		rayList_.push_back(*(new Ray(ray,x,y,z,0.,0.)));
 	}
@@ -44,11 +45,11 @@ XRSource::XRSource(XRSource zeroSource, double x, double y, double z){
 
 
 /** Getter*/
-vector<Ray> XRSource::getRayList() const{
+vector<Ray> XRBeam::getRayList() const{
 	return rayList_;
 }
 
-void XRSource::print() const{
+void XRBeam::print() const{
 	int i =0;
 	for(auto ray: rayList_)
 		ray.print(i++);

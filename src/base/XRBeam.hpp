@@ -10,16 +10,16 @@
 
 using namespace std;
 
-class XRSource{
+class XRBeam{
 
 	private:
 		double position_;
 		vector<Ray> rayList_;
 
 	public:
-  		XRSource();
-		XRSource(vector<Ray> beam, double x0, double y0, double d, double alpha);
-		XRSource(XRSource zeroSource, double x, double y, double z);
+  		XRBeam();
+		XRBeam(vector<Ray> beam, double x0, double y0, double d, double alpha);
+		XRBeam(XRBeam zeroSource, double x, double y, double z);
 
 		vector<Ray> getRayList() const;
 		void print() const;
