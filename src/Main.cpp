@@ -79,43 +79,16 @@ int main() {
 	Sample sample_ (0.,0.,0.,150.,150.,5.,15.,15.,0.5,myMat);
 	//sample_.print();
 
-	XRBeam source_(myPolyCapBeam, 70.0, 70.0,0.0, 0.51, 45.0);
+	XRBeam source_(myPolyCapBeam);
+	source_.primaryTransform(70.0, 70.0,0.0, 0.51, 45.0);
 	//source_.print();
 
 	Tracer tracer_(source_, sample_);
 	tracer_.start();
 
-
-	int i =0;
-	vector<Ray> rayList_;
-	double alpha = 45 / 180 * M_PI;
-	for(auto ray: tracer_.getBeam()){
-		if((ray.getStartZ()>=0) && (ray.getDirZ()<0) ){
-			
-
-			double x0_=ray.getStartX()-70.0;
-			double y0_=cos(alpha)*(ray.getStartY()-70.0)-sin(alpha)*ray.getStartZ();
-			double z0_=sin(alpha)*(ray.getStartY()-70.0)+cos(alpha)*ray.getStartZ();
-
-			double xd_ = ray.getDirX(); 
-			double yd_ = cos(alpha)*ray.getDirY()-sin(alpha)*ray.getDirZ();
-			double zd_ = sin(alpha)*ray.getDirY()+cos(alpha)*ray.getDirZ();
-
-			rayList_.push_back(*(new Ray(x0_,y0_,z0_,xd_,yd_,zd_, 0.,0.,0., false, 17.4,i++,0.,0.,0.,0.,0.,0.)));
-			rayList_.back().print(i-1);
-		}
-	}
-		
-	
-	XRBeam fluorescence_(tracer_.getBeam(), 0.0, 0.0, 0.0, 0.0, -45.0);
+	XRBeam fluorescence_(tracer_.getBeam());
+	fluorescence_.secondaryTransform(70.0, 70.0,0.0, 0.51, 45.0);
 	//fluorescence_.print();
-
-	i =0;
-	for(Ray ray: fluorescence_.getRays()){
-
-
-		//std::cout << myX << " " << myY << " " << myZ << " " << std::endl;
-	}
 
     return 0;
 }

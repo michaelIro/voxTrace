@@ -4,10 +4,10 @@
 
 using namespace std;
 
-/*Empty constructor*/
+/** Empty constructor */
 ChemElement::ChemElement(){}
 
-/*Constructor using Atomic number Z*/
+/** Constructor using Atomic number Z */
 ChemElement::ChemElement(const int& z){
 	z_ =	z;
 	sym_ =	XRayLibAPI::ZToSym(z_);
@@ -15,7 +15,7 @@ ChemElement::ChemElement(const int& z){
 	rho_ = 	XRayLibAPI::Rho(z_);
 }
 
-/*Constructor using Element Symbol used in Periodic Table*/
+/** Constructor using Element Symbol used in Periodic Table */
 ChemElement::ChemElement(const char *symbol){
 	z_=			XRayLibAPI::SymToZ(symbol);
 	sym_ =		symbol;

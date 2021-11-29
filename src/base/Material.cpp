@@ -5,17 +5,17 @@
 Material::Material (){}
 
 /** Standard Constructor
- * @param
- * @return  
+ * @param massFractions
+ * @param rho  
+ * @return Material   
  */
 Material::Material (map<ChemElement* const,double> massFractions, double rho){
 	wi_ = massFractions;
 	rho_ = rho;
 }
 
-/** Regular constructor
- * @param
- * @return  
+/** Getter function for 
+ * @return a 
  */
 map<ChemElement* const,double> Material::getMassFractions() const {
 	return wi_;
@@ -41,7 +41,7 @@ double Material::getMuMass(double energy) const{
 }
 
 /** Get Total μ_Lin of Material
- * @param Energy of the Ray in keV
+ * @param energy of the ray in keV
  * @return Total Linear absorption coefficient in ...
  */
 double Material::getMuLin(double energy) const { 
