@@ -6,32 +6,28 @@
 #include <iostream>
 #include <string>
 #include <map>
-#include <vector>
 
 #include "../base/ChemElement.hpp"
 
-using namespace std;
-
 class Material {
 	private:
-		map<int,double> wi_;
+		map<ChemElement* const,double> wi_;
 		double rho_;
 		
 	public:
   		Material();
-  		Material(map<int,double> massFractions, double rho);
+  		Material(map<ChemElement* const,double> massFractions, double rho);
 
-  		map<int,double> getMassFractions() const;
+  		map<ChemElement* const,double> getMassFractions() const;
 		double getRho() const;
 
-		double getMuMass(double energy, vector<ChemElement> elements) const;
-		double getMuLin(double energy, vector<ChemElement> elements) const;
+		double getMuMass(double energy) const;
+		double getMuLin(double energy) const;
 
-		ChemElement getInteractingElement(double energy, double randomN, vector<ChemElement> elements) const;
+		ChemElement* const getInteractingElement(double energy, double randomN) const;
 
 		void setRho(double rho);
 
-		string getName(vector<ChemElement> elements) const;
 		string getName() const;
 		void print() const;
 };

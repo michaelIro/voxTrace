@@ -12,6 +12,9 @@
 //#include "api/Shadow3API.hpp"
 #include "api/XRayLibAPI.hpp"
 
+#include "base/ChemElement.hpp"
+#include "base/Material.hpp"
+
 
 int main() {
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -47,5 +50,12 @@ int main() {
     /////////////////////////////////////////////////////////////////////////////////////////////////////// XrayLibAPI Tests
     XRayLibAPI::test();
     /////////////////////////////////////////////////////////////////////////////////////////////////////// OptimizerAPI Tests
+    ChemElement cu(29);
+    ChemElement zn(30);
+	  map<ChemElement* const,double> brassMap{{&cu,0.7},{&zn,0.3}};
+    Material brass(brassMap,8.96);
+
+    brass.getMuLin(17.4);
+
     return 0;
 }

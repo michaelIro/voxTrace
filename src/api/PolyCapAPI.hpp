@@ -37,7 +37,7 @@ int polycap_photon_within_pc_boundary(double polycap_radius, polycap_vector3 pho
 #include <filesystem>
 #include <fstream>
 
-#include "./Shadow3API.hpp"
+//#include "./Shadow3API.hpp"
 
 #include <vector>
 #include "../base/Ray.hpp"

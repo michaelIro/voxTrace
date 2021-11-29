@@ -22,15 +22,14 @@ class Sample{
 
 		int xN_,yN_,zN_,voxN_;
 
-		vector<ChemElement> elements_;
 		vector<vector<vector<Voxel>>> voxels_;
 		Voxel *zeroVoxel;
 		Voxel *oobVoxel;
 
 	public:
 		Sample();
-		Sample(double x, double y, double z, double xL, double yL, double zL, double xLV, double yLV, double zLV, vector<vector<vector<Material>>> materials_, vector<ChemElement> elements);
-		Sample(Scan scan_): Sample(0.,0.,0.,scan_.getLengths()[0],scan_.getLengths()[1],scan_.getLengths()[2],15.,15.,15.,scan_.getMaterials(),scan_.getElements()){};
+		Sample(double x, double y, double z, double xL, double yL, double zL, double xLV, double yLV, double zLV, vector<vector<vector<Material>>> materials_);
+		Sample(Scan scan_): Sample(0.,0.,0.,scan_.getLengths()[0],scan_.getLengths()[1],scan_.getLengths()[2],15.,15.,15.,scan_.getMaterials()){};
 		//Sample(const Sample &sample, double *problem);
 
 		double getXPos() const;
@@ -50,13 +49,9 @@ class Sample{
 		Voxel* 	getVoxel(double x, double y, double z);
 		Voxel* 	getVoxel(int x, int y, int z);
 		bool	isOOB(Voxel* vox) const;
-				/**/
+
 		Voxel* findStartVoxel(Ray *ray);
-
-		vector<ChemElement> getElements() const;
-
-		double* sample2problem(); 	
-
+	
 		void print();
 };
 

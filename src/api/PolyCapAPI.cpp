@@ -92,7 +92,7 @@ vector<Ray> PolyCapAPI::traceSource(arma::Mat<double> shadowBeam, int nPhotons){
 	std::cout << "Original Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end1 - begin).count() << "[µs]"  << std::endl;
 	std::cout << "Modified Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end2 - end1).count() << "[µs]" << std::endl;
 
-	vector<Ray> polycapBeam;
+	vector<Ray> polycapBeam(nPhotons);
 	
 	int rayCounter = 0;
 	for( int i = 0; i < efficiencies->images->i_exit; i++ ){

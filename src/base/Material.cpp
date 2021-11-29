@@ -1,67 +1,79 @@
-/*Material*/
-
+/** Material */
 #include "Material.hpp"
 
-using namespace std;
-
-/*Empty constructor*/
+/** Empty Constructor */
 Material::Material (){}
 
-/*Regular constructor*/
-Material::Material (map<int,double> massFractions, double rho){
+/** Standard Constructor
+ * @param
+ * @return  
+ */
+Material::Material (map<ChemElement* const,double> massFractions, double rho){
 	wi_ = massFractions;
 	rho_ = rho;
 }
 
-/*Member getter*/
-map<int,double> Material::getMassFractions() const {return wi_;}
-double Material::getRho() const{ return rho_; }
+/** Regular constructor
+ * @param
+ * @return  
+ */
+map<ChemElement* const,double> Material::getMassFractions() const {
+	return wi_;
+}
 
-/*Get total Mass absorption coefficient */
-double Material::getMuMass(double energy, vector<ChemElement> elements) const{
+/** Get Density ρ of Material
+ * @param
+ * @return Density in ...
+ */
+double Material::getRho() const {
+	return rho_; 
+}
+
+/** Get Total μ_Mass of Material
+ * @param Energy of the Ray in keV
+ * @return Total Mass absorption coefficient in ...
+ */
+double Material::getMuMass(double energy) const{
 	double mum_= 0.;
-	for(auto const& it: wi_){
-		mum_ += elements[it.first].getMuMass(energy)*it.second;
-		//cout<<it.first.getMuMass(energy)<<"*"<<it.second<<"="<<it.first.getMuMass(energy)*it.second<<" -> "<<muMass<<endl;
-		//cout<<"Density"<<rho_<<" "<<it.first.getRho()<<endl;
-	}
+	for(auto it: wi_)
+		mum_ += it.first->getMuMass(energy)*it.second;
 	return mum_;
 }
 
-/**/
-double Material::getMuLin(double energy, vector<ChemElement> elements) const{ return (getMuMass(energy, elements) * rho_);}
+/** Get Total μ_Lin of Material
+ * @param Energy of the Ray in keV
+ * @return Total Linear absorption coefficient in ...
+ */
+double Material::getMuLin(double energy) const { 
+	return (getMuMass(energy) * rho_);
+}
 
-/**/
-ChemElement Material::getInteractingElement(double energy, double randomN, vector<ChemElement> elements) const{
+/** Get interacting Element
+ * @param Energy of the Ray in keV
+ * @param Random Number between 0 and 1 
+ * @return Total Linear absorption coefficient in ...
+ */
+ChemElement* const Material::getInteractingElement(double energy, double randomN) const{
 
-	double muMassTot = getMuMass(energy,elements);
+	double muMassTot = getMuMass(energy);
 	double sum = 0.;
 
-	for(auto const& it: getMassFractions()){
-		sum += elements[it.first].getMuMass(energy)*it.second /muMassTot;
+	for(auto it: getMassFractions()){
+		sum += it.first->getMuMass(energy)*it.second /muMassTot;
 
 		if(sum > randomN)
 			return it.first;	
 	}
 
-	return elements[getMassFractions().end()->first];
+	return getMassFractions().end()->first;
 }
 
 void Material::setRho(double rho){rho_=rho;}
 
-string Material::getName(vector<ChemElement> elements) const {
-	string name;
-	for(auto const& it: wi_){
-		name.append(elements[it.first].Sym());
-		name.append(std::to_string(it.second));
-	}
-	return name;
-}
-
 string Material::getName() const {
 	string name;
 	for(auto const& it: wi_){
-		name.append(to_string(it.first));
+		name.append(it.first->Sym());
 		name.append(" ");
 		name.append(to_string(it.second));
 	}

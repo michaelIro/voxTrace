@@ -6,87 +6,15 @@ using namespace std;
 
 Sample::Sample(){ }
 
-/*Sample::Sample(const Sample &sample, double *problem){
-	x_ = sample.x_;
-	y_ = sample.y_;
-	z_ = sample.z_;
-	xL_ = sample.xL_;
-	yL_ = sample.yL_;
-	zL_ = sample.zL_;
-	xN_ = sample.xN_;
-	yN_ = sample.yN_;
-	zN_ = sample.zN_;
-	voxN_= sample.voxN_;
-	xLV_ = sample.xLV_;
-	yLV_ = sample.yLV_;
-	zLV_ = sample.zLV_;
+// TODO: Look @ alternative Constructors from Old Code 
 
-	//Allocate voxPtrArray
-	voxPtrArray = new Voxel***[xN_];
-	for(int i=0; i<xN_;i++){
-		voxPtrArray[i]= new Voxel**[yN_];
-		for(int j=0; j<yN_;j++)
-			voxPtrArray[i][j] = new Voxel*[zN_];
-	}
-
-	int varParam =0;
-	//Initialize voxPtrArray
-	for(int i=0; i<xN_;i++)
-		for(int j=0; j<yN_;j++)
-			for(int k=0; k<zN_;k++){
-
-				double rho_ = problem[varParam++];
-				map<ChemElement,double> concentrations_= (*(sample.voxPtrArray[i][j][k])).getMaterial().getMasses();
-				for(auto & it: concentrations_)
-					it.second = problem[varParam++];
-				Material mat_(concentrations_,rho_);
-
-				voxPtrArray[i][j][k] = (new Voxel(x_+i*xLV_,y_+j*yLV_,z_+k*zLV_,xLV_,yLV_,zLV_,mat_));
-			}
-			
-	//Define Zero-Voxel and Out-of-Bounds-Voxel
-	*zeroVoxel = *sample.zeroVoxel;
-	*oobVoxel =  *sample.oobVoxel;
-
-	//Define Nearest Neighbours for each Voxel
-	for(int i=0; i<xN_;i++)
-	{
-		for(int j=0; j<yN_;j++)
-		{
-			for(int k=0; k<zN_;k++)
-			{
-				Voxel *nn[27];
-				int count=0;
-					for(int l=-1; l<2;l++)
-					{
-						for(int m=-1; m<2;m++)
-						{
-							for(int n=-1; n<2;n++)
-							{
-								if((i+n < 0) || (i+n>=xN_) || (j+m < 0) || (j+m>=yN_) ||(k+l< 0) || (k+l>=xN_))
-									nn[count++]=oobVoxel;	
-								else
-									nn[count++]=voxPtrArray[i+n][j+m][k+l];	
-							}
-						}
-					}
-				(*voxPtrArray[i][j][k]).setNN(nn);
-			}
-		}
-	}
-}*/
-
-//Sample::Sample(Scan scan){ Sample(0.,0.,0.,scan.getLengths()[0],scan.getLengths()[1],scan.getLengths()[2],15.,15.,15.,scan.getMaterials(),scan.getElements()); }
-
-Sample::Sample(double x, double y, double z, double xL, double yL, double zL, double xLV, double yLV, double zLV, vector<vector<vector<Material>>> materials_, vector<ChemElement> elements){
+Sample::Sample(double x, double y, double z, double xL, double yL, double zL, double xLV, double yLV, double zLV, vector<vector<vector<Material>>> materials_){
 	x_ = x;
 	y_ = y;
 	z_ = z;
 	xL_ = xL;
 	yL_ = yL;
 	zL_ = zL;
-
-	elements_ = elements;
 	
 	xN_ = (int)(xL_/xLV)+1;
 	yN_ = (int)(yL_/yLV)+1;
@@ -160,7 +88,7 @@ int Sample::getXN() const {return xN_;}
 int Sample::getYN() const {return yN_;}
 int Sample::getZN() const {return zN_;}
 int Sample::getVoxN() const {return voxN_;}
-vector<ChemElement> Sample::getElements() const{ return elements_;}
+//vector<ChemElement> Sample::getElements() const{ return elements_;}
 
 Voxel* Sample::getVoxel(double x, double y, double z){
 	Voxel *temp = oobVoxel;

@@ -13,7 +13,7 @@ add_executable(Tests src/Tests.cpp)
 add_executable(Main src/Main.cpp)
 #########################################################################################
 target_link_libraries(Main XRayLibAPI Shadow3API PlotAPI PolyCapAPI OptimizerAPI vt.base vt.tracer)
-target_link_libraries(Tests XRayLibAPI Shadow3API PlotAPI PolyCapAPI OptimizerAPI vt.base vt.tracer)
+target_link_libraries(Tests XRayLibAPI Shadow3API PlotAPI PolyCapAPI OptimizerAPI vt.base)
 #########################################################################################
 add_subdirectory(src/api)
 add_subdirectory(src/base)

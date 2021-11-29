@@ -17,9 +17,12 @@ class XRBeam{
 
 	public:
   		XRBeam();
+		XRBeam(vector<Ray> beam);
+
 		XRBeam(vector<Ray> beam, double x0, double y0, double z0, double d, double alpha);
 		XRBeam(XRBeam zeroSource, double x, double y, double z);
-		//XRBeam getSecondaryBeam(vector<Ray> beam, double x0, double y0, double z0, double d, double alpha);
+		
+		void secondaryTransform(double x0, double y0, double z0, double d, double alpha);
 
 		vector<Ray> getRays() const;
 		void print() const;

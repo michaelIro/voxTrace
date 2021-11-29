@@ -22,7 +22,7 @@ class Ray {
 
 	int iaNum_;							// Number of interactions of this ray
 	bool iaFlag_;						// Interaction Flag
-	//double pb_;
+	double prob_;						// Probability
 		
   public:
   	Ray();

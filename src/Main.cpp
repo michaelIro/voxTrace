@@ -48,8 +48,12 @@ int main() {
 /***********************************************************************************/
 
 	vector<vector<vector<Material>>> myMat;
+    ChemElement cu(29);
+    ChemElement sn(50);
+	ChemElement pb(82);
+	map<ChemElement* const,double> bronzeMap{{&cu,0.7},{&sn,0.2},{&pb,0.1}};
 
-	map<int,double> bronze{{29,0.7},{50,0.2},{82,0.1}};
+	//map<int,double> bronze{{29,0.7},{50,0.2},{82,0.1}};
 
 	//arma::field<Material> myMaterials(11,11,11); TODO: change vec<vec<vec>> to field
 		
@@ -58,7 +62,7 @@ int main() {
 		for(int j = 0; j < 11; j++){
 			vector<Material> myMat2;
 			for(int k = 0; k < 11; k++){
-				myMat2.push_back(Material(bronze,8.96));
+				myMat2.push_back(Material(bronzeMap,8.96));
 				//myMaterials(i,j,k) = Material(cuMatMap,8.96);
 			}
 			myMat1.push_back(myMat2);
@@ -72,11 +76,11 @@ int main() {
 	myElements.push_back(ChemElement(82));
 /***********************************************************************************/
 
-	Sample sample_ (0.,0.,0.,150.,150.,5.,15.,15.,0.5,myMat,myElements);
+	Sample sample_ (0.,0.,0.,150.,150.,5.,15.,15.,0.5,myMat);
 	//sample_.print();
 
 	XRBeam source_(myPolyCapBeam, 70.0, 70.0,0.0, 0.51, 45.0);
-	source_.print();
+	//source_.print();
 
 	Tracer tracer_(source_, sample_);
 	tracer_.start();
@@ -84,14 +88,14 @@ int main() {
 
 	int i =0;
 	vector<Ray> rayList_;
-	double alpha = -45 / 180 * M_PI;
+	double alpha = 45 / 180 * M_PI;
 	for(auto ray: tracer_.getBeam()){
-		if((ray.getStartZ()>=0) ){
+		if((ray.getStartZ()>=0) && (ray.getDirZ()<0) ){
 			
 
 			double x0_=ray.getStartX()-70.0;
-			double y0_=ray.getStartY()-70.0;
-			double z0_=ray.getStartZ();
+			double y0_=cos(alpha)*(ray.getStartY()-70.0)-sin(alpha)*ray.getStartZ();
+			double z0_=sin(alpha)*(ray.getStartY()-70.0)+cos(alpha)*ray.getStartZ();
 
 			double xd_ = ray.getDirX(); 
 			double yd_ = cos(alpha)*ray.getDirY()-sin(alpha)*ray.getDirZ();

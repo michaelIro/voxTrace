@@ -57,13 +57,13 @@ Ray* Tracer::traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample 
 		
 	double tIn;
 	double rayEnergy = (*ray).getEnergyKeV();	
-	double muLin = (*currentVoxel).getMaterial().getMuLin(rayEnergy, (*sample).getElements());
+	double muLin = (*currentVoxel).getMaterial().getMuLin(rayEnergy);
 	double intersectionLength = (*currentVoxel).intersect(ray,nextVoxel,&tIn);
 	double randomN = ((double) rand()) / ((double) RAND_MAX);
 
 
 
-	cout << "  Coordinates: " << (*currentVoxel).getX0()<<" "<<(*currentVoxel).getY0()<<" "<<(*currentVoxel).getZ0()<<endl;
+	//cout << "  Coordinates: " << (*currentVoxel).getX0()<<" "<<(*currentVoxel).getY0()<<" "<<(*currentVoxel).getZ0()<<endl;
 	//cout << "  Next Voxel: " << (*nextVoxel) << endl;
 	//cout << "  Intersection length: " << intersectionLength << "µm" << endl;
 	//cout << "  Linear attenuation coefficient: " << muLin << endl;
@@ -76,23 +76,23 @@ Ray* Tracer::traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample 
 		(*ia)++;
 
 		/*Selection of chemical Element to interact with*/			
-		ChemElement interactingElement = (*currentVoxel).getMaterial().getInteractingElement(rayEnergy,randomN,(*sample).getElements());
+		ChemElement* interactingElement = (*currentVoxel).getMaterial().getInteractingElement(rayEnergy,randomN);
 
 		//cout<<"\t Interacting Element: "<<interactingElement<<endl;
 		//cout<<"  Next: "<<(*nextVoxel).getXPos0()<<" "<<(*nextVoxel).getYPos0()<<" "<<(*nextVoxel).getYPos0()<<endl;
 
 		/*Selection of interaction type*/
-		int interactionType = interactingElement.getInteractionType(rayEnergy,randomN);
+		int interactionType = (*interactingElement).getInteractionType(rayEnergy,randomN);
 		//cout<<"Interaction Type: "<<interactionType<<endl;
 
 		if(interactionType == 0){ 
 			//cout<<"\t Photo-Absorption"<<endl;
 
-			int myShell = interactingElement.getExcitedShell(rayEnergy,randomN);
+			int myShell = (*interactingElement).getExcitedShell(rayEnergy,randomN);
 			//cout<<"\t Excited Shell: "<< myShell << " \n";
 
 			randomN = ((double) rand()) / ((double) RAND_MAX);
-			if(randomN > interactingElement.getFluorescenceYield(myShell)){
+			if(randomN > (*interactingElement).getFluorescenceYield(myShell)){
 				//cout<<"\t Auger-Effect: ";
 				//cout<<interactingElement.getAugerYield(myShell)<<endl;
 				(*ray).setIANum((*ray).getIANum()+1);
@@ -104,7 +104,7 @@ Ray* Tracer::traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample 
 				//cout<<"\t Fluorescence-Yield: "<<interactingElement.getFluorescenceYield(myShell)<<endl;
 
 				randomN = ((double) rand()) / ((double) RAND_MAX);
-				int myLine = interactingElement.getTransition(myShell, randomN);
+				int myLine = (*interactingElement).getTransition(myShell, randomN);
 				//cout<<"\t Line: "<<myLine<<" Energy: "<<interactingElement.getLineEnergy(myLine)<<endl;
 
 				randomN = ((double) rand()) / ((double) RAND_MAX);
@@ -126,7 +126,7 @@ Ray* Tracer::traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample 
 
 				(*ray).rotate(phi,theta);
 				(*ray).setStartCoordinates(xNew,yNew,zNew);
-				(*ray).setEnergy(interactingElement.getLineEnergy(myLine));
+				(*ray).setEnergy((*interactingElement).getLineEnergy(myLine));
 				(*ray).setIANum((*ray).getIANum()+1);
 				(*ray).setIAFlag(true);
 			}
@@ -138,7 +138,7 @@ Ray* Tracer::traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample 
 			double phi = 2*M_PI*randomN;
 				
 			randomN = ((double) rand()) / ((double) RAND_MAX);
-			double theta = interactingElement.getThetaRayl(rayEnergy,randomN);	
+			double theta = (*interactingElement).getThetaRayl(rayEnergy,randomN);	
 	
 			//cout<<"\t Theta: "<<theta<<endl;
 			(*ray).rotate(phi,theta);
@@ -160,7 +160,7 @@ Ray* Tracer::traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample 
 			double phi = 2*M_PI*randomN;
 
 			randomN = ((double) rand()) / ((double) RAND_MAX);
-			double theta = interactingElement.getThetaCompt(rayEnergy,randomN);	
+			double theta = (*interactingElement).getThetaCompt(rayEnergy,randomN);	
 
 			//cout<<"\t Theta: "<<theta<<endl;
 			(*ray).rotate(phi,theta);

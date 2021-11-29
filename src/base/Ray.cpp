@@ -114,6 +114,7 @@ Ray::Ray(double startX, double startY, double startZ, double dirX, double dirY, 
 	
 	iaNum_=0;
 	iaFlag_=false;
+	//prob_= prob;
 }
 
 /*Member-Getter*/
