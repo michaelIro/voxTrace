@@ -13,15 +13,15 @@ using namespace std;
 class XRBeam{
 
 	private:
-		double position_;
 		vector<Ray> rayList_;
 
 	public:
   		XRBeam();
-		XRBeam(vector<Ray> beam, double x0, double y0, double d, double alpha);
+		XRBeam(vector<Ray> beam, double x0, double y0, double z0, double d, double alpha);
 		XRBeam(XRBeam zeroSource, double x, double y, double z);
+		//XRBeam getSecondaryBeam(vector<Ray> beam, double x0, double y0, double z0, double d, double alpha);
 
-		vector<Ray> getRayList() const;
+		vector<Ray> getRays() const;
 		void print() const;
 };
 

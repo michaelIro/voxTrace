@@ -14,8 +14,9 @@ Shadow3API::Shadow3API(char* path){
             src_.load((char *) entry.path().c_str());             // load variables from start.00
 
         else{
-            // TODO: Load optical elements     
-            //OE     oe1;                   //TODO:: Load and trace OEs
+            //std::cout<< entry.path().extension() << std::endl; 
+            // TODO: Load and trace OEs   
+            //OE     oe1;
 
             // load start.01 into oe1
             //oe1.load( (char*) "start.01");

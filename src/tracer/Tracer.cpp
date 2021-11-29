@@ -16,21 +16,21 @@ void Tracer::start(){
 
 	srand(time(NULL)); 		// TODO: is this the correct place? 
 
-	vector<Ray> tracedRays(source_.getRayList().size());
+	vector<Ray> tracedRays(source_.getRays().size());
 	int i = 0;
-	int ia=0;
+	int ia = 0;
 
-	int size = source_.getRayList().size();
+	int size = source_.getRays().size();
 	
-	for (Ray ray: source_.getRayList()) {
+	for (Ray ray: source_.getRays()) {
     	//ray.print(i++);
 		Ray*	currentRay = &ray;
-		//std::cout<<"HERE 13"<<std::endl;
+		//std::cout<<"HERE 00"<<std::endl;
 		Voxel* 	currentVoxel = sample_.findStartVoxel(currentRay);
-		//std::cout<<"HERE 14"<<std::endl;
+		//std::cout<<"HERE 01"<<std::endl;
 		int nextVoxel = 13;	
 		Ray* aNewRay= traceForward(currentRay, currentVoxel,&nextVoxel, &sample_,&ia);
-		//std::cout<<"HERE 12"<<std::endl;
+		//std::cout<<"HERE 02"<<std::endl;
 		tracedRays[i++]=(*aNewRay);	
 	}
 
@@ -63,16 +63,16 @@ Ray* Tracer::traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample 
 
 
 
-	cout << "  Coordinates: " << (*currentVoxel).getX0()<<" "<<(*currentVoxel).getY0()<<" "<<(*currentVoxel).getY0()<<endl;
-	cout << "  Next Voxel: " << (*nextVoxel) << endl;
-	cout << "  Intersection length: " << intersectionLength << "µm" << endl;
-	cout << "  Linear attenuation coefficient: " << muLin << endl;
-	cout << "  Interaction Probability: " << (1.-exp(-muLin*intersectionLength))*100 << "%" << endl<<endl;
+	cout << "  Coordinates: " << (*currentVoxel).getX0()<<" "<<(*currentVoxel).getY0()<<" "<<(*currentVoxel).getZ0()<<endl;
+	//cout << "  Next Voxel: " << (*nextVoxel) << endl;
+	//cout << "  Intersection length: " << intersectionLength << "µm" << endl;
+	//cout << "  Linear attenuation coefficient: " << muLin << endl;
+	//cout << "  Interaction Probability: " << (1.-exp(-muLin*intersectionLength))*100 << "%" << endl<<endl;
 	//(*currentVoxel).print();
 
 	/*Interaction in this Voxel?*/
 	if(exp(-muLin*intersectionLength) < randomN){
-		cout << "Interaction"<<endl;
+		//cout << "Interaction"<<endl;
 		(*ia)++;
 
 		/*Selection of chemical Element to interact with*/			
@@ -83,17 +83,17 @@ Ray* Tracer::traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample 
 
 		/*Selection of interaction type*/
 		int interactionType = interactingElement.getInteractionType(rayEnergy,randomN);
-		cout<<"Interaction Type: "<<interactionType<<endl;
+		//cout<<"Interaction Type: "<<interactionType<<endl;
 
 		if(interactionType == 0){ 
 			//cout<<"\t Photo-Absorption"<<endl;
 
 			int myShell = interactingElement.getExcitedShell(rayEnergy,randomN);
-			cout<<"\t Excited Shell: "<< myShell << " \n";
+			//cout<<"\t Excited Shell: "<< myShell << " \n";
 
 			randomN = ((double) rand()) / ((double) RAND_MAX);
 			if(randomN > interactingElement.getFluorescenceYield(myShell)){
-				cout<<"\t Auger-Effect: ";
+				//cout<<"\t Auger-Effect: ";
 				//cout<<interactingElement.getAugerYield(myShell)<<endl;
 				(*ray).setIANum((*ray).getIANum()+1);
 				(*ray).setIAFlag(true);
@@ -101,11 +101,11 @@ Ray* Tracer::traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample 
 			}
 			else{
 				//int myShell1 = (int) myShell;
-				cout<<"\t Fluorescence-Yield: "<<interactingElement.getFluorescenceYield(myShell)<<endl;
+				//cout<<"\t Fluorescence-Yield: "<<interactingElement.getFluorescenceYield(myShell)<<endl;
 
 				randomN = ((double) rand()) / ((double) RAND_MAX);
 				int myLine = interactingElement.getTransition(myShell, randomN);
-				cout<<"\t Line: "<<myLine<<" Energy: "<<interactingElement.getLineEnergy(myLine)<<endl;
+				//cout<<"\t Line: "<<myLine<<" Energy: "<<interactingElement.getLineEnergy(myLine)<<endl;
 
 				randomN = ((double) rand()) / ((double) RAND_MAX);
 				double phi = 2*M_PI*randomN;
@@ -125,13 +125,9 @@ Ray* Tracer::traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample 
 				//cout<< "NEW COORDINATES:"<<xNew<< " "<<yNew<<" "<<zNew<<endl;
 
 				(*ray).rotate(phi,theta);
-								cout << "HERE 1" << endl;
 				(*ray).setStartCoordinates(xNew,yNew,zNew);
-								cout << "HERE 2" << endl;
 				(*ray).setEnergy(interactingElement.getLineEnergy(myLine));
-												cout << "HERE 3" << endl;
 				(*ray).setIANum((*ray).getIANum()+1);
-												cout << "HERE 4" << endl;
 				(*ray).setIAFlag(true);
 			}
 		}
@@ -187,14 +183,11 @@ Ray* Tracer::traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample 
 		if((*sample).isOOB(currentVoxel)) 
 			(*ray).setFlag(false);
 	}
-											cout << "HERE 5" << endl;
 	//cout<<"Flag"<<(*ray).getFlag()<<endl;
 	if((*ray).getFlag()){
-		cout << "HERE 6" << endl;
 		return traceForward(ray, currentVoxel,nextVoxel,sample,ia);
 	}
 	else {
-		cout << "HERE 67" << endl;
 		return ray;
 	}
 												

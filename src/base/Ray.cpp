@@ -86,7 +86,6 @@ Ray::Ray(const Ray& ray, double x, double y, double z, double phi, double theta)
 	iaFlag_=ray.getIAFlag();
 }
 
-
 Ray::Ray(double startX, double startY, double startZ, double dirX, double dirY, double dirZ, 
 		double asX, double asY, double asZ, bool flag, double k, int q, double opd, double fS, 
 		double fP, double apX, double apY, double apZ){
@@ -140,10 +139,6 @@ double Ray::getOpticalPath() const {return opd_;}
 int Ray::getIANum() const {return iaNum_;}
 bool Ray::getIAFlag() const {return iaFlag_;}
 
-
-double Ray::getEnergyEV() const {
-	return (k_)/*phy::hBar*phy::c/phy::e)*100.*/;
-} // in eV
 
 double Ray::getEnergyKeV() const {
 	return (k_)/*phy::hBar*phy::c/phy::e)/10.*/;

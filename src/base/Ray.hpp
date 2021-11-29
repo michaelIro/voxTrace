@@ -22,6 +22,7 @@ class Ray {
 
 	int iaNum_;							// Number of interactions of this ray
 	bool iaFlag_;						// Interaction Flag
+	//double pb_;
 		
   public:
   	Ray();
@@ -31,6 +32,22 @@ class Ray {
 	  double asX, double asY, double asZ, bool flag, double k, int q, double opd, double fS, 
 	  double fP, double apX, double apY, double apZ);
 	
+	void rotate(double phi, double theta);
+	void translate(double xDist, double yDist, double zDist);
+
+	double* getShadowRay() const;
+	void print(int i) const;  
+
+	// Basic Setter and Getter Functions
+	void setFlag(bool flag);
+    void setStartCoordinates (double x, double y, double z);
+    void setEndCoordinates (double x, double y, double z);
+    void setSPol (double x, double y, double z);
+    void setPPol (double x, double y, double z);
+	void setEnergy(double keV);
+	void setIAFlag(bool iaFlag);
+	void setIANum(int iaNum);
+
 	double 	getStartX() const;
 	double 	getStartY() const;
 	double 	getStartZ() const;
@@ -56,26 +73,6 @@ class Ray {
 
 	bool 	getIAFlag() const;
 	int 	getIANum() const;
-
-    
-	void setFlag(bool flag);
-    void setStartCoordinates (double x, double y, double z);
-    void setEndCoordinates (double x, double y, double z);
-	void rotate(double phi, double theta);
-	void translate(double xDist, double yDist, double zDist);
-    void setSPol (double x, double y, double z);
-    void setPPol (double x, double y, double z);
-	void setEnergy(double keV);
-
-	void setIAFlag(bool iaFlag);
-	void setIANum(int iaNum);
-
-	void fluorescence(double newStartX,double newStartY,double newStartZ, double theta, double phi, double Energy);
-	void rayleigh(double newStartX,double newStartY,double newStartZ, double theta, double phi);
-	
-
-	double* getShadowRay() const;
-	void print(int i) const;  
 };
 
 #endif

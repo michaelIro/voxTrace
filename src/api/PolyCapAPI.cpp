@@ -34,7 +34,7 @@ PolyCapAPI::PolyCapAPI(){
 	//defineCap((char*) "../test-data/polycap/pc-246-descr.txt");
 }
 
-/* Define PolyCap X-Ray-Source */
+/* Define PolyCap */
 void PolyCapAPI::defineCap(char* path){
 	std::ifstream inFile;
 	std::string x;
@@ -46,6 +46,7 @@ void PolyCapAPI::defineCap(char* path){
 	std::cout << length << std::endl;
 
 }
+
 /* Define PolyCap X-Ray-Source */
 void PolyCapAPI::defineSource(){
 
