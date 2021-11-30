@@ -1,3 +1,5 @@
+/** XRBeam */
+
 #ifndef XRSource_H
 #define XRSource_H
 

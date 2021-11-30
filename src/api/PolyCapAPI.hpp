@@ -45,38 +45,33 @@ class PolyCapAPI{
     polycap_source *source;
 	  polycap_transmission_efficiencies *efficiencies;
 
-	  // Optic parameters TODO: IO for clean looking .txt File for these parameters (should be adaptable without recompiling)
-	  double optic_length;					//optic length in cm
-	  double rad_ext_upstream;			//external radius upstream, at entrance window, in cm
-	  double rad_ext_downstream;		//external radius downstream, at exit window, in cm
-	  double rad_int_upstream; 		  //single capillary radius, at optic entrance, in cm
-	  double rad_int_downstream; 		//single capillary radius, at optic exit, in cm
-	  double focal_dist_upstream; 	//focal distance on entrance window side, in cm
-	  double focal_dist_downstream; //focal distance on exit window side, in cm
-	  int n_elem;								    //amount of elements in optic material
-	  int* iz;							        //polycapillary optic material composition: atomic numbers and corresponding weight percentages
-	  double* wi;					          //SiO2
-	  double density;						    //optic material density, in g/cm^3 
-	  double surface_rough;					//surface roughness in Angstrom
-	  double n_capillaries;				  //number of capillaries in the optic
+	  // Polycapillary parameters
+	  double optic_length;					// optic length in cm
+	  double rad_ext_upstream;			// external radius upstream, at entrance window, in cm
+	  double rad_ext_downstream;		// external radius downstream, at exit window, in cm
+	  double rad_int_upstream; 		  // single capillary radius, at optic entrance, in cm
+	  double rad_int_downstream; 		// single capillary radius, at optic exit, in cm
+	  double focal_dist_upstream; 	// focal distance on entrance window side, in cm
+	  double focal_dist_downstream; // focal distance on exit window side, in cm
+	  int n_elem;								    // amount of elements in optic material
+	  int* iz;							        // polycapillary optic material composition: atomic numbers and corresponding weight percentages
+	  double* wi;					          // SiO2
+	  double density;						    // optic material density, in g/cm^3 
+	  double surface_rough;					// surface roughness in Angstrom
+	  double n_capillaries;				  // number of capillaries in the optic
 
     void defineSource();
     void load(char* path);
+    void compareBeams(arma::Mat<double> shadowBeam);
+    void overwritePhoton(arma::rowvec shadowRay, polycap_photon *photon);
 
   public:
     PolyCapAPI(char* path);
     
-    void print();
-    
     vector<Ray> traceSource(arma::Mat<double> shadowBeam, int nPhotons);
-
-    void compareBeams(arma::Mat<double> shadowBeam);
-
-    void overwritePhoton(arma::rowvec shadowRay, polycap_photon *photon);
     polycap_transmission_efficiencies* polycap_shadow_source_get_transmission_efficiencies(polycap_source *source, int max_threads, int n_photons, bool leak_calc, polycap_progress_monitor *progress_monitor, polycap_error **error, arma::Mat<double> shadowBeam);
 
-    //void traceSinglePhoton(arma::Mat<double> shadowBeam);    
-    //polycap_transmission_efficiencies* polycap_shadow_source_get_transmission_efficiencies2(polycap_source *source, int max_threads, int n_photons, bool leak_calc, polycap_progress_monitor *progress_monitor, polycap_error **error, arma::Mat<double> shadowBeam);
+    void print();
 };
 
 #endif

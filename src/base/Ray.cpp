@@ -22,7 +22,7 @@ Ray::Ray(const Ray& ray){
 	apY_= ray.getPPolY();
 	apZ_= ray.getPPolZ();
 	flag_=ray.getFlag();
-	k_=ray.getK();
+	k_=ray.getWaveNumber();
 	q_=ray.getIndex();
 	opd_=ray.getOpticalPath();
 	fS_=ray.getSPhase();
@@ -77,7 +77,7 @@ Ray::Ray(const Ray& ray, double x, double y, double z, double phi, double theta)
 	apZ_= apZ;
 
 	flag_=ray.getFlag();
-	k_=ray.getK();
+	k_=ray.getWaveNumber();
 	q_=ray.getIndex();
 	opd_=ray.getOpticalPath();
 	fS_=ray.getSPhase();
@@ -133,7 +133,7 @@ double Ray::getPPolY() const {return apY_;}
 double Ray::getPPolZ() const {return apZ_;}
 double Ray::getSPhase() const {return fS_;}
 double Ray::getPPhase() const {return fP_;}
-double Ray::getK() const {return k_;}
+double Ray::getWaveNumber() const {return k_;}
 int Ray::getIndex() const {return q_;}
 bool Ray::getFlag() const {return flag_;}
 double Ray::getOpticalPath() const {return opd_;}

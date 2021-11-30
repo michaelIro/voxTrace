@@ -1,4 +1,4 @@
-/** Source */
+/** XRBeam */
 
 #include "XRBeam.hpp"
 
@@ -13,10 +13,10 @@ XRBeam::XRBeam(vector<Ray> rays){
 	rayList_ = rays;
 }
 
-/** Transform Beam from 
- * @param xShift description
- * @param yShift description
- * @param zShift description
+/** Transform Beam Coordinate System -> Shift in x-/y-/z-direction
+ * @param xShift shift in x-direction in ...
+ * @param yShift shift in y-direction in ...
+ * @param zShift shift in z-direction in ...
  */
 void XRBeam::shift(double xShift, double yShift, double zShift){
 

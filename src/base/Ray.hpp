@@ -67,7 +67,7 @@ class Ray {
 		
 	int 	getIndex() const;
     bool 	getFlag() const;
-    double 	getK() const;
+    double 	getWaveNumber() const;
     double 	getOpticalPath() const;
 	double 	getEnergyEV() const;
 	double 	getEnergyKeV() const;

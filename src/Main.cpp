@@ -17,7 +17,7 @@ int main() {
 /***********************************************************************************/
 
 	Shadow3API myShadowSource((char*) "../test-data/shadow3");
-	arma::Mat<double> myShadowBeam = myShadowSource.getBeam(5000000); //15000000	
+	arma::Mat<double> myShadowBeam = myShadowSource.getBeam(1000000); //15000000	
 
 	myShadowBeam.save("../test-data/beam/shadowBeam.csv", arma::csv_ascii);
 	//std::cout << "Shadow-Beam: " << std::endl;
@@ -29,11 +29,12 @@ int main() {
 	//myPolycap.compareBeams(myShadowBeam);
 	//myPolycap.defineCap((char*) "../test-data/polycap/pc-246-descr.txt");
 
-	XRBeam myPrimaryBeam(myPrimaryPolycap.traceSource(myShadowBeam,500000));
+	XRBeam myPrimaryBeam(myPrimaryPolycap.traceSource(myShadowBeam,100000));
 	myPrimaryBeam.primaryTransform(70.0, 70.0,0.0, 0.51, 45.0);
-	
+	for(int i= 0; i < 10; i++)
+		std::cout << myPrimaryBeam.getRays()[i].getProb() << std::endl;
 	//myPrimaryBeam.print();
-	//myPrimaryBeam.getMatrix().save("../test-data/beam/primaryBeam.csv", arma::csv_ascii);
+	myPrimaryBeam.getMatrix().save("../test-data/beam/primaryBeam.csv", arma::csv_ascii);
 
 /***********************************************************************************/
 
