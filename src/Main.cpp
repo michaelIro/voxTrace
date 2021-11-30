@@ -17,22 +17,23 @@ int main() {
 /***********************************************************************************/
 
 	Shadow3API myShadowSource((char*) "../test-data/shadow3");
-	arma::Mat<double> myShadowBeam = myShadowSource.getBeam(100000); //15000000	
+	arma::Mat<double> myShadowBeam = myShadowSource.getBeam(5000000); //15000000	
 
-	myShadowBeam.save("../test-data/shadowBeam.csv", arma::csv_ascii);
+	myShadowBeam.save("../test-data/beam/shadowBeam.csv", arma::csv_ascii);
 	//std::cout << "Shadow-Beam: " << std::endl;
 	//myShadowBeam.print();
 
 /***********************************************************************************/
 
-	PolyCapAPI myPolycap;
+	PolyCapAPI myPrimaryPolycap((char*) "../test-data/polycap/pc-246-descr.txt");
 	//myPolycap.compareBeams(myShadowBeam);
-	vector<Ray> myPolyCapBeam = myPolycap.traceSource(myShadowBeam,1000);
+	//myPolycap.defineCap((char*) "../test-data/polycap/pc-246-descr.txt");
 
-	int counter=0;
-
-	//for (auto it: myPolyCapBeam)
-    //	it.print(counter++);
+	XRBeam myPrimaryBeam(myPrimaryPolycap.traceSource(myShadowBeam,500000));
+	myPrimaryBeam.primaryTransform(70.0, 70.0,0.0, 0.51, 45.0);
+	
+	//myPrimaryBeam.print();
+	//myPrimaryBeam.getMatrix().save("../test-data/beam/primaryBeam.csv", arma::csv_ascii);
 
 /***********************************************************************************/
 
@@ -70,25 +71,27 @@ int main() {
 		myMat.push_back(myMat1);
 	}
 
-	vector<ChemElement> myElements;
-	myElements.push_back(ChemElement(29));
-	myElements.push_back(ChemElement(50));
-	myElements.push_back(ChemElement(82));
 /***********************************************************************************/
 
 	Sample sample_ (0.,0.,0.,150.,150.,5.,15.,15.,0.5,myMat);
 	//sample_.print();
 
-	XRBeam source_(myPolyCapBeam);
-	source_.primaryTransform(70.0, 70.0,0.0, 0.51, 45.0);
-	//source_.print();
+/***********************************************************************************/
 
-	Tracer tracer_(source_, sample_);
+	Tracer tracer_(myPrimaryBeam, sample_);
 	tracer_.start();
 
+/***********************************************************************************/
+
 	XRBeam fluorescence_(tracer_.getBeam());
-	fluorescence_.secondaryTransform(70.0, 70.0,0.0, 0.51, 45.0);
+	fluorescence_.secondaryTransform(70.0, 70.0,0.0, 0.49, 45.0);
+	fluorescence_.getMatrix().save("../test-data/beam/fluorescenceBeam.csv", arma::csv_ascii);
 	//fluorescence_.print();
 
+/***********************************************************************************/
+
+	PolyCapAPI mySecondaryPolycap((char*) "../test-data/polycap/pc-236-descr.txt");	
+
+/***********************************************************************************/
     return 0;
 }

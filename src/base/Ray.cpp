@@ -30,6 +30,7 @@ Ray::Ray(const Ray& ray){
 
 	iaNum_=ray.getIANum();
 	iaFlag_ =ray.getIAFlag();
+	prob_= ray.getProb();
 }
 
 /** Coordinate Transofrmation */
@@ -88,7 +89,7 @@ Ray::Ray(const Ray& ray, double x, double y, double z, double phi, double theta)
 
 Ray::Ray(double startX, double startY, double startZ, double dirX, double dirY, double dirZ, 
 		double asX, double asY, double asZ, bool flag, double k, int q, double opd, double fS, 
-		double fP, double apX, double apY, double apZ){
+		double fP, double apX, double apY, double apZ, double prob){
 	startX_ = startX;
 	startY_ = startY;
 	startZ_ = startZ;
@@ -114,7 +115,7 @@ Ray::Ray(double startX, double startY, double startZ, double dirX, double dirY, 
 	
 	iaNum_=0;
 	iaFlag_=false;
-	//prob_= prob;
+	prob_= prob;
 }
 
 /*Member-Getter*/
@@ -136,6 +137,7 @@ double Ray::getK() const {return k_;}
 int Ray::getIndex() const {return q_;}
 bool Ray::getFlag() const {return flag_;}
 double Ray::getOpticalPath() const {return opd_;}
+double Ray::getProb() const {return prob_;}
 
 int Ray::getIANum() const {return iaNum_;}
 bool Ray::getIAFlag() const {return iaFlag_;}
