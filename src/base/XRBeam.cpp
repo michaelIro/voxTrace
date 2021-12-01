@@ -112,7 +112,8 @@ arma::Mat<double> XRBeam::getMatrix() const{
 	arma::Mat<double> rays = arma::ones(rayList_.size(), 19);
 	int i =0;
 	for(auto ray: rayList_){
-		arma::rowvec row_ = {
+		//arma::rowvec row_ = 
+		rays.row(i++)={
 			ray.getStartX(),ray.getStartY(),ray.getStartZ(),
 			ray.getDirX(),ray.getDirY(),ray.getDirZ(),
 			ray.getSPolX(),ray.getSPolY(),ray.getSPolZ(),
@@ -120,7 +121,6 @@ arma::Mat<double> XRBeam::getMatrix() const{
 			ray.getOpticalPath(),ray.getSPhase(),ray.getPPhase(),
 			ray.getPPolX(),ray.getPPolY(),ray.getPPolZ(),
 			ray.getProb()};
-		rays.row(i++)=row_;
 	}
 		
 	return rays;

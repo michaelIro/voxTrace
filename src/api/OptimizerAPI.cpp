@@ -1,14 +1,14 @@
+/// \dir src/api 
+///      
+/// \brief Brief description of the dir src/api goes here
+/// 
+/// \details A more detailed description goes here. 
+///  
+
 //! API to global optimization library/libraries (ensmallen, OptimLib, GSL, ...)
 /*!
   An interface to 
 */
-
-/// \dir cpp/vtutil 
-///      
-/// \brief Brief description of the dir cpp/vtutil goes here
-/// 
-/// \details A more detailed description goes here. 
-///  
 
 #include "OptimizerAPI.hpp"
 

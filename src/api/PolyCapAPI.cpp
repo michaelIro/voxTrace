@@ -109,8 +109,8 @@ void PolyCapAPI::defineSource(){
 	double source_shift_x = 0.;						//source shift in x compared to optic central axis, in cm
 	double source_shift_y = 0.;						//source shift in y compared to optic central axis, in cm
 	double source_polar = 1.0;						//source polarisation factor
-	int n_energies = 2;								//number of discrete photon energies
-	double energies[2]={1.0,17.4};						//energies for which transmission efficiency should be calculated, in keV
+	int n_energies = 1;								//number of discrete photon energies
+	double energies[1]={17.4};						//energies for which transmission efficiency should be calculated, in keV
 
 	//define photon source, including optic description
 	source = polycap_source_new(description, source_dist, source_rad_x, source_rad_y, source_div_x, source_div_y, source_shift_x, source_shift_y, source_polar, n_energies, energies, &error);
@@ -145,7 +145,7 @@ vector<Ray> PolyCapAPI::traceSource(arma::Mat<double> shadowBeam, int nPhotons){
 	//std::cout << "Original Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end1 - begin).count() << "[µs]"  << std::endl;
 	//std::cout << "Modified Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end2 - end1).count() << "[µs]" << std::endl;
 
-	vector<Ray> polycapBeam(nPhotons);
+	vector<Ray> polycapBeam;
 	
 	int rayCounter = 0;
 	for( int i = 0; i < efficiencies->images->i_exit; i++ ){
@@ -178,14 +178,14 @@ vector<Ray> PolyCapAPI::traceSource(arma::Mat<double> shadowBeam, int nPhotons){
 				efficiencies->images->exit_coord_weights[i]
 				);
 			polycapBeam.push_back(ray_);
-/*
-			std::cout << efficiencies->images->pc_exit_coords[0][i] << " ";
+
+			/*std::cout << efficiencies->images->pc_exit_coords[0][i] << " ";
 			std::cout << efficiencies->images->pc_exit_coords[1][i] << " ";
 			std::cout << efficiencies->images->pc_exit_coords[2][i] << std::endl;
 
 			std::cout << efficiencies->images->pc_exit_dir[0][i] << " ";
 			std::cout << efficiencies->images->pc_exit_dir[1][i] << " ";
-			std::cout << efficiencies->images->pc_exit_dir[2][i] << std::endl << std::endl; */
+			std::cout << efficiencies->images->pc_exit_dir[2][i] << std::endl << std::endl;*/ 
 		}
 	}
 
