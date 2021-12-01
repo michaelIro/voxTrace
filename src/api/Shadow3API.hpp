@@ -28,7 +28,8 @@ class Shadow3API{
       Shadow3API();
       Shadow3API(char* path);
 
-      arma::Mat<double> getBeam(int nRays);
+      void trace(int nRays);
+      arma::Mat<double> getBeam();
 };
 
 #endif

@@ -109,8 +109,8 @@ void PolyCapAPI::defineSource(){
 	double source_shift_x = 0.;						//source shift in x compared to optic central axis, in cm
 	double source_shift_y = 0.;						//source shift in y compared to optic central axis, in cm
 	double source_polar = 1.0;						//source polarisation factor
-	int n_energies = 1;								//number of discrete photon energies
-	double energies[1]={1.0};						//energies for which transmission efficiency should be calculated, in keV
+	int n_energies = 2;								//number of discrete photon energies
+	double energies[2]={1.0,17.4};						//energies for which transmission efficiency should be calculated, in keV
 
 	//define photon source, including optic description
 	source = polycap_source_new(description, source_dist, source_rad_x, source_rad_y, source_div_x, source_div_y, source_shift_x, source_shift_y, source_polar, n_energies, energies, &error);
@@ -154,21 +154,27 @@ vector<Ray> PolyCapAPI::traceSource(arma::Mat<double> shadowBeam, int nPhotons){
 				efficiencies->images->pc_exit_coords[0][i],
 				0.,
 				efficiencies->images->pc_exit_coords[1][i],
+
 				efficiencies->images->pc_exit_dir[0][i],
 				efficiencies->images->pc_exit_dir[2][i],
 				efficiencies->images->pc_exit_dir[1][i],
+
 				0.,
 				0.,
 				0., 
+
 				false, 
 				17.4, 
 				rayCounter++, 
+
 				3.94, 
 				0.0, 
 				0.0,  
+
 				0., 
 				0., 
 				0.,
+
 				efficiencies->images->exit_coord_weights[i]
 				);
 			polycapBeam.push_back(ray_);
@@ -207,101 +213,11 @@ void PolyCapAPI::overwritePhoton(arma::rowvec shadowRay, polycap_photon *photon)
 	photon->start_electric_vector.x = shadowRay(6); 
 	photon->start_electric_vector.y = shadowRay(8); 
 	photon->start_electric_vector.z = shadowRay(7); 
+
+
+
+
 }
-
-/* Blah 
-void PolyCapAPI::traceSinglePhoton(arma::Mat<double> shadowBeam){
-
-	int succesfully_traced = 0;
-	int absorbed = 0;
-	int no_in = 0;
-	int wall_hit =0;
-	int err =0;
-
-	//Test photon
-	polycap_rng *rng;
-	rng = polycap_rng_new();
-	int n_energies = 1;							//number of discrete photon energies
-
-
-	//std::cout << "Shadow 3 - Beam: " << std::endl;
-	//shadowBeam.print();
-
-
-	//arma::Mat<double> polycapBeamAfter = arma::ones(shadowBeam.n_rows,9);
-	arma::Mat<double> polycapBeamTraced = arma::ones(shadowBeam.n_rows,10);
-	
-	#pragma omp parallel for
-    for(int i = 0; i < shadowBeam.n_rows; i++){
-		polycap_photon  *polyCapPhot;
-		polyCapPhot = polycap_source_get_photon(source, rng, NULL);
-
-		overwritePhoton(shadowBeam.row(i), polyCapPhot);
-
-		double energies[1]={shadowBeam(i,10)*HC/(2*M_PI)};	//energies for which transmission efficiency should be calculated, in keV
-		double *weights_temp;
-
-		polycap_error *myError = NULL;
-
-		int success = polycap_photon_launch(polyCapPhot, n_energies, energies, &weights_temp, true, &myError);
-
-
-		polycapBeamTraced(i,0) = polyCapPhot->exit_coords.x; 
-		polycapBeamTraced(i,1) = polyCapPhot->exit_coords.y; 
-		polycapBeamTraced(i,2) = polyCapPhot->exit_coords.z; 
-
-		polycapBeamTraced(i,3) = polyCapPhot->exit_direction.x; 
-		polycapBeamTraced(i,4) = polyCapPhot->exit_direction.y; 
-		polycapBeamTraced(i,5) = polyCapPhot->exit_direction.z; 
-
-		polycapBeamTraced(i,6) = polyCapPhot->exit_electric_vector.x; 
-		polycapBeamTraced(i,7) = polyCapPhot->exit_electric_vector.y; 
-		polycapBeamTraced(i,8) = polyCapPhot->exit_electric_vector.z; 
-		polycapBeamTraced(i,9) = (double) success; 
-
-		polycap_vector3 exit_coords = polycap_photon_get_exit_coords(polyCapPhot);
-		polycap_vector3 exit_dir = polycap_photon_get_exit_direction(polyCapPhot);
-		polycap_vector3 exit_electric_vector = polycap_photon_get_exit_electric_vector(polyCapPhot);
-
-		if(success == 0)
-			absorbed++;
-		if(success == 1)
-			succesfully_traced++;
-		if(success == 2)
-			wall_hit++;
-		if(success == -1)
-			err++;
-		if(success == -2)
-			no_in++;
-
-			//if iesc == 0 here a new photon should be simulated/started as the photon was absorbed within it.
-			//if iesc == 1 check whether photon is in PC exit window as photon reached end of PC
-			//if iesc == 2 a new photon should be simulated/started as the photon hit the walls -> can still leak
-			//if iesc == -2 a new photon should be simulated/started as the photon missed the optic entrance window
-			//if iesc == -1 some error occured
-
-		polycap_photon_free(polyCapPhot);	
-		free(weights_temp);
-
-	}
- 
-	//std::cout << "Polycap - Beam Before: " << std::endl;
-	//polycapBeamBefore.print();
-
-	//std::cout << "Polycap - Beam After: " << std::endl;
-	//polycapBeamAfter.print();
-
-	//std::cout << "Polycap - Beam Traced: " << std::endl;
-	//polycapBeamTraced.print();
-
-	std::cout << std::endl << std::endl;
-	std::cout << "Succesfully Traced Photons: " << succesfully_traced << std::endl;
-	std::cout << "Absorbed Photons: " << absorbed << std::endl;
-	std::cout << "Photons that hit Wall: " << wall_hit << std::endl;
-	std::cout << "Photons that miss entry: " << no_in << std::endl;
-	std::cout << "Error: " << err << std::endl;
-}*/
-
 
 /* A helper function to compare coordinates from Shadow with coordinates from Polycap. FIXME: Remove this function from final code!*/
 void PolyCapAPI::compareBeams(arma::Mat<double> shadowBeam){
@@ -371,6 +287,7 @@ void PolyCapAPI::compareBeams(arma::Mat<double> shadowBeam){
 	"For a given array of energies, and a full polycap_description, get the transmission efficiencies."
 	Can be adapted for further information about inner-capillary processes. TODO: Adapt this further */
 polycap_transmission_efficiencies* PolyCapAPI::polycap_shadow_source_get_transmission_efficiencies(polycap_source *source, int max_threads, int n_photons, bool leak_calc, polycap_progress_monitor *progress_monitor, polycap_error **error, arma::Mat<double> shadowBeam){
+	
 	int i, row=0;
 	int64_t sum_iexit=0, sum_irefl=0, sum_not_entered=0, sum_not_transmitted=0;
 	int64_t *iexit_temp, *not_entered_temp, *not_transmitted_temp;
@@ -378,6 +295,8 @@ polycap_transmission_efficiencies* PolyCapAPI::polycap_shadow_source_get_transmi
 	double *sum_weights;
 	polycap_transmission_efficiencies *efficiencies;
 
+	// allocate memory TODO: Find out why not just simple stack?
+	{
 	// check max_threads
 	if (max_threads < 1 || max_threads > omp_get_max_threads())
 		max_threads = omp_get_max_threads();
@@ -571,76 +490,67 @@ polycap_transmission_efficiencies* PolyCapAPI::polycap_shadow_source_get_transmi
 		return NULL;
 	}
 	efficiencies->source = source;
+	}
 
-//	// use cancelled as global variable to indicate that the OpenMP loop was aborted due to an error
-//	bool cancelled = false;	
+	//OpenMP loop
+	#pragma omp parallel \
+		default(shared) \
+		shared(row)\
+		private(i) \
+		num_threads(max_threads)
+		{
+			int thread_id = omp_get_thread_num();
+			int j = 0;
+			polycap_rng *rng;
+			polycap_photon *photon;
+			int iesc=0, k, l;
+			double *weights;
+			double *weights_temp;
+			//polycap_error *local_error = NULL; // to be used when we are going to call methods that take a polycap_error as argument
+			polycap_leak **extleak = NULL; // define extleak structure for each thread
+			int64_t n_extleak=0;
+			polycap_leak **intleak = NULL; // define intleak structure for each thread
+			int64_t n_intleak=0;
+			int64_t leak_mem_size=0, intleak_mem_size=0; //memory size indicator for leak and intleak structure arrays
+			polycap_vector3 temp_vect; //temporary vector to store electric_vectors during projection onto photon direction
+			double cosalpha, alpha; //angle between initial electric vector and photon direction
+			double c_ae, c_be;
+			polycap_leak **extleak_temp = NULL; // define extleak_temp structure for each thread
+			int64_t n_extleak_temp = 0;
+			polycap_leak **intleak_temp = NULL; // define intleak_temp structure for each thread
+			int64_t n_intleak_temp = 0;
+			int64_t leak_mem_size_temp=0, intleak_mem_size_temp=0; //memory size indicator for leak and intleak temp structure arrays
 
-//	if (!omp_get_cancellation()) {
-//		polycap_set_error_literal(error, POLYCAP_ERROR_OPENMP, "polycap_transmission_efficiencies: OpenMP cancellation support is not available");
-//		polycap_transmission_efficiencies_free(efficiencies);
-//		free(sum_weights);
-//		return NULL;
-//	}
+			weights = (double *) malloc(sizeof(double)*source->n_energies);
 
+			for(k=0; k<source->n_energies; k++)
+				weights[k] = 0.;
 
-//OpenMP loop
-#pragma omp parallel \
-	default(shared) \
-	shared(row)\
-	private(i) \
-	num_threads(max_threads)
-{
-	int thread_id = omp_get_thread_num();
-	int j = 0;
-	polycap_rng *rng;
-	polycap_photon *photon;
-	int iesc=0, k, l;
-	double *weights;
-	double *weights_temp;
-	//polycap_error *local_error = NULL; // to be used when we are going to call methods that take a polycap_error as argument
-	polycap_leak **extleak = NULL; // define extleak structure for each thread
-	int64_t n_extleak=0;
-	polycap_leak **intleak = NULL; // define intleak structure for each thread
-	int64_t n_intleak=0;
-	int64_t leak_mem_size=0, intleak_mem_size=0; //memory size indicator for leak and intleak structure arrays
-	polycap_vector3 temp_vect; //temporary vector to store electric_vectors during projection onto photon direction
-	double cosalpha, alpha; //angle between initial electric vector and photon direction
-	double c_ae, c_be;
-	polycap_leak **extleak_temp = NULL; // define extleak_temp structure for each thread
-	int64_t n_extleak_temp = 0;
-	polycap_leak **intleak_temp = NULL; // define intleak_temp structure for each thread
-	int64_t n_intleak_temp = 0;
-	int64_t leak_mem_size_temp=0, intleak_mem_size_temp=0; //memory size indicator for leak and intleak temp structure arrays
+			// Create new rng
+			rng = polycap_rng_new();
 
-	weights = (double *) malloc(sizeof(double)*source->n_energies);
+			i=0; //counter to monitor calculation proceeding
 
-	for(k=0; k<source->n_energies; k++)
-		weights[k] = 0.;
+			#pragma omp for
+			for(j=0; j < n_photons; j++){
+				do{
+					// Create photon structure
+					photon = polycap_source_get_photon(source, rng, NULL);
 
-	// Create new rng
-	rng = polycap_rng_new();
+					#pragma omp critical
+					{
+						//std::cout << "Photo #" << row++ <<std::endl;
+						overwritePhoton(shadowBeam.row(row++), photon); // FIXME: Ugly solution
+						//	arma::rowvec myRayOrTheHighRay = shadow_source.getSingleRay();
+					}
 
-	i=0; //counter to monitor calculation proceeding
-	#pragma omp for
-	for(j=0; j < n_photons; j++){
-		do{
-			// Create photon structure
-			photon = polycap_source_get_photon(source, rng, NULL);
-
-			#pragma omp critical
-			{
-				//std::cout << "Photo #" << row++ <<std::endl;
-				overwritePhoton(shadowBeam.row(row++), photon); // FIXME: Ugly solution
-				//	arma::rowvec myRayOrTheHighRay = shadow_source.getSingleRay();
-			}
-
-			// Launch photon
-			iesc = polycap_photon_launch(photon, source->n_energies, source->energies, &weights_temp, leak_calc, NULL);
-			//if iesc == 0 here a new photon should be simulated/started as the photon was absorbed within it.
-			//if iesc == 1 check whether photon is in PC exit window as photon reached end of PC
-			//if iesc == 2 a new photon should be simulated/started as the photon hit the walls -> can still leak
-			//if iesc == -2 a new photon should be simulated/started as the photon missed the optic entrance window
-			//if iesc == -1 some error occured
+					// Launch photon
+					iesc = polycap_photon_launch(photon, source->n_energies, source->energies, &weights_temp, leak_calc, NULL);
+					//if iesc == 0 here a new photon should be simulated/started as the photon was absorbed within it.
+					//if iesc == 1 check whether photon is in PC exit window as photon reached end of PC
+					//if iesc == 2 a new photon should be simulated/started as the photon hit the walls -> can still leak
+					//if iesc == -2 a new photon should be simulated/started as the photon missed the optic entrance window
+					//if iesc == -1 some error occured
 
 			if(iesc == 0)
 				not_transmitted_temp[thread_id]++; //photon did not reach end of PC

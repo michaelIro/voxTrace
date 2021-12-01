@@ -26,9 +26,9 @@ Shadow3API::Shadow3API(char* path){
 
 /** Generates X-Rays from a Shadow3-Source and if present trace the generated rays through optical elements. 
  * @param nRays Number of Rays to be generated
- * @return arma::Mat<double> with Rays generated from Source
+ * @return void -> Result is written to beam_ 
  */
-arma::Mat<double> Shadow3API::getBeam(int nRays){
+void Shadow3API::trace(int nRays){
     // overwrite number of rays
     src_.NPOINT=nRays;
 
@@ -40,9 +40,17 @@ arma::Mat<double> Shadow3API::getBeam(int nRays){
         for(int i = 0; i < oe_.size(); i++ )
             beam_.traceOE(&(oe_[i]),1);         // traces OE1
     }
+}
+
+/** Generates X-Rays from a Shadow3-Source and if present trace the generated rays through optical elements.
+ * Each row has the values: x0,y0,z0,   xd,yd,zd,   asx,asy,asz,    flag,k,index,   opd,fs,fp,  apx,apy,apz
+ * @param nRays Number of Rays to be generated
+ * @return arma::Mat<double> with Rays generated from Source
+ */
+arma::Mat<double> Shadow3API::getBeam(){
 
     // write rays to arma::mat
-    arma::Mat<double> rays = arma::ones(src_.NPOINT, src_.NCOL);
+    arma::Mat<double> rays = arma::ones(src_.NPOINT, 18);
     for(int i = 0; i < rays.n_rows; i++)
         for(int j = 0; j < rays.n_cols; j++)
             rays(i,j) = (*(beam_.rays+i*18+j));

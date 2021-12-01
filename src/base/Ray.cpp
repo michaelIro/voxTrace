@@ -190,7 +190,7 @@ void Ray::print(int i)const{
 	//cout << "Ray " << i << "\t P-Pol: \t" << apX_ << "\t " << apY_ << "\t " << apZ_ << endl;
 	//cout << "Ray " << i << "\t Phases: \t" << fS_ << "\t " << fP_ << endl;
 	
-	//cout << "Ray " << i << "\t K & E: \t" << k_ << "\t " << getEnergyKeV() << endl;
+	cout << "Ray " << i << "\t K & E: \t" << k_ << "\t " << getEnergyKeV() << endl;
 	//cout << "Ray " << i << "\t Index & Flag & OPD: \t" << q_ << "\t " << flag_ << "\t " << opd_ << endl;
 	//cout << "Ray " << i << "\t #IA: \t" << iaNum_<< "\t IA-Flag: \t" << iaFlag_<< endl;
 	cout << endl;

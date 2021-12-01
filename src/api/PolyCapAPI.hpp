@@ -71,6 +71,9 @@ class PolyCapAPI{
     vector<Ray> traceSource(arma::Mat<double> shadowBeam, int nPhotons);
     polycap_transmission_efficiencies* polycap_shadow_source_get_transmission_efficiencies(polycap_source *source, int max_threads, int n_photons, bool leak_calc, polycap_progress_monitor *progress_monitor, polycap_error **error, arma::Mat<double> shadowBeam);
 
+    double getFocalDistDownStream();
+
+
     void print();
 };
 

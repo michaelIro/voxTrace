@@ -107,13 +107,22 @@ vector<Ray> XRBeam::getRays() const{
 	return rayList_;
 }
 
-/** Getter*/
+/** Getter*///x0,y0,z0,   xd,yd,zd,   asx,asy,asz,    flag,k,index,   opd,fs,fp,  apx,apy,apz
 arma::Mat<double> XRBeam::getMatrix() const{
-	arma::Mat<double> rays = arma::ones(rayList_.size(), 6);
+	arma::Mat<double> rays = arma::ones(rayList_.size(), 19);
 	int i =0;
-	for(auto ray: rayList_)
-		rays.row(i++)={ray.getStartX(),ray.getStartY(),ray.getStartZ(),ray.getDirX(),ray.getDirY(),ray.getDirZ()};
-
+	for(auto ray: rayList_){
+		arma::rowvec row_ = {
+			ray.getStartX(),ray.getStartY(),ray.getStartZ(),
+			ray.getDirX(),ray.getDirY(),ray.getDirZ(),
+			ray.getSPolX(),ray.getSPolY(),ray.getSPolZ(),
+			(double) ray.getFlag(), ray.getWaveNumber(),(double) ray.getIndex(),
+			ray.getOpticalPath(),ray.getSPhase(),ray.getPPhase(),
+			ray.getPPolX(),ray.getPPolY(),ray.getPPolZ(),
+			ray.getProb()};
+		rays.row(i++)=row_;
+	}
+		
 	return rays;
 }
 
