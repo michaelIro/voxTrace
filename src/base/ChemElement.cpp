@@ -1,4 +1,4 @@
-/*Chemical Element*/
+/** Chemical Element */
 
 #include "ChemElement.hpp"
 
@@ -7,7 +7,10 @@ using namespace std;
 /** Empty constructor */
 ChemElement::ChemElement(){}
 
-/** Constructor using Atomic number Z */
+/** Constructor using Atomic number Z 
+ * @param z Atomic number
+ * @return ChemElement containing information 
+ */
 ChemElement::ChemElement(const int& z){
 	z_ =	z;
 	sym_ =	XRayLibAPI::ZToSym(z_);
@@ -15,7 +18,10 @@ ChemElement::ChemElement(const int& z){
 	rho_ = 	XRayLibAPI::Rho(z_);
 }
 
-/** Constructor using Element Symbol used in Periodic Table */
+/** Constructor using element symbol used in periodic table 
+ * @param symbol Element symbol used in periodic table 
+ * @return ChemElement containing 
+ */
 ChemElement::ChemElement(const char *symbol){
 	z_=			XRayLibAPI::SymToZ(symbol);
 	sym_ =		symbol;
@@ -29,7 +35,7 @@ int ChemElement::Z() const {return z_;}
 double ChemElement::Rho() const {return rho_;}
 const char* ChemElement::Sym() const {return sym_;}
 
-/*Feed symbol to ostream / Overload comparison operators*/
+/** Feed symbol to ostream / Overload comparison operators*/
 ostream& operator<<(std::ostream& os, const ChemElement& el){return os<<el.Sym();}
 bool operator<(const ChemElement& el1, const ChemElement& el2){return (el1.Z() < el2.Z());}
 bool operator>(const ChemElement& el1, const ChemElement& el2){return (el1.Z() > el2.Z());}
@@ -46,7 +52,11 @@ double ChemElement::getLineEnergy(int line) const {
 	return XRayLibAPI::LineE(z_,line*-1-1); //see xraylib and IUPAC for *-1-1
 }
 
-/*Gives back The type of Interaction*/
+/** Calculate interaction type based on comparison with randim number
+ * @param energy Energy of interacting Ray in keV
+ * @param randomN Random number between 0 and 1
+ * @return type of Interaction -> 0 = Photo-Effect / 1 = Rayleigh-Scattering / 2 = Compton-Scattering
+*/
 int ChemElement::getInteractionType(double energy, double randomN) const{
 	
 	double tot = XRayLibAPI::CS_Tot(z_,energy);
@@ -66,14 +76,11 @@ int ChemElement::getExcitedShell(double energy, double randomN){
 	double sum_ = 0.;
 	double cs_tot = XRayLibAPI::CS_Phot(z_,energy);
 
+	if(cs_tot!=0.0)
 	for(myShell_ = 0; myShell_ < 31; myShell_++){
 		temp_= XRayLibAPI::CS_Phot_Part(z_, myShell_, energy) / cs_tot;
-		if(temp_ == 0.) break;
-		else{
-			sum_ += temp_;
-			if(temp_ > randomN) break;
-			//cout<<myShell_<<" " <<temp_<<endl;
-		}	
+		sum_ += temp_;
+		if(sum_ > randomN) break;
 	}
 
 	return myShell_;

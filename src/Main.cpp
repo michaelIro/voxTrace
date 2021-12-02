@@ -17,7 +17,8 @@ int main() {
 /***********************************************************************************/
 
 	Shadow3API myShadowSource((char*) "../test-data/shadow3");
-	myShadowSource.trace(10000000);
+	myShadowSource.trace(1000000);
+
 	arma::Mat<double> myShadowBeam = myShadowSource.getBeam();
 
 	//myShadowBeam.save("../test-data/beam/shadowBeam.csv", arma::csv_ascii);
@@ -27,7 +28,8 @@ int main() {
 /***********************************************************************************/
 
 	PolyCapAPI myPrimaryPolycap((char*) "../test-data/polycap/pc-246-descr.txt");
-	vector<Ray> myPrimaryCapBeam = myPrimaryPolycap.traceSource(myShadowBeam,100000);
+	vector<Ray> myPrimaryCapBeam = myPrimaryPolycap.traceSource(myShadowBeam,10000);
+
 	XRBeam myPrimaryBeam(myPrimaryCapBeam);
 	//myPrimaryBeam.getMatrix().save("../test-data/beam/primaryBeam.csv", arma::csv_ascii);
 	myPrimaryBeam.primaryTransform(70.0, 70.0,0.0, 0.51, 45.0);
@@ -78,11 +80,22 @@ int main() {
 /***********************************************************************************/
 
 	Tracer tracer_(myPrimaryBeam, sample_);
-	tracer_.start();
+	vector<XRBeam> tracedBeams;
+	for(int i= 0; i<200; i++){
+		tracer_.start();
+		tracedBeams.push_back(tracer_.getBeam());
+		std::cout<< i<< std::endl;
+	}
+
+	vector<Ray> superBeam;
+	for(XRBeam xb: tracedBeams)
+		for(Ray ray: xb.getRays())
+			superBeam.push_back(ray);
+
 
 /***********************************************************************************/
 
-	XRBeam fluorescence_(tracer_.getBeam());
+	XRBeam fluorescence_(superBeam);
 	fluorescence_.secondaryTransform(70.0, 70.0,0.0, 0.49, 45.0);
 	fluorescence_.getMatrix().save("../test-data/beam/fluorescenceBeam.csv", arma::csv_ascii);
 	//fluorescence_.print();

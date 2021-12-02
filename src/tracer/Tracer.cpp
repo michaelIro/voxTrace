@@ -12,7 +12,7 @@ Tracer::Tracer(XRBeam source, Sample sample){
 }
 
 void Tracer::start(){
-	cout<<"START: voxTrace - Tracer()"<<endl;
+	std::cout << "START: voxTrace - Tracer()" << std::endl;
 
 	srand(time(NULL)); 		// TODO: is this the correct place? 
 
@@ -22,29 +22,18 @@ void Tracer::start(){
 
 	int size = source_.getRays().size();
 	
+	
 	for (Ray ray: source_.getRays()) {
-    	//ray.print(i++);
 		Ray*	currentRay = &ray;
-		//std::cout<<"HERE 00"<<std::endl;
 		Voxel* 	currentVoxel = sample_.findStartVoxel(currentRay);
-		//std::cout<<"HERE 01"<<std::endl;
 		int nextVoxel = 13;	
 		Ray* aNewRay= traceForward(currentRay, currentVoxel,&nextVoxel, &sample_,&ia);
-		//std::cout<<"HERE 02"<<std::endl;
 		tracedRays[i++]=(*aNewRay);	
 	}
 
 	beam_ = tracedRays;
-	cout<<"END: voxTrace - Tracer()"<<endl;
 
-	/*cout<<"START: RESULTING RAYS"<<endl;
-	i=0;
-	for(auto ray: tracedRays){
-		ray.print(i++);
-	}
-
-	cout<<"END: RESULTING RAYS"<<endl;*/
-
+	std::cout << "END: voxTrace - Tracer()" << std::endl;
 	std::cout << "#Interactions: "<< ia << std::endl;	
 }
 
@@ -75,6 +64,7 @@ Ray* Tracer::traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample 
 		//cout << "Interaction"<<endl;
 		(*ia)++;
 
+		randomN = ((double) rand()) / ((double) RAND_MAX);
 		/*Selection of chemical Element to interact with*/			
 		ChemElement* interactingElement = (*currentVoxel).getMaterial().getInteractingElement(rayEnergy,randomN);
 
@@ -82,12 +72,13 @@ Ray* Tracer::traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample 
 		//cout<<"  Next: "<<(*nextVoxel).getXPos0()<<" "<<(*nextVoxel).getYPos0()<<" "<<(*nextVoxel).getYPos0()<<endl;
 
 		/*Selection of interaction type*/
+		randomN = ((double) rand()) / ((double) RAND_MAX);
 		int interactionType = (*interactingElement).getInteractionType(rayEnergy,randomN);
 		//cout<<"Interaction Type: "<<interactionType<<endl;
 
 		if(interactionType == 0){ 
 			//cout<<"\t Photo-Absorption"<<endl;
-
+			randomN = ((double) rand()) / ((double) RAND_MAX);
 			int myShell = (*interactingElement).getExcitedShell(rayEnergy,randomN);
 			//cout<<"\t Excited Shell: "<< myShell << " \n";
 
@@ -193,6 +184,7 @@ Ray* Tracer::traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample 
 												
 }
 
+/*********************************/
 std::vector<Ray> Tracer::getBeam(){
 	return beam_;
 }

@@ -56,7 +56,7 @@ void XRBeam::primaryTransform(double x0, double y0, double z0, double d, double 
 			x0_, y0_, z0_,
 			xd_, yd_, zd_,
 			ray.getSPolX(),ray.getSPolY(),ray.getSPolZ(), 
-			ray.getFlag(), ray.getEnergyKeV(),ray.getIndex(),
+			ray.getFlag(), ray.getWaveNumber(),ray.getIndex(),
 			ray.getOpticalPath(),ray.getSPhase(),ray.getPPhase(),
 			ray.getPPolX(),ray.getPPolY(),ray.getPPolZ(), 
 			ray.getProb()
@@ -91,7 +91,7 @@ void XRBeam::secondaryTransform(double x0, double y0, double z0, double d, doubl
 				x0_, y0_, z0_,
 				xd_, yd_, zd_,
 				ray.getSPolX(),ray.getSPolY(),ray.getSPolZ(), 
-				ray.getFlag(), ray.getEnergyKeV(),ray.getIndex(),
+				ray.getFlag(), ray.getWaveNumber(),ray.getIndex(),
 				ray.getOpticalPath(),ray.getSPhase(),ray.getPPhase(),
 				ray.getPPolX(),ray.getPPolY(),ray.getPPolZ(), 
 				ray.getProb()
@@ -117,7 +117,7 @@ arma::Mat<double> XRBeam::getMatrix() const{
 			ray.getStartX(),ray.getStartY(),ray.getStartZ(),
 			ray.getDirX(),ray.getDirY(),ray.getDirZ(),
 			ray.getSPolX(),ray.getSPolY(),ray.getSPolZ(),
-			(double) ray.getFlag(), ray.getWaveNumber(),(double) ray.getIndex(),
+			(double) ray.getFlag(), ray.getEnergyKeV(),(double) ray.getIndex(),
 			ray.getOpticalPath(),ray.getSPhase(),ray.getPPhase(),
 			ray.getPPolX(),ray.getPPolY(),ray.getPPolZ(),
 			ray.getProb()};

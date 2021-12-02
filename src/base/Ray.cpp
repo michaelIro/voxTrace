@@ -144,7 +144,7 @@ bool Ray::getIAFlag() const {return iaFlag_;}
 
 
 double Ray::getEnergyKeV() const {
-	return (k_)/*phy::hBar*phy::c/phy::e)/10.*/;
+	return (k_ / 50677.3)/1000.; // Total-Conversion-Factor = 2*Pi / (h*c) * conv_eV_to_J
 } // in keV
 
 void Ray::setFlag(bool flag){flag_=flag;}
@@ -173,7 +173,7 @@ void Ray::setStartCoordinates (double x, double y, double z){
 }
 
 void Ray::setEnergy(double keV){
-	k_=keV/*10*phy::e/(phy::hBar*phy::c)*/;
+	k_=keV*50677.3*1000.;
 }
 
 double* Ray::getShadowRay() const{

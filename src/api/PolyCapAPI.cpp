@@ -101,7 +101,7 @@ void PolyCapAPI::print(){
 void PolyCapAPI::defineSource(){
 
 	// Photon source parameters TODO: IO for clean looking .txt File for these parameters (should be adaptable without recompiling)
-	double source_dist = 10.0;						//distance between optic entrance and source along z-axis
+	double source_dist = 100.49;						//distance between optic entrance and source along z-axis
 	double source_rad_x = 0.37;						//source radius in x, in cm
 	double source_rad_y = 0.37;						//source radius in y, in cm
 	double source_div_x = 0.0;						//source divergence in x, in rad
@@ -110,7 +110,7 @@ void PolyCapAPI::defineSource(){
 	double source_shift_y = 0.;						//source shift in y compared to optic central axis, in cm
 	double source_polar = 1.0;						//source polarisation factor
 	int n_energies = 1;								//number of discrete photon energies
-	double energies[1]={17.4};						//energies for which transmission efficiency should be calculated, in keV
+	double energies[1]={17.44321};						//energies for which transmission efficiency should be calculated, in keV
 
 	//define photon source, including optic description
 	source = polycap_source_new(description, source_dist, source_rad_x, source_rad_y, source_div_x, source_div_y, source_shift_x, source_shift_y, source_polar, n_energies, energies, &error);
@@ -164,7 +164,7 @@ vector<Ray> PolyCapAPI::traceSource(arma::Mat<double> shadowBeam, int nPhotons){
 				0., 
 
 				false, 
-				17.4, 
+				(efficiencies->energies[0])*1000*50677.3, 
 				rayCounter++, 
 
 				3.94, 

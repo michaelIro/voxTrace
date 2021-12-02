@@ -8,15 +8,17 @@
 
 //#include "api/OptimizerAPI.hpp"
 #include "api/PlotAPI.hpp"
-//#include "api/PolyCapAPI.hpp"
-//#include "api/Shadow3API.hpp"
+#include "api/PolyCapAPI.hpp"
+#include "api/Shadow3API.hpp"
 #include "api/XRayLibAPI.hpp"
 
 #include "base/ChemElement.hpp"
 #include "base/Material.hpp"
+#include "base/XRBeam.hpp"
 
 
 int main() {
+    /*
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
     std::cout << "Hello World!" << std::endl;
     /////////////////////////////////////////////////////////////////////////////////////////////////////// Armadillo Tests
@@ -55,7 +57,17 @@ int main() {
 	  map<ChemElement* const,double> brassMap{{&cu,0.7},{&zn,0.3}};
     Material brass(brassMap,8.96);
 
-    brass.getMuLin(17.4);
+    brass.getMuLin(17.4);*/
+
+	  Shadow3API myShadowSource((char*) "../test-data/testeroo");
+	  myShadowSource.trace(10000000);
+
+	  arma::Mat<double> myShadowBeam = myShadowSource.getBeam();
+    //myShadowBeam.save("../test-data/beam/shadowBeam.csv", arma::csv_ascii);
+
+    PolyCapAPI mySecondaryPolycap((char*) "../test-data/polycap/pc-236-descr.txt");	
+	  XRBeam myDetectorBeam(mySecondaryPolycap.traceSource(myShadowBeam,100000));
+    myDetectorBeam.getMatrix().save("../test-data/beam/detectorBeam.csv", arma::csv_ascii);
 
     return 0;
 }
