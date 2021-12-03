@@ -48,7 +48,6 @@ void Shadow3API::trace(int nRays){
  * @return arma::Mat<double> with Rays generated from Source
  */
 arma::Mat<double> Shadow3API::getBeam(){
-
     // write rays to arma::mat
     arma::Mat<double> rays = arma::ones(src_.NPOINT, 18);
     for(int i = 0; i < rays.n_rows; i++)

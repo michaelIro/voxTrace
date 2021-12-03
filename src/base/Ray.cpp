@@ -174,6 +174,11 @@ void Ray::setStartCoordinates (double x, double y, double z){
 
 void Ray::setEnergy(double keV){
 	k_=keV*50677.3*1000.;
+	//		h = 6.62607015*10^-34 (*Js*); 
+	//		c = 2.99792458*10^10(*cm/s*)
+	//		alpha = 1.602176634*10^-19 (*J/eV*)
+	//		k = 2*Pi/lambda
+	// -> Conversion Factor = 2*Pi*alpha / (h*c) = 50677.3
 }
 
 double* Ray::getShadowRay() const{

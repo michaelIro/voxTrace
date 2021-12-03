@@ -21,7 +21,7 @@ int main() {
 
 	arma::Mat<double> myShadowBeam = myShadowSource.getBeam();
 
-	//myShadowBeam.save("../test-data/beam/shadowBeam.csv", arma::csv_ascii);
+	myShadowBeam.save("../test-data/beam/shadowBeam.csv", arma::csv_ascii);
 	//std::cout << "Shadow-Beam: " << std::endl;
 	//myShadowBeam.print();
 
@@ -31,7 +31,7 @@ int main() {
 	vector<Ray> myPrimaryCapBeam = myPrimaryPolycap.traceSource(myShadowBeam,10000);
 
 	XRBeam myPrimaryBeam(myPrimaryCapBeam);
-	//myPrimaryBeam.getMatrix().save("../test-data/beam/primaryBeam.csv", arma::csv_ascii);
+	myPrimaryBeam.getMatrix().save("../test-data/beam/primaryBeam.csv", arma::csv_ascii);
 	myPrimaryBeam.primaryTransform(70.0, 70.0,0.0, 0.51, 45.0);
 
 	//myPrimaryBeam.print();
@@ -81,7 +81,7 @@ int main() {
 
 	Tracer tracer_(myPrimaryBeam, sample_);
 	vector<XRBeam> tracedBeams;
-	for(int i= 0; i<200; i++){
+	for(int i= 0; i<1; i++){
 		tracer_.start();
 		tracedBeams.push_back(tracer_.getBeam());
 		std::cout<< i<< std::endl;
