@@ -213,10 +213,6 @@ void PolyCapAPI::overwritePhoton(arma::rowvec shadowRay, polycap_photon *photon)
 	photon->start_electric_vector.x = shadowRay(6); 
 	photon->start_electric_vector.y = shadowRay(8); 
 	photon->start_electric_vector.z = shadowRay(7); 
-
-
-
-
 }
 
 /* A helper function to compare coordinates from Shadow with coordinates from Polycap. FIXME: Remove this function from final code!*/
