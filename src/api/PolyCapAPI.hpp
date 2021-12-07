@@ -66,6 +66,7 @@ class PolyCapAPI{
     void overwritePhoton(arma::rowvec shadowRay, polycap_photon *photon);
 
   public:
+    PolyCapAPI();
     PolyCapAPI(char* path);
     
     vector<Ray> traceSource(arma::Mat<double> shadowBeam, int nPhotons);

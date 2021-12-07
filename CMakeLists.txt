@@ -13,7 +13,7 @@ add_executable(Tests src/Tests.cpp)
 add_executable(Main src/Main.cpp)
 #########################################################################################
 target_link_libraries(Main XRayLibAPI Shadow3API PlotAPI PolyCapAPI OptimizerAPI vt.base vt.tracer)
-target_link_libraries(Tests XRayLibAPI Shadow3API PlotAPI PolyCapAPI OptimizerAPI vt.base)
+target_link_libraries(Tests XRayLibAPI Shadow3API PlotAPI PolyCapAPI OptimizerAPI vt.base vt.tracer)
 #########################################################################################
 add_subdirectory(src/api)
 add_subdirectory(src/base)
@@ -35,8 +35,6 @@ find_package(HDF5 REQUIRED)
 #find_package(BLAS REQUIRED)
 #find_package(LAPACK REQUIRED)
 #find_package(OpenACC REQUIRED)
-
-
 #find_package(MPI REQUIRED)
 #find_package(CUDA REQUIRED)
 ######################################################################################## end of finding libraries

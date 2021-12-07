@@ -16,7 +16,7 @@
 #include "base/Material.hpp"
 #include "base/XRBeam.hpp"
 
-//#include "tracer/PrimaryBeam.hpp"
+#include "tracer/PrimaryBeam.hpp"
 
 int main() {
     /*
@@ -60,7 +60,7 @@ int main() {
 
     brass.getMuLin(17.4);*/
 
-    //PrimaryBeam myPrimaryBeam((char*) "../test-data/shadow3",(char*) "../test-data/polycap/pc-246-descr.txt");
+    PrimaryBeam myPrimaryBeam((char*) "../test-data/shadow3",(char*) "../test-data/polycap/pc-246-descr.txt");
     //myPrimaryBeam.getShadow3API();
 
 	  //Shadow3API myShadowSource((char*) "../test-data/shadow3");

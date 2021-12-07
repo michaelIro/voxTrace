@@ -1,6 +1,8 @@
 /** PolyCapAPI */
 #include "PolyCapAPI.hpp"
 
+PolyCapAPI::PolyCapAPI(){}
+
 /* Constructor */
 PolyCapAPI::PolyCapAPI(char* path){
 

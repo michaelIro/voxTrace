@@ -11,11 +11,12 @@ PrimaryBeam::PrimaryBeam(){}
  */
 PrimaryBeam::PrimaryBeam(char* shadowPath, char* polycapPath){
 
-	//Shadow3API shadowSource_(shadowPath);
-	//shadowSource_.trace(10000000);
-    //arma::Mat<double> myShadowBeam = shadowSource_.getBeam();
+	shadowSource_ = Shadow3API(shadowPath);
+	shadowSource_.trace(INT_MAX/100);
+    arma::Mat<double> myShadowBeam = shadowSource_.getBeam();
 
-    //PolyCapAPI polyCap_(polycapPath);
+
+    //PolyCapAPI polyCap(polycapPath);
 	//vector<Ray> myPrimaryCapBeam = myPrimaryPolycap.traceSource(myShadowBeam,100000);
 	//XRBeam myPrimaryBeam(myPrimaryCapBeam);
 	//myPrimaryBeam.getMatrix().save("../test-data/beam/primaryBeam.csv", arma::csv_ascii);

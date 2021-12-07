@@ -17,8 +17,8 @@ int main() {
 //---------------------------------------------------------------------------------------------
 
 arma::Mat<double> oneBeamToRuleThemAll;
-/*
-for(int outermosti = 0; outermosti < 100; outermosti++){
+
+//for(int outermosti = 0; outermosti < 100; outermosti++){
 
 	Shadow3API myShadowSource((char*) "../test-data/shadow3");
 	myShadowSource.trace(10000000);
@@ -30,6 +30,7 @@ for(int outermosti = 0; outermosti < 100; outermosti++){
 	//myShadowBeam.print();
 
 //---------------------------------------------------------------------------------------------
+	PolyCapAPI whatThe;
 
 	PolyCapAPI myPrimaryPolycap((char*) "../test-data/polycap/pc-246-descr.txt");
 	vector<Ray> myPrimaryCapBeam = myPrimaryPolycap.traceSource(myShadowBeam,100000);
@@ -40,7 +41,7 @@ for(int outermosti = 0; outermosti < 100; outermosti++){
 
 
 	//myPrimaryBeam.print();
-
+/*
 //---------------------------------------------------------------------------------------------
 
 	//some test comment

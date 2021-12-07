@@ -7,22 +7,24 @@
 //#include <vector>
 //#include <armadillo>
 
-//#include "./Ray.hpp"
+#include "../base/Ray.hpp"
 
 #include "../api/Shadow3API.hpp"
 #include "../api/PolyCapAPI.hpp"
+
 
 class PrimaryBeam{
 
 	private:
 		Shadow3API shadowSource_;
-        PolyCapAPI polyCap_;
+		//PolyCapAPI polyCap_;
 
 	public:
+
   		PrimaryBeam();
 		PrimaryBeam(char* shadowPath, char* polycapPath);
 
-		Shadow3API getShadow3API();
+		//Shadow3API getShadow3API();
 };
 
 #endif
