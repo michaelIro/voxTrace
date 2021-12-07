@@ -16,6 +16,7 @@
 #include "base/Material.hpp"
 #include "base/XRBeam.hpp"
 
+//#include "tracer/PrimaryBeam.hpp"
 
 int main() {
     /*
@@ -59,11 +60,14 @@ int main() {
 
     brass.getMuLin(17.4);*/
 
-	  Shadow3API myShadowSource((char*) "../test-data/shadow3");
-	  myShadowSource.trace(10000);
+    //PrimaryBeam myPrimaryBeam((char*) "../test-data/shadow3",(char*) "../test-data/polycap/pc-246-descr.txt");
+    //myPrimaryBeam.getShadow3API();
 
-	  arma::Mat<double> myShadowBeam = myShadowSource.getBeam();
-    myShadowBeam.save("../test-data/beam/shadowBeam.csv", arma::csv_ascii);
+	  //Shadow3API myShadowSource((char*) "../test-data/shadow3");
+	  //myShadowSource.trace(10000);
+
+	  //arma::Mat<double> myShadowBeam = myShadowSource.getBeam();
+    //myShadowBeam.save("../test-data/beam/shadowBeam.csv", arma::csv_ascii);
 
     //PolyCapAPI mySecondaryPolycap((char*) "../test-data/polycap/pc-236-descr.txt");	
 	  //XRBeam myDetectorBeam(mySecondaryPolycap.traceSource(myShadowBeam,100));

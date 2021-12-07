@@ -14,7 +14,11 @@
 #include "tracer/Tracer.hpp"
 
 int main() {
-/***********************************************************************************/
+//---------------------------------------------------------------------------------------------
+
+arma::Mat<double> oneBeamToRuleThemAll;
+/*
+for(int outermosti = 0; outermosti < 100; outermosti++){
 
 	Shadow3API myShadowSource((char*) "../test-data/shadow3");
 	myShadowSource.trace(10000000);
@@ -25,7 +29,7 @@ int main() {
 	//std::cout << "Shadow-Beam: " << std::endl;
 	//myShadowBeam.print();
 
-/***********************************************************************************/
+//---------------------------------------------------------------------------------------------
 
 	PolyCapAPI myPrimaryPolycap((char*) "../test-data/polycap/pc-246-descr.txt");
 	vector<Ray> myPrimaryCapBeam = myPrimaryPolycap.traceSource(myShadowBeam,100000);
@@ -37,7 +41,7 @@ int main() {
 
 	//myPrimaryBeam.print();
 
-/***********************************************************************************/
+//---------------------------------------------------------------------------------------------
 
 	//some test comment
 	//OptimizerAPI myOptimizer;
@@ -48,7 +52,7 @@ int main() {
 
 	//int a = XRayLibAPI::A(22);
 
-/***********************************************************************************/
+//---------------------------------------------------------------------------------------------
 
 	vector<vector<vector<Material>>> myMat;
     ChemElement cu(29);
@@ -73,12 +77,12 @@ int main() {
 		myMat.push_back(myMat1);
 	} 
 
-/***********************************************************************************/
+//---------------------------------------------------------------------------------------------
 
 	Sample sample_ (0.,0.,0.,150.,150.,5.,15.,15.,0.5,myMat);
 	//sample_.print();
 
-/***********************************************************************************/
+//---------------------------------------------------------------------------------------------
 
 	Tracer tracer_(myPrimaryBeam, sample_);
 	vector<XRBeam> tracedBeams;
@@ -94,17 +98,29 @@ int main() {
 			superBeam.push_back(ray);
 
 
-/***********************************************************************************/
+//---------------------------------------------------------------------------------------------
 
 	XRBeam fluorescence_(superBeam);
 	fluorescence_.secondaryTransform(70.0, 70.0,0.0, 0.49, 45.0);
-	fluorescence_.getMatrix().save("../test-data/beam/fluorescenceBeam.csv", arma::csv_ascii);
+
+	if(outermosti==0)
+		oneBeamToRuleThemAll = fluorescence_.getMatrix();
+	else	
+		oneBeamToRuleThemAll = arma::join_cols(oneBeamToRuleThemAll,fluorescence_.getMatrix());
+	
+	std::cout << std::endl << std::endl << "Iteration #-" << outermosti << std::endl << std::endl;
+}
+
+
+	oneBeamToRuleThemAll.save("../test-data/beam/fluorescenceBeam.csv", arma::csv_ascii);
 	//fluorescence_.print();
+	
 
-/***********************************************************************************/
-
+*/
+//---------------------------------------------------------------------------------------------
+	oneBeamToRuleThemAll.load("../test-data/beam/fluorescenceBeam.csv", arma::csv_ascii);
 	PolyCapAPI mySecondaryPolycap((char*) "../test-data/polycap/pc-236-descr.txt");	
-	XRBeam myDetectorBeam(mySecondaryPolycap.traceSource(fluorescence_.getMatrix(),1));
+	XRBeam myDetectorBeam(mySecondaryPolycap.traceSource(oneBeamToRuleThemAll,9));
 
 /***********************************************************************************/
     return 0;

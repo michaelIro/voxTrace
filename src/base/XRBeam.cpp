@@ -77,7 +77,7 @@ void XRBeam::secondaryTransform(double x0, double y0, double z0, double d, doubl
 	beta = beta / 180 * M_PI;
 	int i =0;
 	for(Ray ray: rayList_){
-		if((ray.getStartZ()>=0) && (ray.getDirZ()<0) ){
+		if((ray.getStartZ()>=0) && (ray.getDirZ()<0)){
 
 			double x0_=ray.getStartX()-x0;
 			double y0_=cos(beta)*(ray.getStartY()-y0)-sin(beta)*(ray.getStartZ()-z0);
@@ -87,15 +87,21 @@ void XRBeam::secondaryTransform(double x0, double y0, double z0, double d, doubl
 			double yd_ = cos(beta)*ray.getDirY()-sin(beta)*ray.getDirZ();
 			double zd_ = sin(beta)*ray.getDirY()+cos(beta)*ray.getDirZ();
 
-			rays_.push_back(*(new Ray(
-				x0_, y0_, z0_,
-				xd_, yd_, zd_,
-				ray.getSPolX(),ray.getSPolY(),ray.getSPolZ(), 
-				ray.getFlag(), ray.getWaveNumber(),ray.getIndex(),
-				ray.getOpticalPath(),ray.getSPhase(),ray.getPPhase(),
-				ray.getPPolX(),ray.getPPolY(),ray.getPPolZ(), 
-				ray.getProb()
-			)));
+
+			double dfac_= 0.49 / yd_;
+			double rin_= 0.1; //actually 0.095
+			double r_spot_ = sqrt( (xd_*dfac_)*(xd_*dfac_) + (zd_*dfac_)*(zd_*dfac_));
+			if(r_spot_ < rin_){
+				rays_.push_back(*(new Ray(
+					x0_, y0_, z0_,
+					xd_, yd_, zd_,
+					ray.getSPolX(),ray.getSPolY(),ray.getSPolZ(), 
+					ray.getFlag(), ray.getWaveNumber(),ray.getIndex(),
+					ray.getOpticalPath(),ray.getSPhase(),ray.getPPhase(),
+					ray.getPPolX(),ray.getPPolY(),ray.getPPolZ(), 
+					ray.getProb()
+				)));
+			}
 		}
 	}
 	rayList_=rays_;
