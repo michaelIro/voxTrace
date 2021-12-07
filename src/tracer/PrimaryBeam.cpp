@@ -5,21 +5,24 @@
 /** Empty Constructor */
 PrimaryBeam::PrimaryBeam(){}
 
-/** Standard Constructor 
- * @param rays A vector of Ray
- * @return PrimaryBeam
- */
-PrimaryBeam::PrimaryBeam(char* shadowPath, char* polycapPath){
+/** Standard Constructor */
+PrimaryBeam::PrimaryBeam(Shadow3API* shadowSource, PolyCapAPI* polyCap){
 
-	shadowSource_ = Shadow3API(shadowPath);
-	shadowSource_.trace(INT_MAX/100);
-    arma::Mat<double> myShadowBeam = shadowSource_.getBeam();
+	srand(time(NULL)); 
+	double randomN = ((double) rand()) / ((double) RAND_MAX);
+	
+	shadowSource_ = shadowSource;
+	polyCap_ = polyCap;
 
+	(*shadowSource_).trace(INT_MAX/100);
+    arma::Mat<double> myShadowBeam = (*shadowSource_).getBeam();
+	//myShadowBeam.save("../test-data/beam/shadowBeam.csv", arma::csv_ascii);
 
-    //PolyCapAPI polyCap(polycapPath);
+	XRBeam myDetectorBeam((*polyCap_).traceSource(myShadowBeam,100));
+    //myDetectorBeam.getMatrix().save("../test-data/beam/detectorBeam.csv", arma::csv_ascii);
+
 	//vector<Ray> myPrimaryCapBeam = myPrimaryPolycap.traceSource(myShadowBeam,100000);
-	//XRBeam myPrimaryBeam(myPrimaryCapBeam);
-	//myPrimaryBeam.getMatrix().save("../test-data/beam/primaryBeam.csv", arma::csv_ascii);
+
 	//myPrimaryBeam.primaryTransform(70.0, 70.0,0.0, 0.51, 45.0);
 	//myPrimaryBeam.print();
 }

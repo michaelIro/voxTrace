@@ -3,26 +3,20 @@
 #ifndef PrimaryBeam_H
 #define PrimaryBeam_H
 
-//#include <iostream>
-//#include <vector>
-//#include <armadillo>
-
-#include "../base/Ray.hpp"
-
 #include "../api/Shadow3API.hpp"
 #include "../api/PolyCapAPI.hpp"
-
+#include "../base/XRBeam.hpp"
 
 class PrimaryBeam{
 
 	private:
-		Shadow3API shadowSource_;
-		//PolyCapAPI polyCap_;
+		Shadow3API* shadowSource_;
+		PolyCapAPI* polyCap_;
 
 	public:
 
   		PrimaryBeam();
-		PrimaryBeam(char* shadowPath, char* polycapPath);
+		PrimaryBeam(Shadow3API* shadowSource, PolyCapAPI* polyCap);
 
 		//Shadow3API getShadow3API();
 };
