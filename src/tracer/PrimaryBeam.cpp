@@ -9,16 +9,25 @@ PrimaryBeam::PrimaryBeam(){}
 PrimaryBeam::PrimaryBeam(Shadow3API* shadowSource, PolyCapAPI* polyCap){
 
 	srand(time(NULL)); 
-	double randomN = ((double) rand()) / ((double) RAND_MAX);
+		double randomN = ((double) rand()) / ((double) RAND_MAX);
 	
 	shadowSource_ = shadowSource;
 	polyCap_ = polyCap;
 
-	(*shadowSource_).trace(INT_MAX/100);
-    arma::Mat<double> myShadowBeam = (*shadowSource_).getBeam();
+	
+	#pragma omp parallel for
+    for(int i = 0; i < 16; i++){
+		//int mySeed = rand();
+		Shadow3API sourceCopy = (*shadowSource);
+		sourceCopy.trace(100000000,rand());
+		std::cout << i << std::endl;
+	}
+
+	//(*shadowSource_).trace(100000000);
+    //arma::Mat<double> myShadowBeam = (*shadowSource_).getBeam();
 	//myShadowBeam.save("../test-data/beam/shadowBeam.csv", arma::csv_ascii);
 
-	XRBeam myDetectorBeam((*polyCap_).traceSource(myShadowBeam,100));
+	//XRBeam myDetectorBeam((*polyCap_).traceSource(myShadowBeam,1000000));
     //myDetectorBeam.getMatrix().save("../test-data/beam/detectorBeam.csv", arma::csv_ascii);
 
 	//vector<Ray> myPrimaryCapBeam = myPrimaryPolycap.traceSource(myShadowBeam,100000);

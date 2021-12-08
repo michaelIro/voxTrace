@@ -31,6 +31,7 @@ Shadow3API::Shadow3API(char* path){
 void Shadow3API::trace(int nRays){
     // overwrite number of rays
     src_.NPOINT=nRays;
+    std::cout << "Seed" << src_.ISTAR1 << std::endl;
 
     // calculate source
     beam_.genSource(&src_);
@@ -40,6 +41,16 @@ void Shadow3API::trace(int nRays){
         for(int i = 0; i < oe_.size(); i++ )
             beam_.traceOE(&(oe_[i]),1);         // traces OE1
     }
+}
+
+/** Generates X-Rays from a Shadow3-Source and if present trace the generated rays through optical elements. 
+ * @param nRays Number of Rays to be generated
+ * @param seed 
+ * @return void -> Result is written to beam_ 
+ */
+void Shadow3API::trace(int nRays, int seed){
+    src_.ISTAR1=seed;
+    trace(nRays);
 }
 
 /** Generates X-Rays from a Shadow3-Source and if present trace the generated rays through optical elements.

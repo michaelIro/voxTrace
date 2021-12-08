@@ -6,6 +6,8 @@
 #include "../api/Shadow3API.hpp"
 #include "../api/PolyCapAPI.hpp"
 #include "../base/XRBeam.hpp"
+#include <omp.h>
+
 
 class PrimaryBeam{
 
