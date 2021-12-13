@@ -69,6 +69,5 @@ int main() {
     PrimaryBeam myPrimaryBeam(&myShadowSource, &mySecondaryPolycap);
 
 
-
     return 0;
 }

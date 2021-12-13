@@ -6,7 +6,9 @@
 #include "../api/Shadow3API.hpp"
 #include "../api/PolyCapAPI.hpp"
 #include "../base/XRBeam.hpp"
+
 #include <omp.h>
+#include <chrono>
 
 
 class PrimaryBeam{
@@ -19,8 +21,6 @@ class PrimaryBeam{
 
   		PrimaryBeam();
 		PrimaryBeam(Shadow3API* shadowSource, PolyCapAPI* polyCap);
-
-		//Shadow3API getShadow3API();
 };
 
 #endif

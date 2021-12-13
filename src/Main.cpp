@@ -23,7 +23,7 @@ arma::Mat<double> oneBeamToRuleThemAll;
 	Shadow3API myShadowSource((char*) "../test-data/shadow3");
 	myShadowSource.trace(10000000);
 
-	arma::Mat<double> myShadowBeam = myShadowSource.getBeam();
+	arma::Mat<double> myShadowBeam = myShadowSource.getBeamMatrix();
 
 	//myShadowBeam.save("../test-data/beam/shadowBeam.csv", arma::csv_ascii);
 	//std::cout << "Shadow-Beam: " << std::endl;
@@ -33,7 +33,7 @@ arma::Mat<double> oneBeamToRuleThemAll;
 	PolyCapAPI whatThe;
 
 	PolyCapAPI myPrimaryPolycap((char*) "../test-data/polycap/pc-246-descr.txt");
-	vector<Ray> myPrimaryCapBeam = myPrimaryPolycap.traceSource(myShadowBeam,100000);
+	vector<Ray> myPrimaryCapBeam = myPrimaryPolycap.trace(myShadowBeam,100000,(char*) "../test-data/polycap/pc-246.hdf5");
 
 	XRBeam myPrimaryBeam(myPrimaryCapBeam);
 	//myPrimaryBeam.getMatrix().save("../test-data/beam/primaryBeam.csv", arma::csv_ascii);
@@ -121,7 +121,7 @@ arma::Mat<double> oneBeamToRuleThemAll;
 //---------------------------------------------------------------------------------------------
 	oneBeamToRuleThemAll.load("../test-data/beam/fluorescenceBeam.csv", arma::csv_ascii);
 	PolyCapAPI mySecondaryPolycap((char*) "../test-data/polycap/pc-236-descr.txt");	
-	XRBeam myDetectorBeam(mySecondaryPolycap.traceSource(oneBeamToRuleThemAll,9));
+	XRBeam myDetectorBeam(mySecondaryPolycap.trace(oneBeamToRuleThemAll,9,(char*) "../test-data/polycap/pc-236.hdf5"));
 
 /***********************************************************************************/
     return 0;

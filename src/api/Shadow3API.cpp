@@ -31,7 +31,13 @@ Shadow3API::Shadow3API(char* path){
 void Shadow3API::trace(int nRays){
     // overwrite number of rays
     src_.NPOINT=nRays;
-    std::cout << "Seed" << src_.ISTAR1 << std::endl;
+    
+    stringstream ss;
+    ss << "Seed: " << src_.ISTAR1 <<"\n";
+    //string str = ss.str();
+    //std::string =  + 
+    //std::cout << "Seed: " << src_.ISTAR1 << std::endl;
+    std::cout <<  ss.str();
 
     // calculate source
     beam_.genSource(&src_);
@@ -58,7 +64,7 @@ void Shadow3API::trace(int nRays, int seed){
  * @param nRays Number of Rays to be generated
  * @return arma::Mat<double> with Rays generated from Source
  */
-arma::Mat<double> Shadow3API::getBeam(){
+arma::Mat<double> Shadow3API::getBeamMatrix(){
     // write rays to arma::mat
     arma::Mat<double> rays = arma::ones(src_.NPOINT, 18);
     for(int i = 0; i < rays.n_rows; i++)
@@ -66,4 +72,30 @@ arma::Mat<double> Shadow3API::getBeam(){
             rays(i,j) = (*(beam_.rays+i*18+j));
 
     return rays;
+}
+
+/** Generates X-Rays from a Shadow3-Source and if present trace the generated rays through optical elements.
+ * Each row has the values: x0,y0,z0,   xd,yd,zd,   asx,asy,asz,    flag,k,index,   opd,fs,fp,  apx,apy,apz
+ * @param nRays Number of Rays to be generated
+ * @return arma::Mat<double> with Rays generated from Source
+ */
+arma::Mat<double> Shadow3API::getBeamMatrix(vector<Beam>* beams){
+
+    // write rays to arma::mat
+    arma::Mat<double> rays = arma::ones(src_.NPOINT*(*beams).size(), 18); //TODO: make different beam sizes possible
+    for(int k = 0; k< (*beams).size(); k++)
+        for(int i = 0; i < rays.n_rows; i++)
+            for(int j = 0; j < rays.n_cols; j++)
+                rays(i,j+k*(*beams).size()) = (*((*beams)[k].rays+i*18+j));
+
+    return rays;
+}
+
+/** Generates X-Rays from a Shadow3-Source and if present trace the generated rays through optical elements.
+ * Each row has the values: x0,y0,z0,   xd,yd,zd,   asx,asy,asz,    flag,k,index,   opd,fs,fp,  apx,apy,apz
+ * @param nRays Number of Rays to be generated
+ * @return Beam
+ */
+Beam Shadow3API::getBeam(){
+    return beam_;
 }

@@ -30,7 +30,11 @@ class Shadow3API{
 
       void trace(int nRays);
       void trace(int nRays, int seed);
-      arma::Mat<double> getBeam();
+
+      arma::Mat<double> getBeamMatrix();
+      arma::Mat<double> getBeamMatrix(vector<Beam>* beams);
+      
+      Beam getBeam();
 };
 
 #endif

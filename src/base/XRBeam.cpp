@@ -13,6 +13,30 @@ XRBeam::XRBeam(vector<Ray> rays){
 	rayList_ = rays;
 }
 
+XRBeam XRBeam::probabilty(XRBeam beam){
+	vector<Ray> rays;
+	srand(time(NULL)); 
+	for(auto beam_: beam.getRays())
+		if(beam_.getProb() < ((double) rand()) / ((double) RAND_MAX))
+			rays.push_back(beam_);
+
+	return XRBeam(rays);
+}
+
+XRBeam XRBeam::merge(vector<XRBeam> beams){
+	vector<Ray> myays;
+
+	for(XRBeam beam_: beams){
+		for(Ray ray_: beam_.getRays()){
+			myays.push_back(ray_);
+		}
+		int i = myays.size();
+	}
+
+	return XRBeam(myays);
+}
+
+
 /** Transform Beam Coordinate System -> Shift in x-/y-/z-direction
  * @param xShift shift in x-direction in ...
  * @param yShift shift in y-direction in ...

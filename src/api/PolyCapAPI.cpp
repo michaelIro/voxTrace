@@ -1,9 +1,10 @@
 /** PolyCapAPI */
 #include "PolyCapAPI.hpp"
 
+/** Default Constructor */
 PolyCapAPI::PolyCapAPI(){}
 
-/* Constructor */
+/** Constructor */
 PolyCapAPI::PolyCapAPI(char* path){
 
 
@@ -19,8 +20,6 @@ PolyCapAPI::PolyCapAPI(char* path){
 	polycap_profile_free(profile); 				//We can free the profile structure, as it is now contained in description
 
 	defineSource();
-
-
 }
 
 /** Load policapillary parameters */
@@ -119,7 +118,7 @@ void PolyCapAPI::defineSource(){
 }
 
 /** Tracer */
-vector<Ray> PolyCapAPI::traceSource(arma::Mat<double> shadowBeam, int nPhotons){
+vector<Ray> PolyCapAPI::trace(arma::Mat<double> shadowBeam, int nPhotons, char* savePath){
 
 	int i;
     double** weights;
@@ -191,8 +190,7 @@ vector<Ray> PolyCapAPI::traceSource(arma::Mat<double> shadowBeam, int nPhotons){
 		}
 	}
 
-
-	polycap_transmission_efficiencies_write_hdf5(efficiencies,"../test-data/polycap/pc-246.hdf5",NULL);
+	polycap_transmission_efficiencies_write_hdf5(efficiencies,savePath,NULL);
 
 	double *efficiencies_arr = NULL;
 	polycap_transmission_efficiencies_get_data(efficiencies, NULL, NULL, &efficiencies_arr, NULL);

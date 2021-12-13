@@ -30,6 +30,8 @@ endif (ARMADILLO_FOUND)
 if(NOT ARMADILLO_FOUND)
     message(FATAL_ERROR "Armadillo was not found! Check if it is installed on your System. If it isn't, go to http://arma.sourceforge.net/ and follow the instrucions.")
 endif(NOT ARMADILLO_FOUND)
+
+target_compile_options(Tests PUBLIC -DARMA_USE_HDF5)
 ######################################################################################## future acceleration options
 find_package(HDF5 REQUIRED)
 #find_package(BLAS REQUIRED)

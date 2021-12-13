@@ -23,7 +23,7 @@ map<ChemElement* const,double> Material::getMassFractions() const {
 
 /** Get Density ρ of Material
  * @param
- * @return Density in ...
+ * @return Density in \f$\frac{g}{cm^3}\f$
  */
 double Material::getRho() const {
 	return rho_; 
