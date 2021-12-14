@@ -14,7 +14,6 @@ Voxel::Voxel(double x0, double y0, double z0, double x1, double y1, double z1, M
 	y1_ = y1;
 	z1_ = z1;
 	mat_ = mat;
-	//spe_ = spe;
 }
 
 double Voxel::getX0() const {return x0_;}
@@ -28,7 +27,6 @@ double Voxel::getY1() const {return (y0_ + y1_);}
 double Voxel::getZ1() const {return (z0_ + z1_);}
 
 Material Voxel::getMaterial() const {return mat_;}
-//Spectrum Voxel::getSpectrum() const {return spe_;}
 
 /*Nearest-Neighbour-Array getter*/
 Voxel* Voxel::getNN(int i) const {return nn_[i];}

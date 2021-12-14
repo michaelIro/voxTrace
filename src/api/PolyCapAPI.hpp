@@ -40,6 +40,7 @@ int polycap_photon_within_pc_boundary(double polycap_radius, polycap_vector3 pho
 
 class PolyCapAPI{
   private: 
+  	polycap_profile *profile;
     polycap_error *error;
     polycap_description *description;
     polycap_source *source;
@@ -60,8 +61,20 @@ class PolyCapAPI{
 	  double surface_rough;					// surface roughness in Angstrom
 	  double n_capillaries;				  // number of capillaries in the optic
 
-    void defineSource();
-    void load(char* path);
+    // Photon source parameters -> FIXME: Please load even if you use Shadow-Source
+	  double source_dist;				    // distance between optic entrance and source along z-axis
+	  double source_rad_x;					// source radius in x, in cm
+	  double source_rad_y;					// source radius in y, in cm
+	  double source_div_x;					// source divergence in x, in rad
+	  double source_div_y;					// source divergence in y, in rad
+	  double source_shift_x;				// source shift in x compared to optic central axis, in cm
+	  double source_shift_y;				// source shift in y compared to optic central axis, in cm
+	  double source_polar;					// source polarisation factor
+	  int n_energies;								// number of discrete photon energies
+	  double* energies;					    // energies for which transmission efficiency should be calculated, in keV
+
+    void load_source_param(char* path);
+    void load_cap_param(char* path);
     void compareBeams(arma::Mat<double> shadowBeam);
     void overwritePhoton(arma::rowvec shadowRay, polycap_photon *photon);
 
@@ -72,8 +85,22 @@ class PolyCapAPI{
     vector<Ray> trace(arma::Mat<double> shadowBeam, int nPhotons, char* savePath);
     polycap_transmission_efficiencies* polycap_shadow_source_get_transmission_efficiencies(polycap_source *source, int max_threads, int n_photons, bool leak_calc, polycap_progress_monitor *progress_monitor, polycap_error **error, arma::Mat<double> shadowBeam);
 
-    double getFocalDistDownStream();
+    // Getter functions for optic parameters
+    double get_optic_length();
+    double get_rad_ext_upstream();
+    double get_rad_ext_downstream();
+    double get_rad_int_upstream();
+    double get_rad_int_downstream();
+    double get_focal_dist_upstream();
+    double get_focal_dist_downstream();
+    int get_n_elem();
+    int* get_iz();
+    double* get_wi();
+    double get_density();
+    double get_surface_rough();
+    double get_n_capillaries();
 
+    double getFocalDistDownStream();
 
     void print();
 };

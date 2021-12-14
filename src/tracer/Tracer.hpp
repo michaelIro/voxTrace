@@ -18,14 +18,14 @@
 #include "../base/Sample.hpp"
 #include "../base/XRBeam.hpp"
 
-
 using namespace std;
 
 class Tracer {
 
 	private:
-		XRBeam source_;
+		XRBeam primary_;
 		Sample sample_;
+		XRBeam secondary_;
 		std::vector<Ray> beam_;
 		
 	public:

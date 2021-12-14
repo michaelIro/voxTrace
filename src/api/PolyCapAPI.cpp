@@ -1,29 +1,33 @@
 /** PolyCapAPI */
 #include "PolyCapAPI.hpp"
 
-/** Default Constructor */
+/** Empty Constructor */
 PolyCapAPI::PolyCapAPI(){}
 
-/** Constructor */
+/** Standard Constructor */
 PolyCapAPI::PolyCapAPI(char* path){
 
+	load_cap_param(path);
+	load_source_param(path);
 
-	load(path);
+	// initialize error
 	error = NULL;
 
-	//define optic profile shape
-	polycap_profile *profile;
+	// define optic profile shape
 	profile = polycap_profile_new(POLYCAP_PROFILE_ELLIPSOIDAL, optic_length, rad_ext_upstream, rad_ext_downstream, rad_int_upstream, rad_int_downstream, focal_dist_upstream, focal_dist_downstream, &error);
 
-	//define optic description
+	// define optic description
 	description = polycap_description_new(profile, surface_rough, n_capillaries, n_elem, iz, wi, density, &error);
-	polycap_profile_free(profile); 				//We can free the profile structure, as it is now contained in description
+	//polycap_profile_free(profile); 		//We can free the profile structure, as it is now contained in description
 
-	defineSource();
+	// define photon source, including optic description
+	source = polycap_source_new(description, source_dist, source_rad_x, source_rad_y, source_div_x, source_div_y, source_shift_x, source_shift_y, source_polar, n_energies, energies, &error);
 }
 
-/** Load policapillary parameters */
-void PolyCapAPI::load(char* path){
+/** Load policapillary parameters from File
+ *  @param path to .txt-File containing parameters for description of the capillary optic
+ */
+void PolyCapAPI::load_cap_param(char* path){
 	std::ifstream inFile;
 	std::string x;
 	inFile.open(path);
@@ -80,9 +84,57 @@ void PolyCapAPI::load(char* path){
 	n_capillaries = std::stod(x.substr(0,x.find(';'))); 
 }
 
+/** Define PolyCap X-Ray-Source 
+ *  @param path to .txt-File containing parameters for description of the photon source
+*/
+void PolyCapAPI::load_source_param(char* path){
+
+	std::ifstream inFile;
+	std::string x;
+	inFile.open((char*) "../test-data/polycap/source-descr.txt"); //FIXME: Path
+
+	std::getline(inFile, x);
+	//std::cout << x << std::endl<< std::endl;
+
+	std::getline(inFile, x);
+	source_dist = std::stod(x.substr(0,x.find(';'))); 
+
+	std::getline(inFile, x);
+	source_rad_x = std::stod(x.substr(0,x.find(';'))); 
+
+	std::getline(inFile, x);
+	source_rad_y = std::stod(x.substr(0,x.find(';'))); 
+
+	std::getline(inFile, x);
+	source_div_x = std::stod(x.substr(0,x.find(';'))); 
+
+	std::getline(inFile, x);
+	source_div_y = std::stod(x.substr(0,x.find(';'))); 
+
+	std::getline(inFile, x);
+	source_shift_x = std::stod(x.substr(0,x.find(';'))); 
+
+	std::getline(inFile, x);
+	source_shift_y = std::stod(x.substr(0,x.find(';'))); 
+
+	std::getline(inFile, x);
+	source_polar = std::stod(x.substr(0,x.find(';'))); 
+
+	std::getline(inFile, x);
+	n_energies= std::stoi(x.substr(0,x.find(';'))); 
+
+	std::getline(inFile, x);
+	energies = new double[n_energies];
+	int i = 0;
+	std::stringstream ss1(x.substr(x.find('{')+1, x.find('}')-x.find('{')-1));
+	std::string s;
+    while (std::getline(ss1, s, ',')) 
+		energies[i++] = stod(s); 
+}
+
 /** Print policapillary parameters */
 void PolyCapAPI::print(){
-	std::cout << "Polycapillary Parameters:" << std::endl<< std::endl;
+	std::cout << "Polycapillary Parameters: " << std::endl<< std::endl;
 	std::cout << "optic_length: " << optic_length << std::endl<< std::endl;
 	std::cout << "rad_ext_upstream: " << rad_ext_upstream << std::endl<< std::endl;
 	std::cout << "rad_ext_downstream: " << rad_ext_downstream << std::endl<< std::endl;
@@ -90,132 +142,15 @@ void PolyCapAPI::print(){
 	std::cout << "rad_int_downstream: " << rad_int_downstream << std::endl<< std::endl;
 	std::cout << "focal_dist_upstream: " << focal_dist_upstream << std::endl<< std::endl;
 	std::cout << "focal_dist_downstream: " << focal_dist_downstream << std::endl<< std::endl;
-	std::cout << "n_elem : " << n_elem << "\t" << iz[0] << "\t" << iz[1] << std::endl<< std::endl;
-	std::cout << "n_elem-Z : " << "\t" << iz[0] << "\t" << iz[1] << std::endl<< std::endl;
+	std::cout << "n_elem: " << n_elem << "\t" << iz[0] << "\t" << iz[1] << std::endl<< std::endl;
+	std::cout << "n_elem-Z: " << "\t" << iz[0] << "\t" << iz[1] << std::endl<< std::endl;
 	std::cout << "n_elem-W: " << "\t" << wi[0] << "\t" << wi[1] << std::endl<< std::endl;
 	std::cout << "density: " << density << std::endl<< std::endl;
-	std::cout << "surface_rough " << surface_rough << std::endl<< std::endl;
-	std::cout << "n_capillaries : " << n_capillaries << std::endl<< std::endl;
+	std::cout << "surface_rough: " << surface_rough << std::endl<< std::endl;
+	std::cout << "n_capillaries: " << n_capillaries << std::endl<< std::endl;
 }
 
-/** Define PolyCap X-Ray-Source */
-void PolyCapAPI::defineSource(){
-
-	// Photon source parameters TODO: IO for clean looking .txt File for these parameters (should be adaptable without recompiling)
-	double source_dist = 100.49;						//distance between optic entrance and source along z-axis
-	double source_rad_x = 0.37;						//source radius in x, in cm
-	double source_rad_y = 0.37;						//source radius in y, in cm
-	double source_div_x = 0.0;						//source divergence in x, in rad
-	double source_div_y = 0.0;						//source divergence in y, in rad
-	double source_shift_x = 0.;						//source shift in x compared to optic central axis, in cm
-	double source_shift_y = 0.;						//source shift in y compared to optic central axis, in cm
-	double source_polar = 1.0;						//source polarisation factor
-	int n_energies = 1;								//number of discrete photon energies
-	double energies[1]={17.44321};						//energies for which transmission efficiency should be calculated, in keV
-
-	//define photon source, including optic description
-	source = polycap_source_new(description, source_dist, source_rad_x, source_rad_y, source_div_x, source_div_y, source_shift_x, source_shift_y, source_polar, n_energies, energies, &error);
-}
-
-/** Tracer */
-vector<Ray> PolyCapAPI::trace(arma::Mat<double> shadowBeam, int nPhotons, char* savePath){
-
-	int i;
-    double** weights;
-
-	// Simulation parameters
-	int n_threads = -1;				// amount of threads to use; -1 means use all available
-	int n_photons = nPhotons;		// simulate nPhotons succesfully transmitted photons (excluding leak events)
-	bool leak_calc = false;			// choose to perform leak photon calculations or not. Leak calculations take significantly more time
-
-	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-
-	//calculate transmission efficiency curve
-	//std::cout << "Original" << std::endl;
-	//efficiencies = polycap_source_get_transmission_efficiencies(source, n_threads, n_photons, leak_calc, NULL, &error);
-	//std::cout << std::endl;
-
-	std::chrono::steady_clock::time_point end1 = std::chrono::steady_clock::now();
-
-	//std::cout << "Modified" << std::endl;
-	efficiencies = polycap_shadow_source_get_transmission_efficiencies(source, n_threads, n_photons, leak_calc, NULL, &error, shadowBeam);
-	//std::cout << std::endl;
-
-	std::chrono::steady_clock::time_point end2 = std::chrono::steady_clock::now();
-
-	//std::cout << "Original Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end1 - begin).count() << "[µs]"  << std::endl;
-	//std::cout << "Modified Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end2 - end1).count() << "[µs]" << std::endl;
-
-	vector<Ray> polycapBeam;
-	
-	int rayCounter = 0;
-	for( int i = 0; i < efficiencies->images->i_exit; i++ ){
-		if( efficiencies->images->exit_coord_weights[i] >0){
-			Ray ray_(
-				efficiencies->images->pc_exit_coords[0][i],
-				0.,
-				efficiencies->images->pc_exit_coords[1][i],
-
-				efficiencies->images->pc_exit_dir[0][i],
-				efficiencies->images->pc_exit_dir[2][i],
-				efficiencies->images->pc_exit_dir[1][i],
-
-				0.,
-				0.,
-				0., 
-
-				false, 
-				(efficiencies->energies[0])*1000*50677.3, 
-				rayCounter++, 
-
-				3.94, 
-				0.0, 
-				0.0,  
-
-				0., 
-				0., 
-				0.,
-
-				efficiencies->images->exit_coord_weights[i]
-				);
-			polycapBeam.push_back(ray_);
-
-			/*std::cout << efficiencies->images->pc_exit_coords[0][i] << " ";
-			std::cout << efficiencies->images->pc_exit_coords[1][i] << " ";
-			std::cout << efficiencies->images->pc_exit_coords[2][i] << std::endl;
-
-			std::cout << efficiencies->images->pc_exit_dir[0][i] << " ";
-			std::cout << efficiencies->images->pc_exit_dir[1][i] << " ";
-			std::cout << efficiencies->images->pc_exit_dir[2][i] << std::endl << std::endl;*/ 
-		}
-	}
-
-	polycap_transmission_efficiencies_write_hdf5(efficiencies,savePath,NULL);
-
-	double *efficiencies_arr = NULL;
-	polycap_transmission_efficiencies_get_data(efficiencies, NULL, NULL, &efficiencies_arr, NULL);
-
-	polycap_source_free(source);
-	polycap_transmission_efficiencies_free(efficiencies);
-
-	return polycapBeam;
-}
-
-void PolyCapAPI::overwritePhoton(arma::rowvec shadowRay, polycap_photon *photon){
-	photon->start_coords.x = shadowRay(0); 
-	photon->start_coords.y = shadowRay(2); 							// Switch Coordinate System:  y-shadow = z-polycap  
-	photon->start_coords.z = shadowRay(1); 
-
-	photon->start_direction.x = shadowRay(3); 
-	photon->start_direction.y = shadowRay(5); 
-	photon->start_direction.z = shadowRay(4); 
-
-	photon->start_electric_vector.x = shadowRay(6); 
-	photon->start_electric_vector.y = shadowRay(8); 
-	photon->start_electric_vector.z = shadowRay(7); 
-}
-
-/* A helper function to compare coordinates from Shadow with coordinates from Polycap. FIXME: Remove this function from final code!*/
+/** A helper function to compare coordinates from Shadow with coordinates from Polycap. FIXME: Remove this function from final code!*/
 void PolyCapAPI::compareBeams(arma::Mat<double> shadowBeam){
 	
 	polycap_rng *rng;
@@ -278,6 +213,82 @@ void PolyCapAPI::compareBeams(arma::Mat<double> shadowBeam){
 	std::cout << "Polycap - Beam After: " << std::endl;
 	polycapBeamAfter.print();
 }
+
+/** Trace Photons through capillary optic */
+vector<Ray> PolyCapAPI::trace(arma::Mat<double> shadowBeam, int nPhotons, char* savePath){
+
+	int i;
+    double** weights;
+
+	// Simulation parameters
+	int n_threads = -1;				// amount of threads to use; -1 means use all available
+	int n_photons = nPhotons;		// simulate nPhotons succesfully transmitted photons (excluding leak events)
+	bool leak_calc = false;			// choose to perform leak photon calculations or not. Leak calculations take significantly more time
+
+	efficiencies = polycap_shadow_source_get_transmission_efficiencies(source, n_threads, n_photons, leak_calc, NULL, &error, shadowBeam);
+
+	vector<Ray> polycapBeam;
+	
+	int rayCounter = 0;
+	for( int i = 0; i < efficiencies->images->i_exit; i++ ){
+		if( efficiencies->images->exit_coord_weights[i] >0){
+			Ray ray_(
+				efficiencies->images->pc_exit_coords[0][i],
+				0.,
+				efficiencies->images->pc_exit_coords[1][i],
+
+				efficiencies->images->pc_exit_dir[0][i],
+				efficiencies->images->pc_exit_dir[2][i],
+				efficiencies->images->pc_exit_dir[1][i],
+
+				0.,
+				0.,
+				0., 
+
+				false, 
+				(efficiencies->energies[0])*1000*50677.3, 
+				rayCounter++, 
+
+				3.94, 
+				0.0, 
+				0.0,  
+
+				0., 
+				0., 
+				0.,
+
+				efficiencies->images->exit_coord_weights[i]
+				);
+			polycapBeam.push_back(ray_);
+		}
+	}
+
+	polycap_transmission_efficiencies_write_hdf5(efficiencies,savePath,NULL);
+
+	double *efficiencies_arr = NULL;
+	polycap_transmission_efficiencies_get_data(efficiencies, NULL, NULL, &efficiencies_arr, NULL);
+
+	//polycap_source_free(source);
+	//polycap_transmission_efficiencies_free(efficiencies);
+
+	return polycapBeam;
+}
+
+void PolyCapAPI::overwritePhoton(arma::rowvec shadowRay, polycap_photon *photon){
+	photon->start_coords.x = shadowRay(0); 
+	photon->start_coords.y = shadowRay(2); 							// Switch Coordinate System:  y-shadow = z-polycap  
+	photon->start_coords.z = shadowRay(1); 
+
+	photon->start_direction.x = shadowRay(3); 
+	photon->start_direction.y = shadowRay(5); 
+	photon->start_direction.z = shadowRay(4); 
+
+	photon->start_electric_vector.x = shadowRay(6); 
+	photon->start_electric_vector.y = shadowRay(8); 
+	photon->start_electric_vector.z = shadowRay(7); 
+}
+
+
 
 /* 	This is a modified copy of the function polycap_source_get_transmission_efficiencies from polycap code. 
 	"For a given array of energies, and a full polycap_description, get the transmission efficiencies."
@@ -677,7 +688,7 @@ polycap_transmission_efficiencies* PolyCapAPI::polycap_shadow_source_get_transmi
 		} while(iesc == 0 || iesc == 2 || iesc == -2 || iesc == -1); //TODO: make this function exit if polycap_photon_launch returned -1... Currently, if returned -1 due to memory shortage technically one would end up in infinite loop
 
 		if(thread_id == 0 && (double)i/((double)n_photons/(double)max_threads/10.) >= 1.){
-			printf("%d%% Complete\t%" PRId64 " reflections\tLast reflection at z=%f, d_travel=%f\n",((j*100)/(n_photons/max_threads)),photon->i_refl,photon->exit_coords.z, photon->d_travel);
+			//printf("%d%% Complete\t%" PRId64 " reflections\tLast reflection at z=%f, d_travel=%f\n",((j*100)/(n_photons/max_threads)),photon->i_refl,photon->exit_coords.z, photon->d_travel);
 			i=0;
 		}
 		i++;//counter just to follow % completed
@@ -839,12 +850,9 @@ polycap_transmission_efficiencies* PolyCapAPI::polycap_shadow_source_get_transmi
 	}
 	polycap_rng_free(rng);
 	free(weights);
-} //#pragma omp parallel
+} 
 
-//	if (cancelled)
-//		return NULL;
-
-	//add all started photons together
+	// add all started photons together
 	for(i=0; i < max_threads; i++){
 		sum_iexit += iexit_temp[i];
 		sum_not_entered += not_entered_temp[i];
@@ -855,23 +863,21 @@ polycap_transmission_efficiencies* PolyCapAPI::polycap_shadow_source_get_transmi
 	printf("Open area Calculated: %lf, Simulated: %lf\n",((round(sqrt(12. * description->n_cap - 3.)/6.-0.5)+0.5)*6.)*((round(sqrt(12. * description->n_cap - 3.)/6.-0.5)+0.5)*6.)/12.*(description->profile->cap[0]*description->profile->cap[0]*M_PI)/(3.*sin(M_PI/3)*description->profile->ext[0]*description->profile->ext[0]), (double)(sum_iexit+sum_not_transmitted)/(sum_iexit+sum_not_entered+sum_not_transmitted));
 	printf("iexit: %" PRId64 ", no enter: %" PRId64 ", no trans: %" PRId64 "\n",sum_iexit,sum_not_entered,sum_not_transmitted);
 
-	//Continue working with simulated open area, as this should be a more honoust comparisson?
+	// Continue working with simulated open area, as this should be a more honest comparison?
 	description->open_area = (double)(sum_iexit+sum_not_transmitted)/(sum_iexit+sum_not_entered+sum_not_transmitted);
 
 	// Complete output structure
 	efficiencies->n_energies = source->n_energies;
 	efficiencies->images->i_start = sum_iexit+sum_not_entered+sum_not_transmitted;
 	efficiencies->images->i_exit = sum_iexit;
-//printf("//////\n");
+
 	for(i=0; i<source->n_energies; i++){
 		efficiencies->energies[i] = source->energies[i];
 		efficiencies->efficiencies[i] = (sum_weights[i] / ((double)sum_iexit+(double)sum_not_transmitted)) * description->open_area;
-//printf("	Energy: %lf keV, Weight: %lf \n", efficiencies->energies[i], sum_weights[i]);
+		//printf("	Energy: %lf keV, Weight: %lf \n", efficiencies->energies[i], sum_weights[i]);
 	}
-//printf("//////\n");
 
-
-	//free alloc'ed memory
+	// free allocated memory
 	free(sum_weights);
 	free(iexit_temp);
 	free(not_entered_temp);

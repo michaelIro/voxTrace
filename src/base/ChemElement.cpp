@@ -9,7 +9,7 @@ ChemElement::ChemElement(){}
 
 /** Constructor using Atomic number Z 
  * @param z Atomic number
- * @return ChemElement containing information 
+ * @return ChemElement-Object containing all information about chemical element.
  */
 ChemElement::ChemElement(const int& z){
 	z_ =	z;

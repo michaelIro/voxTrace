@@ -7,7 +7,7 @@ using namespace std;
 Tracer::Tracer(){}
 
 Tracer::Tracer(XRBeam source, Sample sample){
-	source_=source;
+	primary_=source;
 	sample_=sample;
 }
 
@@ -16,21 +16,21 @@ void Tracer::start(){
 
 	srand(time(NULL)); 		// TODO: is this the correct place? 
 
-	vector<Ray> tracedRays(source_.getRays().size());
+	vector<Ray> tracedRays(primary_.getRays().size());
 	int i = 0;
 	int ia = 0;
-
-	int size = source_.getRays().size();
+	int size = primary_.getRays().size();
 	
-	
-	for (Ray ray: source_.getRays()) {
+	for (Ray ray: primary_.getRays()) {
+		//std::cout << i << std::endl;
 		Ray*	currentRay = &ray;
 		Voxel* 	currentVoxel = sample_.findStartVoxel(currentRay);
 		int nextVoxel = 13;	
 		Ray* aNewRay= traceForward(currentRay, currentVoxel,&nextVoxel, &sample_,&ia);
-		tracedRays[i++]=(*aNewRay);	
+		tracedRays[i++]=*(aNewRay);
 	}
-
+	
+	//secondary_=new XRBeam(tracedRays);
 	beam_ = tracedRays;
 
 	std::cout << "END: voxTrace - Tracer()" << std::endl;
@@ -49,8 +49,6 @@ Ray* Tracer::traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample 
 	double muLin = (*currentVoxel).getMaterial().getMuLin(rayEnergy);
 	double intersectionLength = (*currentVoxel).intersect(ray,nextVoxel,&tIn);
 	double randomN = ((double) rand()) / ((double) RAND_MAX);
-
-
 
 	//cout << "  Coordinates: " << (*currentVoxel).getX0()<<" "<<(*currentVoxel).getY0()<<" "<<(*currentVoxel).getZ0()<<endl;
 	//cout << "  Next Voxel: " << (*nextVoxel) << endl;

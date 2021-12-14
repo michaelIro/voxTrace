@@ -1,7 +1,7 @@
 /** XRBeam */
 
-#ifndef XRSource_H
-#define XRSource_H
+#ifndef XRBeam_H
+#define XRBeam_H
 
 #include <iostream>
 #include <vector>
@@ -9,17 +9,15 @@
 
 #include "./Ray.hpp"
 
-//#include "../api/Shadow3API.hpp"
-//#include "../api/PolyCapAPI.hpp"
-
 class XRBeam{
 
 	private:
-		vector<Ray> rayList_;
+		vector<Ray> rays_;
 
 	public:
   		XRBeam();
 		XRBeam(vector<Ray> rays);
+		XRBeam(arma::Mat<double> rays);
 
 		void shift(double x, double y, double z);
 		void primaryTransform(double x0, double y0, double z0, double d, double alpha);

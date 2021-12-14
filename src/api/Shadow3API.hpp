@@ -27,14 +27,17 @@ class Shadow3API{
     public:
       Shadow3API();
       Shadow3API(char* path);
+      Shadow3API(Shadow3API* shadow3api);
 
       void trace(int nRays);
       void trace(int nRays, int seed);
 
       arma::Mat<double> getBeamMatrix();
       arma::Mat<double> getBeamMatrix(vector<Beam>* beams);
-      
-      Beam getBeam();
+
+      Source get_src_();
+      vector<OE> get_oe_();   
+      Beam get_beam_();
 };
 
 #endif

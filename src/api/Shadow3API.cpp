@@ -24,6 +24,16 @@ Shadow3API::Shadow3API(char* path){
     }   
 }
 
+/** Copy Constructor
+* @param shadow3api 
+* @return Shadow3API-Object
+*/
+Shadow3API::Shadow3API(Shadow3API* shadow3api){
+    src_ = (*shadow3api).get_src_();
+    //oe_ = (*shadow3api).get_oe_(); // TODO: Check if NULL here
+    //beam_ = (*shadow3api).get_beam_();
+}
+
 /** Generates X-Rays from a Shadow3-Source and if present trace the generated rays through optical elements. 
  * @param nRays Number of Rays to be generated
  * @return void -> Result is written to beam_ 
@@ -96,6 +106,14 @@ arma::Mat<double> Shadow3API::getBeamMatrix(vector<Beam>* beams){
  * @param nRays Number of Rays to be generated
  * @return Beam
  */
-Beam Shadow3API::getBeam(){
+Beam Shadow3API::get_beam_(){
     return beam_;
+}
+
+Source Shadow3API::get_src_(){
+    return src_;
+}
+
+vector<OE> Shadow3API::get_oe_(){
+    return oe_;
 }

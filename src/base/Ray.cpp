@@ -9,9 +9,9 @@ Ray::Ray(){}
 
 /** Copy constructor */
 Ray::Ray(const Ray& ray){
-	startX_ = ray.getStartX();
-	startY_ = ray.getStartY();
-	startZ_ = ray.getStartZ();
+	x0_ = ray.getStartX();
+	y0_ = ray.getStartY();
+	z0_ = ray.getStartZ();
 	dirX_ = ray.getDirX();
 	dirY_ = ray.getDirY();
 	dirZ_ = ray.getDirZ();
@@ -36,9 +36,9 @@ Ray::Ray(const Ray& ray){
 /** Coordinate Transofrmation */
 Ray::Ray(const Ray& ray, double x, double y, double z, double phi, double theta){
 
-	startX_ = ray.getStartX() - x;
-	startY_ = ray.getStartY() - y;
-	startZ_ = ray.getStartZ() - z;
+	x0_ = ray.getStartX() - x;
+	y0_ = ray.getStartY() - y;
+	z0_ = ray.getStartZ() - z;
 
 	dirX_ = ray.getDirX();
 	dirY_ = ray.getDirY();
@@ -90,9 +90,9 @@ Ray::Ray(const Ray& ray, double x, double y, double z, double phi, double theta)
 Ray::Ray(double startX, double startY, double startZ, double dirX, double dirY, double dirZ, 
 		double asX, double asY, double asZ, bool flag, double k, int q, double opd, double fS, 
 		double fP, double apX, double apY, double apZ, double prob){
-	startX_ = startX;
-	startY_ = startY;
-	startZ_ = startZ;
+	x0_ = startX;
+	y0_ = startY;
+	z0_ = startZ;
 	
 
 	dirX_ = dirX; 	
@@ -119,9 +119,9 @@ Ray::Ray(double startX, double startY, double startZ, double dirX, double dirY, 
 }
 
 /*Member-Getter*/
-double Ray::getStartX() const {return startX_;}
-double Ray::getStartY() const {return startY_;}
-double Ray::getStartZ() const {return startZ_;}
+double Ray::getStartX() const {return x0_;}
+double Ray::getStartY() const {return y0_;}
+double Ray::getStartZ() const {return z0_;}
 double Ray::getDirX() const {return dirX_;}
 double Ray::getDirY() const {return dirY_;}
 double Ray::getDirZ() const {return dirZ_;}
@@ -161,15 +161,15 @@ void Ray::rotate(double phi, double theta){
 }
 
 void Ray::translate(double xDist, double yDist, double zDist){
-	startX_ -= xDist;
-	startY_ -= yDist;
-	startZ_ -= zDist;
+	x0_ -= xDist;
+	y0_ -= yDist;
+	z0_ -= zDist;
 }
 
 void Ray::setStartCoordinates (double x, double y, double z){
-	startX_ = x;
-	startY_ = y;
-	startZ_ = z;
+	x0_ = x;
+	y0_ = y;
+	z0_ = z;
 }
 
 void Ray::setEnergy(double keV){
@@ -189,15 +189,15 @@ double* Ray::getShadowRay() const{
 void Ray::print(int i)const{
 	cout << endl;
 	cout.precision(19);
-	cout << "Ray " << i << "\t Start: \t" << startX_ << "\t " << startY_ << "\t " << startZ_ << endl;
+	cout << "Ray " << i << "\t Start: \t" << x0_ << "\t " << y0_ << "\t " << z0_ << endl;
 	cout << "Ray " << i << "\t Direct: \t" << dirX_ << "\t " << dirY_ << "\t " << dirZ_ << endl;
-	//cout << "Ray " << i << "\t S-Pol: \t" << asX_ << "\t " << asY_ << "\t " << asZ_ << endl;
-	//cout << "Ray " << i << "\t P-Pol: \t" << apX_ << "\t " << apY_ << "\t " << apZ_ << endl;
-	//cout << "Ray " << i << "\t Phases: \t" << fS_ << "\t " << fP_ << endl;
+	cout << "Ray " << i << "\t S-Pol: \t" << asX_ << "\t " << asY_ << "\t " << asZ_ << endl;
+	cout << "Ray " << i << "\t P-Pol: \t" << apX_ << "\t " << apY_ << "\t " << apZ_ << endl;
+	cout << "Ray " << i << "\t Phases: \t" << fS_ << "\t " << fP_ << endl;
 	
 	cout << "Ray " << i << "\t K & E: \t" << k_ << "\t " << getEnergyKeV() << endl;
-	//cout << "Ray " << i << "\t Index & Flag & OPD: \t" << q_ << "\t " << flag_ << "\t " << opd_ << endl;
-	//cout << "Ray " << i << "\t #IA: \t" << iaNum_<< "\t IA-Flag: \t" << iaFlag_<< endl;
+	cout << "Ray " << i << "\t Index & Flag & OPD: \t" << q_ << "\t " << flag_ << "\t " << opd_ << endl;
+	cout << "Ray " << i << "\t #IA: \t" << iaNum_<< "\t IA-Flag: \t" << iaFlag_<< endl;
 	cout << endl;
 	
 	//long double dir_xL= (long double) dirX_;

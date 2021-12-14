@@ -9,11 +9,13 @@ project(voxTrace VERSION 1.0)
 set(CMAKE_CXX_STANDARD 20)
 #########################################################################################
 # add the executable
-add_executable(Tests src/Tests.cpp)
+add_executable(Test-1 src/Test-1.cpp)
+add_executable(Test-2 src/Test-2.cpp)
 add_executable(Main src/Main.cpp)
 #########################################################################################
 target_link_libraries(Main XRayLibAPI Shadow3API PlotAPI PolyCapAPI OptimizerAPI vt.base vt.tracer)
-target_link_libraries(Tests XRayLibAPI Shadow3API PlotAPI PolyCapAPI OptimizerAPI vt.base vt.tracer)
+target_link_libraries(Test-1 XRayLibAPI Shadow3API PlotAPI PolyCapAPI OptimizerAPI vt.base vt.tracer)
+target_link_libraries(Test-2 XRayLibAPI Shadow3API PlotAPI PolyCapAPI OptimizerAPI vt.base vt.tracer)
 #########################################################################################
 add_subdirectory(src/api)
 add_subdirectory(src/base)
@@ -24,14 +26,15 @@ add_subdirectory(docs)
 find_package(Armadillo REQUIRED)
 if (ARMADILLO_FOUND)
   include_directories(${ARMADILLO_INCLUDE_DIRS})
-  target_link_libraries (Tests ${ARMADILLO_LIBRARIES})
+  target_link_libraries (Test-1 ${ARMADILLO_LIBRARIES})
   target_link_libraries (Main ${ARMADILLO_LIBRARIES})
 endif (ARMADILLO_FOUND)
 if(NOT ARMADILLO_FOUND)
     message(FATAL_ERROR "Armadillo was not found! Check if it is installed on your System. If it isn't, go to http://arma.sourceforge.net/ and follow the instrucions.")
 endif(NOT ARMADILLO_FOUND)
 
-target_compile_options(Tests PUBLIC -DARMA_USE_HDF5)
+target_compile_options(Test-1 PUBLIC -DARMA_USE_HDF5)
+#target_compile_options(Test-2 PUBLIC -DARMA_USE_HDF5)
 ######################################################################################## future acceleration options
 find_package(HDF5 REQUIRED)
 #find_package(BLAS REQUIRED)
