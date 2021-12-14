@@ -13,26 +13,27 @@ PrimaryBeam::PrimaryBeam(Shadow3API* shadowSource, PolyCapAPI* polyCap){
 	srand(time(NULL)); 
 	double randomN = ((double) rand()) / ((double) RAND_MAX);
 
-	int threadNum = 16;
+	int threadNum = 4;
 	int raysPerThread = 8000000;
 	vector<int> randomNumbers;
-	vector<XRBeam> beams_(16);
+	vector<XRBeam> beams_(threadNum);
 
 	std::chrono::steady_clock::time_point t0_ = std::chrono::steady_clock::now();
-	#pragma omp parallel for
-	for(int i = 0; i < 16; i++){
 
-    	//Shadow3API myShadowSource((char*) "../test-data/shadow3");
-		Shadow3API myShadowSource(shadowSource);
-		myShadowSource.trace(raysPerThread,rand());
-
+	for(int j = 0; j< 4; j++){
+		#pragma omp parallel for
+		for(int i = 0; i < threadNum; i++){
+    		//Shadow3API myShadowSource((char*) "../test-data/shadow3");
+			Shadow3API myShadowSource(shadowSource);
+			myShadowSource.trace(raysPerThread,rand());
+		}
     	PolyCapAPI myPrimaryPolycap((char*) "../test-data/polycap/pc-246-descr.txt");	
 
 		XRBeam myDetectorBeam(
 			myPrimaryPolycap.trace(myShadowSource.getBeamMatrix(),100000,(char *)"../test-data/beam/beam.hdf5")
-			);
+		);
 
-		beams_[i] = XRBeam::probabilty(myDetectorBeam);
+		beams_[i+j*threadNum] = XRBeam::probabilty(myDetectorBeam);
 	}
 
 	std::chrono::steady_clock::time_point t1_ = std::chrono::steady_clock::now();
