@@ -27,7 +27,7 @@ void Tracer::start(){
 		Voxel* 	currentVoxel = sample_.findStartVoxel(currentRay);
 		int nextVoxel = 13;	
 		Ray* aNewRay= traceForward(currentRay, currentVoxel,&nextVoxel, &sample_,&ia);
-		tracedRays[i++]=*(aNewRay);
+		tracedRays[i++]=(*aNewRay);
 	}
 	
 	//secondary_=new XRBeam(tracedRays);

@@ -27,6 +27,7 @@ find_package(Armadillo REQUIRED)
 if (ARMADILLO_FOUND)
   include_directories(${ARMADILLO_INCLUDE_DIRS})
   target_link_libraries (Test-1 ${ARMADILLO_LIBRARIES})
+  target_link_libraries (Test-2 ${ARMADILLO_LIBRARIES})
   target_link_libraries (Main ${ARMADILLO_LIBRARIES})
 endif (ARMADILLO_FOUND)
 if(NOT ARMADILLO_FOUND)
@@ -34,12 +35,12 @@ if(NOT ARMADILLO_FOUND)
 endif(NOT ARMADILLO_FOUND)
 
 target_compile_options(Test-1 PUBLIC -DARMA_USE_HDF5)
-#target_compile_options(Test-2 PUBLIC -DARMA_USE_HDF5)
+target_compile_options(Test-2 PUBLIC -DARMA_USE_HDF5)
 ######################################################################################## future acceleration options
 find_package(HDF5 REQUIRED)
-#find_package(BLAS REQUIRED)
-#find_package(LAPACK REQUIRED)
-#find_package(OpenACC REQUIRED)
+#find_package(BLAS REQUIRED)      # These 
+#find_package(LAPACK REQUIRED)    #
+#find_package(OpenACC REQUIRED)   #
 #find_package(MPI REQUIRED)
 #find_package(CUDA REQUIRED)
 ######################################################################################## end of finding libraries

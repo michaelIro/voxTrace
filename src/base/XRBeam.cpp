@@ -67,11 +67,11 @@ XRBeam XRBeam::merge(vector<XRBeam> beams){
  */
 void XRBeam::shift(double xShift, double yShift, double zShift){
 
-	vector<Ray> rays_ = {};
+	vector<Ray> rays__ = {};
 	for(auto ray: rays_){
-		rays_.push_back(*(new Ray(ray,ray.getStartX()+xShift,ray.getStartY()+yShift,ray.getStartZ()+zShift,0.,0.)));
+		rays__.push_back(*(new Ray(ray,ray.getStartX()+xShift,ray.getStartY()+yShift,ray.getStartZ()+zShift,0.,0.)));
 	}
-	rays_=rays_;
+	rays_=rays__;
 }
 
 /** Transform Primary Beam from 
@@ -83,7 +83,7 @@ void XRBeam::shift(double xShift, double yShift, double zShift){
  */
 void XRBeam::primaryTransform(double x0, double y0, double z0, double d, double alpha){
 
-	vector<Ray> rays_={};
+	vector<Ray> rays__={};
 
 	alpha = alpha / 180 * M_PI;
 
@@ -98,7 +98,7 @@ void XRBeam::primaryTransform(double x0, double y0, double z0, double d, double 
 		double yd_ = cos(alpha)*ray.getDirY()-sin(alpha)*ray.getDirZ();
 		double zd_ = sin(alpha)*ray.getDirY()+cos(alpha)*ray.getDirZ();
 
-		rays_.push_back(*(new Ray(
+		rays__.push_back(*(new Ray(
 			x0_, y0_, z0_,
 			xd_, yd_, zd_,
 			ray.getSPolX(),ray.getSPolY(),ray.getSPolZ(), 
@@ -108,7 +108,7 @@ void XRBeam::primaryTransform(double x0, double y0, double z0, double d, double 
 			ray.getProb()
 		)));
 	}
-	rays_=rays_;
+	rays_=rays__;
 }
 
 /** Transform Secondary Beam from 
@@ -119,11 +119,11 @@ void XRBeam::primaryTransform(double x0, double y0, double z0, double d, double 
  * @param beta description
  */
 void XRBeam::secondaryTransform(double x0, double y0, double z0, double d, double beta){
-	vector<Ray> rays_;
+	vector<Ray> rays__;
 	beta = beta / 180 * M_PI;
 	int i =0;
 	for(Ray ray: rays_){
-		if((ray.getStartZ()>=0) && (ray.getDirZ()<0)){
+		if((ray.getStartZ()>=0.0) && (ray.getDirZ()<0.0)){
 
 			double x0_=ray.getStartX()-x0;
 			double y0_=cos(beta)*(ray.getStartY()-y0)-sin(beta)*(ray.getStartZ()-z0);
@@ -137,8 +137,8 @@ void XRBeam::secondaryTransform(double x0, double y0, double z0, double d, doubl
 			double dfac_= 0.49 / yd_;
 			double rin_= 0.1; //actually 0.095
 			double r_spot_ = sqrt( (xd_*dfac_)*(xd_*dfac_) + (zd_*dfac_)*(zd_*dfac_));
-			if(r_spot_ < rin_){
-				rays_.push_back(*(new Ray(
+			//if(r_spot_ < rin_){
+				rays__.push_back(*(new Ray(
 					x0_, y0_, z0_,
 					xd_, yd_, zd_,
 					ray.getSPolX(),ray.getSPolY(),ray.getSPolZ(), 
@@ -147,10 +147,10 @@ void XRBeam::secondaryTransform(double x0, double y0, double z0, double d, doubl
 					ray.getPPolX(),ray.getPPolY(),ray.getPPolZ(), 
 					ray.getProb()
 				)));
-			}
+			//}
 		}
 	}
-	rays_=rays_;
+	rays_=rays__;
 }
 
 
@@ -161,11 +161,11 @@ vector<Ray> XRBeam::getRays() const{
 
 /** Getter*///x0,y0,z0,   xd,yd,zd,   asx,asy,asz,    flag,k,index,   opd,fs,fp,  apx,apy,apz
 arma::Mat<double> XRBeam::getMatrix() const{
-	arma::Mat<double> rays = arma::ones(rays_.size(), 19);
+	arma::Mat<double> rays__ = arma::ones(rays_.size(), 19);
 	int i =0;
 	for(auto ray: rays_){
 		//arma::rowvec row_ = 
-		rays.row(i++)={
+		rays__.row(i++)={
 			ray.getStartX(),ray.getStartY(),ray.getStartZ(),
 			ray.getDirX(),ray.getDirY(),ray.getDirZ(),
 			ray.getSPolX(),ray.getSPolY(),ray.getSPolZ(),
@@ -175,7 +175,7 @@ arma::Mat<double> XRBeam::getMatrix() const{
 			ray.getProb()};
 	}
 		
-	return rays;
+	return rays__;
 }
 
 /** Print all Rays */

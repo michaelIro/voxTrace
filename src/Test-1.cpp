@@ -1,8 +1,3 @@
-// -*- lsst-c++ -*-
-//!  Perform Tests for all external libraries
-/*!
-  A more elaborate class description.
-*/
 #include <iostream>
 #include <armadillo>
 
@@ -23,7 +18,7 @@
 
 int main() {
 	
-	std::cout << "Hello World!" << std::endl;
+	std::cout << "START: Test-1" << std::endl;
 
 //---------------------------------------------------------------------------------------------
 
@@ -37,8 +32,9 @@ int main() {
 	temp_.load(arma::hdf5_name("/media/miro/Data/Shadow-Beam/PrimaryBeam.h5","my_data"));
 
 	XRBeam prim_(temp_);
-	prim_.getRays()[1].print(1);
-
+	//prim_.getRays()[1].print(1);
+	prim_.primaryTransform(70.0, 70.0,0.0, 0.51, 45.0);
+	//prim_.getRays()[1].print(1);
 //---------------------------------------------------------------------------------------------
 
 	vector<vector<vector<Material>>> myMat;
@@ -53,13 +49,12 @@ int main() {
 			vector<Material> myMat2;
 			for(int k = 0; k < 11; k++){
 				myMat2.push_back(Material(bronzeMap,8.96));
-				//myMaterials(i,j,k) = Material(cuMatMap,8.96);
 			}
 			myMat1.push_back(myMat2);
 		}
 		myMat.push_back(myMat1);
 	} 
-	
+
 //---------------------------------------------------------------------------------------------
 
 	Sample sample_ (0.,0.,0.,150.,150.,5.,15.,15.,0.5,myMat);
@@ -74,14 +69,15 @@ int main() {
 
 	XRBeam fluorescence_(tracer_.getBeam());
 	fluorescence_.secondaryTransform(70.0, 70.0,0.0, 0.49, 45.0);
+	fluorescence_.getMatrix().save(arma::hdf5_name("/media/miro/Data/Shadow-Beam/SecondaryBeam.h5","my_data"));
 
 //---------------------------------------------------------------------------------------------
 
 	PolyCapAPI mySecondaryPolycap((char*) "../test-data/polycap/pc-236-descr.txt");	
-	XRBeam myDetectorBeam(mySecondaryPolycap.trace(fluorescence_.getMatrix(),400,(char*) "../test-data/polycap/pc-236.hdf5"));
+	XRBeam myDetectorBeam(mySecondaryPolycap.trace(fluorescence_.getMatrix(),4,(char*) "../test-data/polycap/pc-236.hdf5"));
 
 //---------------------------------------------------------------------------------------------
-
+	std::cout << "END: Test-1" << std::endl;
     return 0;
 
 }
