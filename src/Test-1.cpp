@@ -73,8 +73,8 @@ int main() {
 
 //---------------------------------------------------------------------------------------------
 
-	PolyCapAPI mySecondaryPolycap((char*) "../test-data/polycap/pc-236-descr.txt");	
-	XRBeam myDetectorBeam(mySecondaryPolycap.trace(fluorescence_.getMatrix(),4,(char*) "../test-data/polycap/pc-236.hdf5"));
+	//PolyCapAPI mySecondaryPolycap((char*) "../test-data/polycap/pc-236-descr.txt");	
+	//XRBeam myDetectorBeam(mySecondaryPolycap.trace(fluorescence_.getMatrix(),4,(char*) "../test-data/polycap/pc-236.hdf5"));
 
 //---------------------------------------------------------------------------------------------
 	std::cout << "END: Test-1" << std::endl;

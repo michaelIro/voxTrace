@@ -20,22 +20,25 @@ PrimaryBeam::PrimaryBeam(Shadow3API* shadowSource, PolyCapAPI* polyCap){
 
 	std::chrono::steady_clock::time_point t0_ = std::chrono::steady_clock::now();
 
-	for(int j = 0; j< 4; j++){
-		#pragma omp parallel for
+	#pragma omp parallel
+	{
+		//arma::Mat<double> temp_beam_;
+
+		#pragma omp for
 		for(int i = 0; i < threadNum; i++){
     		//Shadow3API myShadowSource((char*) "../test-data/shadow3");
 			Shadow3API myShadowSource(shadowSource);
 			myShadowSource.trace(raysPerThread,rand());
+
+    		PolyCapAPI myPrimaryPolycap((char*) "../test-data/polycap/pc-246-descr.txt");	
+
+			XRBeam myDetectorBeam(
+				myPrimaryPolycap.trace(myShadowSource.getBeamMatrix(),100000,(char *)"../test-data/beam/beam.hdf5")
+			);
+
+			beams_[i] = XRBeam::probabilty(myDetectorBeam);
 		}
-    	PolyCapAPI myPrimaryPolycap((char*) "../test-data/polycap/pc-246-descr.txt");	
-
-		XRBeam myDetectorBeam(
-			myPrimaryPolycap.trace(myShadowSource.getBeamMatrix(),100000,(char *)"../test-data/beam/beam.hdf5")
-		);
-
-		beams_[i+j*threadNum] = XRBeam::probabilty(myDetectorBeam);
 	}
-
 	std::chrono::steady_clock::time_point t1_ = std::chrono::steady_clock::now();
 	XRBeam finalBeam = XRBeam::merge(beams_);
 	finalBeam.getMatrix().save(arma::hdf5_name("/media/miro/Data/Shadow-Beam/PrimaryBeam.h5", "my_data"));
