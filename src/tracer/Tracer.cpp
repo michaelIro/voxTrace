@@ -1,11 +1,10 @@
-/**Tracer*/
-
 #include "Tracer.hpp"
 
-using namespace std;
+//using namespace std;
 
-Tracer::Tracer(){}
+//Tracer::Tracer(){}
 
+/** Tracer */
 Tracer::Tracer(XRBeam source, Sample sample){
 	primary_=source;
 	sample_=sample;
@@ -20,7 +19,9 @@ void Tracer::start(){
 	int i = 0;
 	int ia = 0;
 	int size = primary_.getRays().size();
-	
+
+
+	#pragma omp parallel for
 	for (Ray ray: primary_.getRays()) {
 		//std::cout << i << std::endl;
 		Ray*	currentRay = &ray;
@@ -30,8 +31,8 @@ void Tracer::start(){
 		tracedRays[i++]=(*aNewRay);
 	}
 	
-	//secondary_=new XRBeam(tracedRays);
-	beam_ = tracedRays;
+	secondary_= *(new XRBeam(tracedRays));
+	//beam_ = tracedRays;
 
 	std::cout << "END: voxTrace - Tracer()" << std::endl;
 	std::cout << "#Interactions: "<< ia << std::endl;	
@@ -183,8 +184,8 @@ Ray* Tracer::traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample 
 }
 
 /*********************************/
-std::vector<Ray> Tracer::getBeam(){
-	return beam_;
+XRBeam Tracer::getSecondaryBeam(){
+	return secondary_;
 }
 /*********************************/
 
