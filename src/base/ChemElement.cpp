@@ -5,7 +5,7 @@
 using namespace std;
 
 /** Empty constructor */
-ChemElement::ChemElement(){}
+//ChemElement::ChemElement(){}
 
 /** Constructor using Atomic number Z 
  * @param z Atomic number
@@ -20,7 +20,7 @@ ChemElement::ChemElement(const int& z){
 
 /** Constructor using element symbol used in periodic table 
  * @param symbol Element symbol used in periodic table 
- * @return ChemElement containing 
+ * @return ChemElement-Object containing all information about chemical element.
  */
 ChemElement::ChemElement(const char *symbol){
 	z_=			XRayLibAPI::SymToZ(symbol);
@@ -29,7 +29,7 @@ ChemElement::ChemElement(const char *symbol){
 	rho_ = 		XRayLibAPI::Rho(z_);
 }
 
-/*Getter-Functions for member variables*/
+/** Getter-Functions for member variables*/
 double ChemElement::A() const {return a_;}
 int ChemElement::Z() const {return z_;}
 double ChemElement::Rho() const {return rho_;}

@@ -9,18 +9,19 @@
 
 #include <omp.h>
 #include <chrono>
+#include <thread> 
 
 
 class PrimaryBeam{
 
 	private:
-		Shadow3API* shadowSource_;
-		PolyCapAPI* polyCap_;
+		//Shadow3API* shadowSource_;
+		//PolyCapAPI* polyCap_;
 
 	public:
 
-  		PrimaryBeam();
-		PrimaryBeam(Shadow3API* shadowSource, PolyCapAPI* polyCap);
+  		PrimaryBeam() = delete;
+		PrimaryBeam(Shadow3API& shadowSource, PolyCapAPI& polyCap);
 };
 
 #endif

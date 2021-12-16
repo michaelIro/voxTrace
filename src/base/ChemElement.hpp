@@ -20,7 +20,7 @@ class ChemElement {
 		double rho_;			// Density at room temperature [g/cm³]
 
   	public:
-  		ChemElement();
+  		ChemElement() = delete;
   		ChemElement(const char *symbol);
 		ChemElement(const int& z);
 		

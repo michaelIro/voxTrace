@@ -1,5 +1,9 @@
 #include <iostream>
 
+//namespace Shadow3{
+// #include <shadow_bind_cpp.hpp>
+//}
+/**
 //#include "api/OptimizerAPI.hpp"
 #include "api/PlotAPI.hpp"
 #include "api/PolyCapAPI.hpp"
@@ -10,11 +14,15 @@
 #include "base/Material.hpp"
 #include "base/XRBeam.hpp"
 
-#include "tracer/PrimaryBeam.hpp"
+#include "tracer/PrimaryBeam.hpp"**/
 
 int main() {
-    std::cout << "Hello World!" << std::endl;
+	std::cout << "START: Test-2" << std::endl;
 
+
+    
+    // Shadow3::Source mysrc;
+    /**
     Shadow3API shadow_((char*) "../test-data/shadow3");
     PolyCapAPI pc1_((char*) "../test-data/polycap/pc-246-descr.txt");	
 
@@ -25,6 +33,9 @@ int main() {
 	);
 
 	beam_.getMatrix().save(arma::hdf5_name("../test-data/beam/beam.h5", "my_data"));
-
+    **/
+	std::cout << "END: Test-2" << std::endl;
     return 0;
 }
+
+

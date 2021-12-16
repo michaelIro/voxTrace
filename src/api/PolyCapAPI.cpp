@@ -263,7 +263,7 @@ vector<Ray> PolyCapAPI::trace(arma::Mat<double> shadowBeam, int nPhotons, char* 
 		}
 	}
 
-	polycap_transmission_efficiencies_write_hdf5(efficiencies,savePath,NULL);
+	//polycap_transmission_efficiencies_write_hdf5(efficiencies,savePath,NULL);
 
 	double *efficiencies_arr = NULL;
 	polycap_transmission_efficiencies_get_data(efficiencies, NULL, NULL, &efficiencies_arr, NULL);

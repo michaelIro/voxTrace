@@ -12,20 +12,25 @@
 #ifndef Shadow3API_H
 #define Shadow3API_H
 
-#include <shadow_bind_cpp.hpp>
+//using namespace std;
+//namespace myNameSpace{
+ // using namespace std;
+  #include <shadow_bind_cpp.hpp>
+//}
+
 
 #include <armadillo>
 #include <filesystem>
-#include <vector>
+//#include <vector>
 
 class Shadow3API{
     private:
       Source src_;
-      vector<OE> oe_;
+      std::vector<OE> oe_;
       Beam beam_;
 
     public:
-      Shadow3API();
+      Shadow3API() = delete;
       Shadow3API(char* path);
       Shadow3API(Shadow3API* shadow3api);
 
@@ -36,7 +41,7 @@ class Shadow3API{
       arma::Mat<double> getBeamMatrix(vector<Beam>* beams);
 
       Source get_src_();
-      vector<OE> get_oe_();   
+      std::vector<OE> get_oe_();   
       Beam get_beam_();
 };
 

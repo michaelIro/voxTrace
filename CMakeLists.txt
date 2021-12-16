@@ -4,14 +4,22 @@ cmake_minimum_required(VERSION 3.10)
 
 # sets the project name
 project(voxTrace VERSION 1.0)
+#project(MY_PROJECT )
 
 # sets the C++ standard to C++20
 set(CMAKE_CXX_STANDARD 20)
+
+enable_language(CUDA)
+include(CheckLanguage)
+check_language(CUDA)
+
 #########################################################################################
 # add the executable
 add_executable(Test-1 src/Test-1.cpp)
 add_executable(Test-2 src/Test-2.cpp)
 add_executable(Main src/Main.cpp)
+set_target_properties(Test-2 PROPERTIES
+                            CUDA_SEPARABLE_COMPILATION ON)
 #########################################################################################
 target_link_libraries(Main XRayLibAPI Shadow3API PlotAPI PolyCapAPI OptimizerAPI vt.base vt.tracer)
 target_link_libraries(Test-1 XRayLibAPI Shadow3API PlotAPI PolyCapAPI OptimizerAPI vt.base vt.tracer)
@@ -42,5 +50,5 @@ find_package(HDF5 REQUIRED)
 #find_package(LAPACK REQUIRED)    #
 #find_package(OpenACC REQUIRED)   #
 #find_package(MPI REQUIRED)
-#find_package(CUDA REQUIRED)
+find_package(CUDA REQUIRED)
 ######################################################################################## end of finding libraries

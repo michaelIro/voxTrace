@@ -1,7 +1,7 @@
 #ifndef Tracer_H
 #define Tracer_H
 
-/**Tracer*/
+/** Tracer */
 
 #include <iostream>
 #include <math.h> 
@@ -18,7 +18,7 @@
 #include "../base/Sample.hpp"
 #include "../base/XRBeam.hpp"
 
-using namespace std;
+//using namespace std;
 
 class Tracer {
 
@@ -26,7 +26,6 @@ class Tracer {
 		XRBeam primary_;
 		Sample sample_;
 		XRBeam secondary_;
-		std::vector<Ray> beam_;
 		
 	public:
   		Tracer();
@@ -34,9 +33,9 @@ class Tracer {
 
 		void start();
 
-		/*Trace the Path of a single ray.*/
 		Ray* traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample* sample, int* ia);
-		std::vector<Ray> getBeam();
+		
+		XRBeam getSecondaryBeam();
 };
 
 #endif

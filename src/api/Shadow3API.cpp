@@ -2,7 +2,7 @@
 #include "Shadow3API.hpp"
 
 /* Empty constructor */
-Shadow3API::Shadow3API(){}
+//Shadow3API::Shadow3API(){}
 
 /** Constructor loading start.00 File from given Path to define Source.
 * @param path Path to folder that contains at least a start.00 file defining the source and possibly start.** files defining the optical elements. (Shadow3)
@@ -14,12 +14,12 @@ Shadow3API::Shadow3API(char* path){
             src_.load((char *) entry.path().c_str());             // load variables from start.00
 
         else{
-            //std::cout<< entry.path().extension() << std::endl; 
-            // TODO: Load and trace OEs   
-            //OE     oe1;
-
-            // load start.01 into oe1
-            //oe1.load( (char*) "start.01");
+            //std::cout<< entry.path().extension().string().substr(1) << std::endl; // TODO: Check if file is really start.** 
+            
+            // load start.** into oe
+            OE     oe__;
+            oe__.load((char *) entry.path().c_str());
+            oe_.push_back(oe__);
         }
     }   
 }
@@ -114,6 +114,6 @@ Source Shadow3API::get_src_(){
     return src_;
 }
 
-vector<OE> Shadow3API::get_oe_(){
+std::vector<OE> Shadow3API::get_oe_(){
     return oe_;
 }
