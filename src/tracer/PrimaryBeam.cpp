@@ -10,7 +10,7 @@ PrimaryBeam::PrimaryBeam(Shadow3API& shadowSource, PolyCapAPI& polyCap){
 
 	srand(time(NULL)); 
 
-	for(int i = 75 ; i < 150; i ++){
+	for(int i = 194 ; i < 400; i ++){
 
 		std::chrono::steady_clock::time_point t0_ = std::chrono::steady_clock::now();
 
