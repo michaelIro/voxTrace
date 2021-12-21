@@ -91,7 +91,7 @@ int ChemElement::getTransition(int shell, double randomN){
 	//IUPAC iupac;
 	for(int myLine =getTransitionList(shell)[0]; myLine <= getTransitionList(shell)[1]; myLine++){
 		int lineInput = myLine*-1-1;
-		double ratio = RadRate(z_,lineInput,NULL);
+		double ratio = XRayLibAPI::RadRate(z_,lineInput);
 		if(ratio!=0)		
 			lineRatios.insert({myLine,ratio});
 	}
@@ -113,7 +113,7 @@ map<int,double> ChemElement::getLineRatios(int shell){
 	//IUPAC iupac;
 	for(int myLine = getTransitionList(shell)[0]; myLine <= getTransitionList(shell)[1]; myLine++){
 		int lineInput = myLine*-1-1;
-		double ratio = RadRate(z_,lineInput,NULL);
+		double ratio = XRayLibAPI::RadRate(z_,lineInput);
 		if(ratio!=0)		
 			lineRatios.insert({myLine,ratio});
 	}
@@ -149,7 +149,7 @@ double ChemElement::getThetaCompt(double energy, double randomN){
 	for(int i=0; i<arraysize; i++){
 		x = ((double)i)/((double)(stepsize));
 		theta[i]= 2*asin(x*photLambda);
-		prob[i] = DCS_Compt(z_,energy,theta[i],NULL);
+		prob[i] = XRayLibAPI::DCS_Compt(z_,energy,theta[i]);
 
 		if((isnan(prob[i]))) break;
 		if(i!=0) probSum += prob[i-1]*(cos(theta[i]) - cos(theta[i-1]));	
@@ -182,7 +182,7 @@ double ChemElement::getThetaRayl(double energy, double randomN){
 	for(int i=0; i<arraysize; i++){
 		x = ((double)i)/((double)(stepsize));
 		theta[i]= 2*asin(x*photLambda);
-		prob[i] = DCS_Rayl(z_,energy,theta[i],NULL);
+		prob[i] = XRayLibAPI::DCS_Rayl(z_,energy,theta[i]);
 
 		if((isnan(prob[i]))) break;
 		if(i!=0) probSum += prob[i-1]*(cos(theta[i]) - cos(theta[i-1]));	

@@ -1,57 +1,65 @@
 /*XRayLib API*/
 #include "XRayLibAPI.hpp"
 
-/*Empty constructor*/
-XRayLibAPI::XRayLibAPI(){}
-
 const char* XRayLibAPI::ZToSym(int z){
-    return AtomicNumberToSymbol(z, NULL);
+    return XRayLib::AtomicNumberToSymbol(z, NULL);
 }
 
 double XRayLibAPI::SymToZ(const char* symbol){
-    return SymbolToAtomicNumber(symbol, NULL);
+    return XRayLib::SymbolToAtomicNumber(symbol, NULL);
 }
 
 double XRayLibAPI::A(int z){
-    return AtomicWeight(z, NULL);
+    return XRayLib::AtomicWeight(z, NULL);
 }
 
 double XRayLibAPI::Rho(int z){
-    return ElementDensity(z, NULL);
+    return XRayLib::ElementDensity(z, NULL);
 }
 
 double XRayLibAPI::CS_Tot(int z, double energy){
-    return CS_Total(z, energy, NULL);
+    return XRayLib::CS_Total(z, energy, NULL);
 }
 
 double XRayLibAPI::CS_Phot(int z, double energy){
-    return CS_Photo(z, energy, NULL);
+    return XRayLib::CS_Photo(z, energy, NULL);
 }
 
 double XRayLibAPI::CS_Ray(int z, double energy){
-    return CS_Rayl(z, energy, NULL);
+    return XRayLib::CS_Rayl(z, energy, NULL);
 }
 
 double XRayLibAPI::CS_Phot_Part(int z, int shell, double energy){
-    return CS_Photo_Partial(z, shell, energy, NULL); 
+    return XRayLib::CS_Photo_Partial(z, shell, energy, NULL); 
 }
 
 double XRayLibAPI::CS_FluorL(int z, int shell, double energy){
-    return CS_FluorLine(z,shell, energy,NULL);
+    return XRayLib::CS_FluorLine(z,shell, energy,NULL);
 }
 
 double XRayLibAPI::FluorY(int z, int shell){
-    return FluorYield(z,shell,NULL);
+    return XRayLib::FluorYield(z,shell,NULL);
 }
 
 double XRayLibAPI::AugY(int z, int shell){
-    return AugerYield(z,shell,NULL);
+    return XRayLib::AugerYield(z,shell,NULL);
 }
 
 double XRayLibAPI::LineE(int z, int line){
-    return LineEnergy(z, line, NULL);
+    return XRayLib::LineEnergy(z, line, NULL);
+}
+double XRayLibAPI::RadRate(int z, int line){
+    return XRayLib::RadRate(z, line, NULL);
+}
+
+double XRayLibAPI::DCS_Rayl(int z, double energy, double theta){
+    return XRayLib::DCS_Rayl(z, energy, theta, NULL);
+}
+
+double XRayLibAPI::DCS_Compt(int z, double energy, double theta){
+    return XRayLib::DCS_Compt(z, energy, theta, NULL);
 }
 
 void XRayLibAPI::test(){
-    double a = CS_Photo_Partial(29,K_SHELL,17.4,NULL);
+    double a = XRayLib::CS_Photo_Partial(29,K_SHELL,17.4,NULL);
 }

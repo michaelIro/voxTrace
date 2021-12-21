@@ -27,13 +27,13 @@
 #ifndef XRayLibAPI_H
 #define XRayLibAPI_H
 
-#include "xraylib.h"
+namespace XRayLib{
+  #include "xraylib.h"
+}
 
 class XRayLibAPI{
 
     public:
-        XRayLibAPI();
-
         // Periodic Table 
         static const char* ZToSym(int z);
         static double SymToZ(const char* symbol);
@@ -46,16 +46,18 @@ class XRayLibAPI{
         static double CS_Ray(int z, double energy);
         static double CS_Phot_Part(int z, int shell, double energy); 
         static double CS_FluorL(int z, int shell, double energy);
+
+        static double DCS_Rayl(int z, double energy, double theta);
+        static double DCS_Compt(int z, double energy, double theta);
         
         // Fluorescence- / Auger- Yield
         static double FluorY(int z, int shell);
         static double AugY(int z, int shell);
+        static double RadRate(int z, int line);
 
         static double LineE(int z, int line);
 
         static void test();
-
-
 };
 
 #endif
