@@ -12,16 +12,14 @@
 #ifndef Shadow3API_H
 #define Shadow3API_H
 
-//using namespace std;
-//namespace myNameSpace{
- // using namespace std;
+//namespace myNameSpace
+//{
   #include <shadow_bind_cpp.hpp>
 //}
-
+  //using namespace std;
 
 #include <armadillo>
 #include <filesystem>
-//#include <vector>
 
 class Shadow3API{
     private:
@@ -38,7 +36,7 @@ class Shadow3API{
       void trace(int nRays, int seed);
 
       arma::Mat<double> getBeamMatrix();
-      arma::Mat<double> getBeamMatrix(vector<Beam>* beams);
+      arma::Mat<double> getBeamMatrix(std::vector<Beam>* beams);
 
       Source get_src_();
       std::vector<OE> get_oe_();   

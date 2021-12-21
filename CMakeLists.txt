@@ -28,6 +28,7 @@ target_link_libraries(Test-2 XRayLibAPI Shadow3API PlotAPI PolyCapAPI OptimizerA
 add_subdirectory(src/api)
 add_subdirectory(src/base)
 add_subdirectory(src/tracer)
+add_subdirectory(src/cuda)
 add_subdirectory(docs)
 ######################################################################################### find installed libraries
 # Armadillo: a C++ library for linear algebra & scientific computing (Apache 2.0 license)

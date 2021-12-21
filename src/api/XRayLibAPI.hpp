@@ -34,6 +34,8 @@ namespace XRayLib{
 class XRayLibAPI{
 
     public:
+        XRayLibAPI() = delete;
+        
         // Periodic Table 
         static const char* ZToSym(int z);
         static double SymToZ(const char* symbol);

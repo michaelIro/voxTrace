@@ -1,4 +1,4 @@
-/* Shadow 3 API*/
+/** Shadow 3 API */
 #include "Shadow3API.hpp"
 
 /* Empty constructor */
@@ -89,7 +89,7 @@ arma::Mat<double> Shadow3API::getBeamMatrix(){
  * @param nRays Number of Rays to be generated
  * @return arma::Mat<double> with Rays generated from Source
  */
-arma::Mat<double> Shadow3API::getBeamMatrix(vector<Beam>* beams){
+arma::Mat<double> Shadow3API::getBeamMatrix(std::vector<Beam>* beams){
 
     // write rays to arma::mat
     arma::Mat<double> rays = arma::ones(src_.NPOINT*(*beams).size(), 18); //TODO: make different beam sizes possible

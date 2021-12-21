@@ -1,4 +1,4 @@
-/*XRayLib API*/
+/** XRayLib API */
 #include "XRayLibAPI.hpp"
 
 const char* XRayLibAPI::ZToSym(int z){
