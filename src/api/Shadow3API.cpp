@@ -14,7 +14,7 @@ Shadow3API::Shadow3API(char* path){
             src_.load((char *) entry.path().c_str());             // load variables from start.00
 
         else{
-            //std::cout<< entry.path().extension().string().substr(1) << std::endl; // TODO: Check if file is really start.** 
+            //std::cout<< entry.path().extension().string().substr(1) << std::endl; // TODO: Check if file is really start.** & Check correct order of OE
             
             // load start.** into oe
             OE     oe__;

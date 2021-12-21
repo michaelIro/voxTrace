@@ -263,7 +263,7 @@ vector<Ray> PolyCapAPI::trace(arma::Mat<double> shadowBeam, int nPhotons, char* 
 		}
 	}
 
-	//polycap_transmission_efficiencies_write_hdf5(efficiencies,savePath,NULL);
+	polycap_transmission_efficiencies_write_hdf5(efficiencies,savePath,NULL);
 
 	double *efficiencies_arr = NULL;
 	polycap_transmission_efficiencies_get_data(efficiencies, NULL, NULL, &efficiencies_arr, NULL);
@@ -287,8 +287,6 @@ void PolyCapAPI::overwritePhoton(arma::rowvec shadowRay, polycap_photon *photon)
 	photon->start_electric_vector.y = shadowRay(8); 
 	photon->start_electric_vector.z = shadowRay(7); 
 }
-
-
 
 /* 	This is a modified copy of the function polycap_source_get_transmission_efficiencies from polycap code. 
 	"For a given array of energies, and a full polycap_description, get the transmission efficiencies."

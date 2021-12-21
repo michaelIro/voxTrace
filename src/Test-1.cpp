@@ -24,15 +24,16 @@ int main() {
 
 	PrimaryBeam primary_(shadow_, pc1_);
 
-	//std::vector<XRBeam> beams_;
-	//arma::Mat<double> temp_;
-	//for(int i=0; i<50; i++){
-	//	temp_.load(arma::hdf5_name("/media/miro/Data/Shadow-Beam/PrimaryBeam-"+std::to_string(i)+".h5","my_data"));
-	//	beams_.push_back(XRBeam(temp_));
-	//}
+	/*std::vector<XRBeam> beams_;
+	arma::Mat<double> temp_;
+	for(int i=450; i<500; i++){
+		temp_.load(arma::hdf5_name("/media/miro/Data/Shadow-Beam/Single/PrimaryBeam-"+std::to_string(i)+".h5","my_data"));
+		beams_.push_back(XRBeam(temp_));
+	}
 		
-	//XRBeam temp1_ = XRBeam::merge(beams_);
-	//temp1_.getMatrix().save(arma::hdf5_name("/media/miro/Data/Shadow-Beam/PrimaryBeam.h5","my_data"));
+	XRBeam temp1_ = XRBeam::merge(beams_);
+	temp1_.getMatrix().save(arma::hdf5_name("/media/miro/Data/Shadow-Beam/Bunch/PrimaryBeam-50-10.h5","my_data"));
+	*/
 	//temp_.load(arma::hdf5_name("/media/miro/Data/Shadow-Beam/PrimaryBeam.h5","my_data"));
 
 	//XRBeam prim_(temp_);
