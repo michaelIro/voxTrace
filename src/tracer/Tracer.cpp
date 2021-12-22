@@ -1,9 +1,5 @@
 #include "Tracer.hpp"
 
-//using namespace std;
-
-//Tracer::Tracer(){}
-
 /** Tracer */
 Tracer::Tracer(XRBeam source, Sample sample){
 	primary_=source;

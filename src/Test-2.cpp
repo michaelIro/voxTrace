@@ -29,7 +29,7 @@ int main() {
     shadow_.trace(8000000,rand());
 
     XRBeam beam_(
-			pc1_.trace(shadow_.getBeamMatrix(),100000,(char *)"../test-data/out/beam/beam.hdf5")
+			pc1_.trace(shadow_.getBeamMatrix(),100000,(char *)"../test-data/out/beam/beam.hdf5",true)
 	);
 
 	beam_.getMatrix().save(arma::hdf5_name("../test-data/out/beam/beam.h5", "my_data"));

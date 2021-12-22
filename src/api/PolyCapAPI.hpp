@@ -79,28 +79,15 @@ class PolyCapAPI{
     void overwritePhoton(arma::rowvec shadowRay, polycap_photon *photon);
 
   public:
-    PolyCapAPI();
+    PolyCapAPI() = delete;
     PolyCapAPI(char* path);
+    //PolyCapAPI(const PolyCapAPI& polyCapAPI);
     
-    vector<Ray> trace(arma::Mat<double> shadowBeam, int nPhotons, char* savePath);
+
+    vector<Ray> trace(arma::Mat<double> shadowBeam, int nPhotons, std::filesystem::path savePath, bool save);
+    //vector<Ray> trace(arma::Mat<double> shadowBeam, int nPhotons): PolyCapAPI::trace(shadowBeam, nPhotons, " ", false);
+
     polycap_transmission_efficiencies* polycap_shadow_source_get_transmission_efficiencies(polycap_source *source, int max_threads, int n_photons, bool leak_calc, polycap_progress_monitor *progress_monitor, polycap_error **error, arma::Mat<double> shadowBeam);
-
-    // Getter functions for optic parameters
-    double get_optic_length();
-    double get_rad_ext_upstream();
-    double get_rad_ext_downstream();
-    double get_rad_int_upstream();
-    double get_rad_int_downstream();
-    double get_focal_dist_upstream();
-    double get_focal_dist_downstream();
-    int get_n_elem();
-    int* get_iz();
-    double* get_wi();
-    double get_density();
-    double get_surface_rough();
-    double get_n_capillaries();
-
-    double getFocalDistDownStream();
 
     void print();
 };

@@ -28,11 +28,11 @@ Shadow3API::Shadow3API(char* path){
 * @param shadow3api 
 * @return Shadow3API-Object
 */
-Shadow3API::Shadow3API(Shadow3API* shadow3api){
-    src_ = (*shadow3api).get_src_();
+//Shadow3API::Shadow3API(Shadow3API* shadow3api){
+//    src_ = (*shadow3api).get_src_();
     //oe_ = (*shadow3api).get_oe_(); // TODO: Check if NULL here
     //beam_ = (*shadow3api).get_beam_();
-}
+//}
 
 /** Generates X-Rays from a Shadow3-Source and if present trace the generated rays through optical elements. 
  * @param nRays Number of Rays to be generated

@@ -112,7 +112,7 @@ int main() {
 //---------------------------------------------------------------------------------------------
 	//oneBeamToRuleThemAll.load("../test-data/out/beam/fluorescenceBeam.csv", arma::csv_ascii);
 	PolyCapAPI mySecondaryPolycap((char*) "../test-data/in/polycap/pc-236-descr.txt");	
-	XRBeam myDetectorBeam(mySecondaryPolycap.trace(fluorescence_.getMatrix(),50,(char*) "../test-data/in/polycap/pc-236.hdf5"));
+	XRBeam myDetectorBeam(mySecondaryPolycap.trace(fluorescence_.getMatrix(),50,(char*) "../test-data/in/polycap/pc-236.hdf5",true));
 
 /***********************************************************************************/
     return 0;

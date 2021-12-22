@@ -2,7 +2,9 @@
 #include "PolyCapAPI.hpp"
 
 /** Empty Constructor */
-PolyCapAPI::PolyCapAPI(){}
+//PolyCapAPI::PolyCapAPI(const PolyCapAPI& polyCapAPI){
+
+//}
 
 /** Standard Constructor */
 PolyCapAPI::PolyCapAPI(char* path){
@@ -132,7 +134,7 @@ void PolyCapAPI::load_source_param(char* path){
 		energies[i++] = stod(s); 
 }
 
-/** Print policapillary parameters */
+/** Print policapillary parameters + source parameters */
 void PolyCapAPI::print(){
 	std::cout << "Polycapillary Parameters: " << std::endl<< std::endl;
 	std::cout << "optic_length: " << optic_length << std::endl<< std::endl;
@@ -148,6 +150,8 @@ void PolyCapAPI::print(){
 	std::cout << "density: " << density << std::endl<< std::endl;
 	std::cout << "surface_rough: " << surface_rough << std::endl<< std::endl;
 	std::cout << "n_capillaries: " << n_capillaries << std::endl<< std::endl;
+
+	std::cout << "Source Parameters: " << std::endl<< std::endl;
 }
 
 /** A helper function to compare coordinates from Shadow with coordinates from Polycap. FIXME: Remove this function from final code!*/
@@ -215,7 +219,7 @@ void PolyCapAPI::compareBeams(arma::Mat<double> shadowBeam){
 }
 
 /** Trace Photons through capillary optic */
-vector<Ray> PolyCapAPI::trace(arma::Mat<double> shadowBeam, int nPhotons, char* savePath){
+vector<Ray> PolyCapAPI::trace(arma::Mat<double> shadowBeam, int nPhotons, std::filesystem::path savePath, bool save){
 
 	int i;
     double** weights;
@@ -263,10 +267,11 @@ vector<Ray> PolyCapAPI::trace(arma::Mat<double> shadowBeam, int nPhotons, char* 
 		}
 	}
 
-	polycap_transmission_efficiencies_write_hdf5(efficiencies,savePath,NULL);
+	if(save == true)
+		polycap_transmission_efficiencies_write_hdf5(efficiencies, savePath.c_str(), NULL);
 
-	double *efficiencies_arr = NULL;
-	polycap_transmission_efficiencies_get_data(efficiencies, NULL, NULL, &efficiencies_arr, NULL);
+	//double *efficiencies_arr = NULL;
+	//polycap_transmission_efficiencies_get_data(efficiencies, NULL, NULL, &efficiencies_arr, NULL);
 
 	//polycap_source_free(source);
 	//polycap_transmission_efficiencies_free(efficiencies);

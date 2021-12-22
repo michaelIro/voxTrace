@@ -25,21 +25,24 @@ PrimaryBeam::PrimaryBeam(Shadow3API& shadowSource, PolyCapAPI& polyCap){
 				if(fresh_ == true)
 					std::this_thread::sleep_for(std::chrono::milliseconds(1)); 
 				else{
-					//Shadow3API shadow_source_copy_(&shadowSource);
+					Shadow3API shadow_source_copy_(shadowSource);
 					shadowSource.trace(10000000,rand());
 					fresh_ = true;
 				}
 			}
     	};
 
-		auto polycap_lambda_ = [&shadowSource, &fresh_, &counter_, max_iter_, &beams_,&mu_]() {
+		auto polycap_lambda_ = [&shadowSource, &fresh_, &counter_, max_iter_, &beams_,&mu_,&polyCap]() {
 			while(counter_ < max_iter_){
 				if(fresh_ == true){
 					arma::Mat<double> shadow_beam_ = shadowSource.getBeamMatrix();
 					fresh_=false;
 
-					PolyCapAPI myPrimaryPolycap((char*) "../test-data/in/polycap/pc-246-descr.txt");
-					XRBeam tracedBeam(myPrimaryPolycap.trace(shadow_beam_ ,100000,(char *)"../test-data/out/beam/beam.hdf5"));	
+					//PolyCapAPI myPrimaryPolycap((char*) "../test-data/in/polycap/pc-246-descr.txt");
+					PolyCapAPI myPrimaryPolycap(polyCap);
+					XRBeam tracedBeam(
+						myPrimaryPolycap.trace(shadow_beam_ ,100000,"../test-data/out/beam/beam-"+std::to_string(counter_)+".hdf5",false)
+					);	
 					
 					mu_.lock();
 					beams_.push_back(XRBeam::probabilty(tracedBeam));

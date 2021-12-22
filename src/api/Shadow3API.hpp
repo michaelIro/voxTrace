@@ -30,7 +30,7 @@ class Shadow3API{
     public:
       Shadow3API() = delete;
       Shadow3API(char* path);
-      Shadow3API(Shadow3API* shadow3api);
+      //Shadow3API(Shadow3API* shadow3api);
 
       void trace(int nRays);
       void trace(int nRays, int seed);

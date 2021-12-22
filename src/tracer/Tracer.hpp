@@ -28,7 +28,7 @@ class Tracer {
 		XRBeam secondary_;
 		
 	public:
-  		Tracer();
+  		Tracer() = delete;
 		Tracer(XRBeam source, Sample sample);
 
 		void start();
