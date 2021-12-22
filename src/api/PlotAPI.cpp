@@ -1,7 +1,5 @@
 #include "PlotAPI.hpp"
 
-PlotAPI::PlotAPI(){}
-
 void PlotAPI::test(){
     // Create a vector with values from 0 to pi divived into 200 uniform intervals for the x-axis
     sciplot::Vec x = sciplot::linspace(0.0, sciplot::PI, 200);

@@ -1,6 +1,6 @@
 #########################################################################################
 # sets the minimum required version of CMake itself 
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.18)
 
 # sets the project name and version number
 project(voxTrace VERSION 1.0)

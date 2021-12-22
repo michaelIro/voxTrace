@@ -1,6 +1,6 @@
 #########################################################################################
 # sets the minimum required version of CMake itself 
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.18)
 
 # Tells CMake to use pkg-config (The standard installations of both X-Ray-Lib and Polycap are easier to link using this)
 include(FindPkgConfig)

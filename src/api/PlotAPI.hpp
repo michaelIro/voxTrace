@@ -2,12 +2,12 @@
 #ifndef PlotAPI_H
 #define PlotAPI_H
 
-#include <sciplot/sciplot.hpp>
+#include <sciplot/sciplot.hpp>  // namespace sciplot already defined
 
 class PlotAPI{
 
     public:
-        PlotAPI();
+        PlotAPI() = delete;
         static void test();
 
 };
