@@ -1,0 +1,11 @@
+Polycapillary-Source-Parameter-Input-File
+100.0;			// distance between optic entrance and source along z-axis
+0.37;			// source radius in x, in cm
+0.37;			// source radius in y, in cm
+0.0;			// source divergence in x, in rad
+0.0;			// source divergence in y, in rad
+0.;				// source shift in x compared to optic central axis, in cm
+0.;				// source shift in y compared to optic central axis, in cm
+1.0;			// source polarisation factor
+1;				// number of discrete photon energies
+[1]={1.0};		// energies for which transmission efficiency should be calculated, in keV

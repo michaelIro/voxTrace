@@ -1,6 +1,6 @@
 #include <iostream>
 #include "cuda/MyDummy.cuh"
-#include "base/ChemElement.hpp"
+//#include "api/PlotAPI.hpp"
 
 int main() {
 	std::cout << "START: Test-3" << std::endl;
@@ -8,11 +8,10 @@ int main() {
     int N = 1<<20;
     float *x, *y;
 
-    //CudaAccelerator::callAdd(N, x, y);
     MyDummy::callAdd(N, x, y);
-    MyDummy::test();
 
-    ChemElement cu(29);
+    //arma::Mat<double> dummy;
+    //PlotAPI::scatter_plot((char*) "../test-data/out/plots/example-sine-functions.pdf",true,true, dummy);
 
     std::cout << "END: Test-3" << std::endl;
     return 0;

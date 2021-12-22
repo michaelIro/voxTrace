@@ -8,7 +8,7 @@ project(voxTrace VERSION 1.0)
 # sets the C++ standard to C++20
 set(CMAKE_CXX_STANDARD 20)
 #########################################################################################
-add_library(CudaAPI MyDummy.cu)
+add_library(vt.cuda MyDummy.cu)
 #########################################################################################
 #set_target_properties(CudaAPI PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 #target_include_directories(vt.cuda PUBLIC)

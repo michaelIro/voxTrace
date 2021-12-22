@@ -33,5 +33,17 @@ void PlotAPI::test(){
     //plot.show();
 
     // Save the plot to a PDF file
-    plot.save("../test-data/plots/example-sine-functions.pdf");
+    plot.save("../test-data/out/plots/example-sine-functions.pdf");
+}
+
+void PlotAPI::scatter_plot(char* save_path, bool x_right, bool y_up, arma::Mat<double> xy_coordinates){
+    sciplot::Vec x = { 1, 2, 3 };
+    sciplot::Vec y = { 4, 5, 6 };
+
+    sciplot::Plot plot;
+  
+    plot.drawPoints(x, y).pointType(0);
+
+    // Save the plot to a PDF file
+    plot.save(save_path);
 }

@@ -19,8 +19,8 @@ int main() {
 
 //---------------------------------------------------------------------------------------------
 
-	Shadow3API shadow_((char*) "../test-data/shadow3");
-	PolyCapAPI pc1_((char*) "../test-data/polycap/pc-246-descr.txt");	
+	Shadow3API shadow_((char*) "../test-data/in/shadow3");
+	PolyCapAPI pc1_((char*) "../test-data/in/polycap/pc-246-descr.txt");	
 
 	PrimaryBeam primary_(shadow_, pc1_);
 

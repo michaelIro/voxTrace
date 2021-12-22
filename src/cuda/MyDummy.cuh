@@ -5,7 +5,6 @@ class MyDummy{
 
 	public:
 		static void callAdd(int N, float *x, float *y);
-		static void test();
 
 };
 

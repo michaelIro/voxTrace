@@ -20,7 +20,7 @@ void MyDummy::callAdd(int N, float *x, float *y){
   }
 
   // Run kernel on 1M elements on the GPU
-  add<<<1, 1>>>(N, x, y);
+  add<<<256, 256>>>(N, x, y);
 
   // Wait for GPU to finish before accessing on host
   cudaDeviceSynchronize();
@@ -35,42 +35,3 @@ void MyDummy::callAdd(int N, float *x, float *y){
   cudaFree(x);
   cudaFree(y);
 }
-
-void MyDummy::test(){
-    std::cout << " Is this working? " << std::endl;
-}
-
-/*
-int main(void)
-{
-  int N = 1<<20;
-  float *x, *y;
-
-  // Allocate Unified Memory – accessible from CPU or GPU
-  cudaMallocManaged(&x, N*sizeof(float));
-  cudaMallocManaged(&y, N*sizeof(float));
-
-  // initialize x and y arrays on the host
-  for (int i = 0; i < N; i++) {
-    x[i] = 1.0f;
-    y[i] = 2.0f;
-  }
-
-  // Run kernel on 1M elements on the GPU
-  add<<<1, 1>>>(N, x, y);
-
-  // Wait for GPU to finish before accessing on host
-  cudaDeviceSynchronize();
-
-  // Check for errors (all values should be 3.0f)
-  float maxError = 0.0f;
-  for (int i = 0; i < N; i++)
-    maxError = fmax(maxError, fabs(y[i]-3.0f));
-  std::cout << "Max error: " << maxError << std::endl;
-
-  // Free memory
-  cudaFree(x);
-  cudaFree(y);
-  
-  return 0;
-}*/

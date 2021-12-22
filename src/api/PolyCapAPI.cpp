@@ -91,7 +91,7 @@ void PolyCapAPI::load_source_param(char* path){
 
 	std::ifstream inFile;
 	std::string x;
-	inFile.open((char*) "../test-data/polycap/source-descr.txt"); //FIXME: Path
+	inFile.open((char*) "../test-data/in/polycap/source-descr.txt"); //FIXME: Path
 
 	std::getline(inFile, x);
 	//std::cout << x << std::endl<< std::endl;

@@ -38,8 +38,8 @@ PrimaryBeam::PrimaryBeam(Shadow3API& shadowSource, PolyCapAPI& polyCap){
 					arma::Mat<double> shadow_beam_ = shadowSource.getBeamMatrix();
 					fresh_=false;
 
-					PolyCapAPI myPrimaryPolycap((char*) "../test-data/polycap/pc-246-descr.txt");
-					XRBeam tracedBeam(myPrimaryPolycap.trace(shadow_beam_ ,100000,(char *)"../test-data/beam/beam.hdf5"));	
+					PolyCapAPI myPrimaryPolycap((char*) "../test-data/in/polycap/pc-246-descr.txt");
+					XRBeam tracedBeam(myPrimaryPolycap.trace(shadow_beam_ ,100000,(char *)"../test-data/out/beam/beam.hdf5"));	
 					
 					mu_.lock();
 					beams_.push_back(XRBeam::probabilty(tracedBeam));
@@ -82,14 +82,14 @@ PrimaryBeam::PrimaryBeam(Shadow3API& shadowSource, PolyCapAPI& polyCap){
 
 		#pragma omp for
 		for(int i = 0; i < threadNum; i++){
-    		//Shadow3API myShadowSource((char*) "../test-data/shadow3");
+    		//Shadow3API myShadowSource((char*) "../test-data/in/shadow3");
 			Shadow3API myShadowSource(shadowSource);
 			myShadowSource.trace(raysPerThread,rand());
 
-    		PolyCapAPI myPrimaryPolycap((char*) "../test-data/polycap/pc-246-descr.txt");	
+    		PolyCapAPI myPrimaryPolycap((char*) "../test-data/in/polycap/pc-246-descr.txt");	
 
 			XRBeam myDetectorBeam(
-				myPrimaryPolycap.trace(myShadowSource.getBeamMatrix(),100000,(char *)"../test-data/beam/beam.hdf5")
+				myPrimaryPolycap.trace(myShadowSource.getBeamMatrix(),100000,(char *)"../test-data/out/beam/beam.hdf5")
 			);
 
 			beams_[i] = XRBeam::probabilty(myDetectorBeam);
@@ -108,7 +108,7 @@ PrimaryBeam::PrimaryBeam(Shadow3API& shadowSource, PolyCapAPI& polyCap){
 		Shadow3API shadowCopy_ = (*shadowSource);
 		shadowCopy_.trace(raysPerThread/threadNum,randomNumbers[i+1]);
 		//beam_.push_back((*shadowSource).getBeamMatrix());
-		//std::string name = "../test-data/beam/Beam-" + std::to_string(i) + ".h5";
+		//std::string name = "../test-data/out/beam/Beam-" + std::to_string(i) + ".h5";
 		//(*shadowSource).getBeamMatrix().save(arma::hdf5_name(name, "my_data"));
 	} 
 	

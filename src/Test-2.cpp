@@ -23,16 +23,16 @@ int main() {
     
     // Shadow3::Source mysrc;
     
-    Shadow3API shadow_((char*) "../test-data/shadow3");
-    PolyCapAPI pc1_((char*) "../test-data/polycap/pc-246-descr.txt");	
+    Shadow3API shadow_((char*) "../test-data/in/shadow3");
+    PolyCapAPI pc1_((char*) "../test-data/in/polycap/pc-246-descr.txt");	
 
     shadow_.trace(8000000,rand());
 
     XRBeam beam_(
-			pc1_.trace(shadow_.getBeamMatrix(),100000,(char *)"../test-data/beam/beam.hdf5")
+			pc1_.trace(shadow_.getBeamMatrix(),100000,(char *)"../test-data/out/beam/beam.hdf5")
 	);
 
-	beam_.getMatrix().save(arma::hdf5_name("../test-data/beam/beam.h5", "my_data"));
+	beam_.getMatrix().save(arma::hdf5_name("../test-data/out/beam/beam.h5", "my_data"));
     
 	std::cout << "END: Test-2" << std::endl;
     return 0;

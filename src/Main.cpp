@@ -18,23 +18,23 @@ int main() {
 //{
 //---------------------------------------------------------------------------------------------
 
-	//Shadow3API myShadowSource((char*) "../test-data/shadow3");
+	//Shadow3API myShadowSource((char*) "../test-data/in/shadow3");
 	//myShadowSource.trace(10000000);
 
 	//arma::Mat<double> myShadowBeam = myShadowSource.getBeamMatrix();
-	//myShadowBeam.save("../test-data/beam/shadowBeam.csv", arma::csv_ascii);
+	//myShadowBeam.save("../test-data/out/beam/shadowBeam.csv", arma::csv_ascii);
 	//std::cout << "Shadow-Beam: " << std::endl;
 	//myShadowBeam.print();
 
 //---------------------------------------------------------------------------------------------
 
-	//PolyCapAPI myPrimaryPolycap((char*) "../test-data/polycap/pc-246-descr.txt");
-	//vector<Ray> myPrimaryCapBeam = myPrimaryPolycap.trace(myShadowBeam,100000,(char*) "../test-data/polycap/pc-246.hdf5");
+	//PolyCapAPI myPrimaryPolycap((char*) "../test-data/in/polycap/pc-246-descr.txt");
+	//vector<Ray> myPrimaryCapBeam = myPrimaryPolycap.trace(myShadowBeam,100000,(char*) "../test-data/in/polycap/pc-246.hdf5");
 
 	arma::Mat<double> myPrimaryCapBeam;
 	myPrimaryCapBeam.load(arma::hdf5_name("/media/miro/Data/Shadow-Beam/Bunch/PrimaryBeam-50-1.h5","my_data"));
 	XRBeam myPrimaryBeam(myPrimaryCapBeam);
-	//myPrimaryBeam.getMatrix().save("../test-data/beam/primaryBeam.csv", arma::csv_ascii);
+	//myPrimaryBeam.getMatrix().save("../test-data/out/beam/primaryBeam.csv", arma::csv_ascii);
 	myPrimaryBeam.primaryTransform(70.0, 70.0,0.0, 0.51, 45.0);
 
 	//myPrimaryBeam.print();
@@ -43,12 +43,6 @@ int main() {
 
 	//some test comment
 	//OptimizerAPI myOptimizer;
-
-	//arma::Mat<double> A;
-	//A.load("../test-data/polycap/Primary.txt", arma::auto_detect);
-	//A.print();
-
-	//int a = XRayLibAPI::A(22);
 
 //---------------------------------------------------------------------------------------------
 	//}
@@ -109,16 +103,16 @@ int main() {
 //}
 
 
-	//fluorescence_.getMatrix().save("../test-data/beam/fluorescenceBeam.csv", arma::csv_ascii);
+	//fluorescence_.getMatrix().save("../test-data/out/beam/fluorescenceBeam.csv", arma::csv_ascii);
 	//fluorescence_.print();
 	//arma::Mat<double> temp_;
-	//temp_.load("../test-data/beam/fluorescenceBeam.csv", arma::csv_ascii);
+	//temp_.load("../test-data/out/beam/fluorescenceBeam.csv", arma::csv_ascii);
 	//XRBeam fluorescence_(temp_);
 
 //---------------------------------------------------------------------------------------------
-	//oneBeamToRuleThemAll.load("../test-data/beam/fluorescenceBeam.csv", arma::csv_ascii);
-	PolyCapAPI mySecondaryPolycap((char*) "../test-data/polycap/pc-236-descr.txt");	
-	XRBeam myDetectorBeam(mySecondaryPolycap.trace(fluorescence_.getMatrix(),50,(char*) "../test-data/polycap/pc-236.hdf5"));
+	//oneBeamToRuleThemAll.load("../test-data/out/beam/fluorescenceBeam.csv", arma::csv_ascii);
+	PolyCapAPI mySecondaryPolycap((char*) "../test-data/in/polycap/pc-236-descr.txt");	
+	XRBeam myDetectorBeam(mySecondaryPolycap.trace(fluorescence_.getMatrix(),50,(char*) "../test-data/in/polycap/pc-236.hdf5"));
 
 /***********************************************************************************/
     return 0;
