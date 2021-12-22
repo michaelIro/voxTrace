@@ -1,27 +1,14 @@
 #include <iostream>
 
-//namespace Shadow3{
-// #include <shadow_bind_cpp.hpp>
-//}
-
-//#include "api/OptimizerAPI.hpp"
-#include "api/PlotAPI.hpp"
 #include "api/PolyCapAPI.hpp"
 #include "api/Shadow3API.hpp"
-#include "api/XRayLibAPI.hpp"
 
-#include "base/ChemElement.hpp"
-#include "base/Material.hpp"
 #include "base/XRBeam.hpp"
 
 #include "tracer/PrimaryBeam.hpp"
 
 int main() {
 	std::cout << "START: Test-2" << std::endl;
-
-
-    
-    // Shadow3::Source mysrc;
     
     Shadow3API shadow_((char*) "../test-data/in/shadow3");
     PolyCapAPI pc1_((char*) "../test-data/in/polycap/pc-246-descr.txt");	

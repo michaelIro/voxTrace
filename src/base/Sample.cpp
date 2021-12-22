@@ -4,7 +4,7 @@
 
 using namespace std;
 
-Sample::Sample(){ }
+//Sample::Sample(){ }
 
 // TODO: Look @ alternative Constructors from Old Code 
 
