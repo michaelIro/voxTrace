@@ -9,7 +9,7 @@
 * @return Shadow3API-Object
 */
 Shadow3API::Shadow3API(char* path){
-    for (const auto & entry : filesystem::directory_iterator(path)){
+    for (const auto & entry : std::filesystem::directory_iterator(path)){
         if(entry.path().filename() == "start.00")
             src_.load((char *) entry.path().c_str());             // load variables from start.00
 
@@ -17,7 +17,7 @@ Shadow3API::Shadow3API(char* path){
             //std::cout<< entry.path().extension().string().substr(1) << std::endl; // TODO: Check if file is really start.** & Check correct order of OE
             
             // load start.** into oe
-            OE     oe__;
+            Shadow3::OE     oe__;
             oe__.load((char *) entry.path().c_str());
             oe_.push_back(oe__);
         }
@@ -42,7 +42,7 @@ void Shadow3API::trace(int nRays){
     // overwrite number of rays
     src_.NPOINT=nRays;
     
-    stringstream ss;
+    std::stringstream ss;
     ss << "Seed: " << src_.ISTAR1 <<"\n";
     //string str = ss.str();
     //std::string =  + 
@@ -89,7 +89,7 @@ arma::Mat<double> Shadow3API::getBeamMatrix(){
  * @param nRays Number of Rays to be generated
  * @return arma::Mat<double> with Rays generated from Source
  */
-arma::Mat<double> Shadow3API::getBeamMatrix(std::vector<Beam>* beams){
+arma::Mat<double> Shadow3API::getBeamMatrix(std::vector<Shadow3::Beam>* beams){
 
     // write rays to arma::mat
     arma::Mat<double> rays = arma::ones(src_.NPOINT*(*beams).size(), 18); //TODO: make different beam sizes possible
@@ -106,14 +106,14 @@ arma::Mat<double> Shadow3API::getBeamMatrix(std::vector<Beam>* beams){
  * @param nRays Number of Rays to be generated
  * @return Beam
  */
-Beam Shadow3API::get_beam_(){
+Shadow3::Beam Shadow3API::get_beam_(){
     return beam_;
 }
 
-Source Shadow3API::get_src_(){
+Shadow3::Source Shadow3API::get_src_(){
     return src_;
 }
 
-std::vector<OE> Shadow3API::get_oe_(){
+std::vector<Shadow3::OE> Shadow3API::get_oe_(){
     return oe_;
 }

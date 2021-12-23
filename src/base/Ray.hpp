@@ -10,7 +10,7 @@
 using namespace std;
 class Ray {
 	// These Parameters are taken 1:1 from Shadow3
-	double x0_, y0_, z0_;	// Start coordinates of X-Ray-photon
+	double x0_, y0_, z0_;				// Start coordinates of X-Ray-photon
 	double dirX_, dirY_, dirZ_;			// Coordinates of direction Vector of X-Ray-Photon
 	double asX_, asY_, asZ_;			// sPolarization
 	double apX_, apY_, apZ_;			// pPolarization

@@ -14,18 +14,19 @@
 
 //namespace myNameSpace
 //{
-  #include <shadow_bind_cpp.hpp>
+//using namespace std;
+#include <shadow_bind_cpp.hpp>
 //}
-  //using namespace std;
+
 
 #include <armadillo>
 #include <filesystem>
 
 class Shadow3API{
     private:
-      Source src_;
-      std::vector<OE> oe_;
-      Beam beam_;
+      Shadow3::Source src_;
+      std::vector<Shadow3::OE> oe_;
+      Shadow3::Beam beam_;
 
     public:
       Shadow3API() = delete;
@@ -36,11 +37,11 @@ class Shadow3API{
       void trace(int nRays, int seed);
 
       arma::Mat<double> getBeamMatrix();
-      arma::Mat<double> getBeamMatrix(std::vector<Beam>* beams);
+      arma::Mat<double> getBeamMatrix(std::vector<Shadow3::Beam>* beams);
 
-      Source get_src_();
-      std::vector<OE> get_oe_();   
-      Beam get_beam_();
+      Shadow3::Source get_src_();
+      std::vector<Shadow3::OE> get_oe_();   
+      Shadow3::Beam get_beam_();
 };
 
 #endif
