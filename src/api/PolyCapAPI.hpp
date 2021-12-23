@@ -7,6 +7,7 @@ API to PolyCap, a C library to calculate X-ray transmission through polycapillar
 
   For more general usage this Interface also implements an Interface to Rays generated/traced with the Shadow3 code.
 */
+
 /*  
 Add this to polycap-photon.h then reinstall polycap and copy polycap-private.h and config.h to install dir  
   
@@ -22,6 +23,7 @@ polycap_leak* polycap_leak_new(polycap_vector3 leak_coords, polycap_vector3 leak
 POLYCAP_EXTERN
 int polycap_photon_within_pc_boundary(double polycap_radius, polycap_vector3 photon_coord, polycap_error **error);
 */
+
 #ifndef PolyCapAPI_H
 #define PolyCapAPI_H
 
@@ -44,7 +46,7 @@ class PolyCapAPI{
     polycap_error *error;
     polycap_description *description;
     polycap_source *source;
-	  polycap_transmission_efficiencies *efficiencies;
+	polycap_transmission_efficiencies *efficiencies;
 
 	  // Polycapillary parameters
 	  double optic_length;					// optic length in cm
@@ -83,7 +85,7 @@ class PolyCapAPI{
     PolyCapAPI(char* path);
     //PolyCapAPI(const PolyCapAPI& polyCapAPI);
     
-
+	//vector<Ray> traceFast(arma::Mat<double> shadowBeam);
     vector<Ray> trace(arma::Mat<double> shadowBeam, int nPhotons, std::filesystem::path savePath, bool save);
     //vector<Ray> trace(arma::Mat<double> shadowBeam, int nPhotons): PolyCapAPI::trace(shadowBeam, nPhotons, " ", false);
 

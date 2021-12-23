@@ -606,7 +606,7 @@ polycap_transmission_efficiencies* PolyCapAPI::polycap_shadow_source_get_transmi
 			if(leak_calc) { //store potential leak and intleak events for photons that did not reach optic exit window
 				if(iesc == 0 || iesc == 2){ 
 					// this photon did not reach end of PC or this photon hit capilary wall at optic entrance
-					//	but could contain leak info to pass on to future photons,
+					// but could contain leak info to pass on to future photons,
 					if(photon->n_extleak > 0){
 						n_extleak_temp += photon->n_extleak;
 						if(n_extleak_temp > leak_mem_size_temp){
