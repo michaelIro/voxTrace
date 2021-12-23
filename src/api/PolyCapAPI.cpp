@@ -218,6 +218,34 @@ void PolyCapAPI::compareBeams(arma::Mat<double> shadowBeam){
 	polycapBeamAfter.print();
 }
 
+
+/** Trace Photons through capillary optic */
+vector<Ray> PolyCapAPI::traceFast(arma::Mat<double> shadowBeam){
+	vector<Ray> beam__;
+	int i;
+	int max_threads = omp_get_max_threads();
+	//#pragma omp parallel \
+		default(shared) \
+		private(i) \
+		num_threads(omp_get_max_threads())
+	//{
+
+
+		//polycap_photon* myPhotonCopy(photon);
+
+		double *weights_temp;
+		#pragma omp parallel for
+		for(i = 0; i < shadowBeam.n_rows; i++){
+			polycap_rng *rng = polycap_rng_new();
+			polycap_photon* photon = polycap_source_get_photon(source, rng, NULL);
+			int iesc = polycap_photon_launch(photon, source->n_energies, source->energies, &weights_temp, false, NULL);
+
+		}
+	//}
+
+	return beam__;
+}
+
 /** Trace Photons through capillary optic */
 vector<Ray> PolyCapAPI::trace(arma::Mat<double> shadowBeam, int nPhotons, std::filesystem::path savePath, bool save){
 

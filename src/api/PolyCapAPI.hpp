@@ -85,7 +85,7 @@ class PolyCapAPI{
     PolyCapAPI(char* path);
     //PolyCapAPI(const PolyCapAPI& polyCapAPI);
     
-	//vector<Ray> traceFast(arma::Mat<double> shadowBeam);
+	vector<Ray> traceFast(arma::Mat<double> shadowBeam);
     vector<Ray> trace(arma::Mat<double> shadowBeam, int nPhotons, std::filesystem::path savePath, bool save);
     //vector<Ray> trace(arma::Mat<double> shadowBeam, int nPhotons): PolyCapAPI::trace(shadowBeam, nPhotons, " ", false);
 
