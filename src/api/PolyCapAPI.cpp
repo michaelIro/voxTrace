@@ -218,85 +218,248 @@ void PolyCapAPI::compareBeams(arma::Mat<double> shadowBeam){
 	polycapBeamAfter.print();
 }
 
-
 /** Trace Photons through capillary optic */
 vector<Ray> PolyCapAPI::traceFast(arma::Mat<double> shadowBeam){
 
 	vector<Ray> beam__;
-	//int max_threads = omp_get_max_threads();
+	int i,row=0;
+	int max_threads = omp_get_max_threads();
+	polycap_photon* photon;
+	
+	unsigned int seed_ = chrono::steady_clock::now().time_since_epoch().count();
+	//boost::mt19937 rand_gen_(seed_);
+	boost::mt19937 rand_gen_(seed_);
+	std::vector<int> seeds_;
+	for(i =0; i< max_threads; i++)
+		seeds_.push_back(rand_gen_());
+	arma::rowvec current_row_ ;
 
-	#pragma omp parallel for
-	for(int i = 0; i < shadowBeam.n_rows; i++){
 
-    	polycap_error *error__ = NULL;
+	#pragma omp parallel \
+		default(shared) \
+		shared(row)\
+		private(photon, rand_gen_, current_row_) \
+		num_threads(max_threads)
+		{
+			boost::random::uniform_01<double> dist;
+			rand_gen_.seed(seeds_[omp_get_thread_num()]);
+
+			current_row_ = shadowBeam.row(0);
+			photon = polycap_photon_new(source->description,
+				{current_row_(0),current_row_(2),current_row_(1)}, 
+				{current_row_(3),current_row_(5),current_row_(4)}, 
+				{1.0,0.0,0.0}, NULL);	
+			//double a = dist(rand_gen_);
+			//rand_gen_.seed(12);
+			//double b = dist(rand_gen_);
+			//rand_gen_.seed(12);
+			//double c = dist(rand_gen_);
+			//rand_gen_.seed(12);
+
 		double *weights_temp;
 		polycap_vector3 temp_vect__;
+		double energy;
+		int iesc;
 
-		polycap_vector3 start_coords__ = {shadowBeam(i,0),shadowBeam(i,2),shadowBeam(i,1)};
-		polycap_vector3 start_dir__ = {shadowBeam(i,3),shadowBeam(i,5),shadowBeam(i,4)};
-		polycap_vector3 start_el_vec__ = {1.0,0.0,0.0};
-		double energy = shadowBeam(i,10)/50677300.0 ; // in keV
+		//polycap_vector3 start_coords__;
+		//polycap_vector3 start_dir__;
+		//polycap_vector3 start_el_vec__;
+		//polycap_rng* rng = polycap_rng_new();
 
-		polycap_photon* photon = polycap_photon_new(source->description, start_coords__, start_dir__, start_el_vec__, NULL);	
+		//arma::rowvec first_row_ = shadowBeam.row(0);
 
-		int iesc = polycap_photon_launch(photon, 1, &energy, &weights_temp, false,&error__);
+		
+		#pragma omp for
+		for(i = 0; i < shadowBeam.n_rows; i++){
+			polycap_error *error__ = NULL;
+			current_row_ = shadowBeam.row(i);
 
-		if(iesc == 1) {			//check whether photon is within optic exit window, different check for monocapillary case...
-			temp_vect__.x = photon->exit_coords.x + photon->exit_direction.x * (description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
-			temp_vect__.y = photon->exit_coords.y + photon->exit_direction.y * (description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
-			temp_vect__.z = description->profile->z[description->profile->nmax];	
 
-			iesc = polycap_photon_within_pc_boundary(description->profile->ext[description->profile->nmax],temp_vect__, NULL);
 
-		}
+			//start_coords__ = {current_row_(0),current_row_(2),current_row_(1)};
+			//start_dir__ = {current_row_(3),current_row_(5),current_row_(4)};
+			//start_el_vec__ = {1.0,0.0,0.0};
 
-		// Register succesfully transmitted photon
-		if(iesc == 1){
-			double weight = weights_temp[0];
-			double n_refl = photon->i_refl;
+			energy = current_row_(10)/50677300.0 ; // in keV
 
-			double xe_ = photon->exit_coords.x + photon->exit_direction.x*(description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
-			double ye_ = photon->exit_coords.y + photon->exit_direction.y*(description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
-			double ze_ = photon->exit_coords.z + photon->exit_direction.z*(description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
+			//photon = polycap_source_get_photon(source, rng, NULL);
+
+			#pragma omp critical
+			{
+				overwritePhoton(shadowBeam.row(i), photon); // FIXME: Ugly solution
+			}
+
+
+			iesc = polycap_photon_launch(photon, 1, &energy, &weights_temp, false,&error__);
+
+			if(iesc == 1) {			//check whether photon is within optic exit window, different check for monocapillary case deleted
+				temp_vect__.x = photon->exit_coords.x + photon->exit_direction.x * (description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
+				temp_vect__.y = photon->exit_coords.y + photon->exit_direction.y * (description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
+				temp_vect__.z = description->profile->z[description->profile->nmax];	
+
+				iesc = polycap_photon_within_pc_boundary(description->profile->ext[description->profile->nmax],temp_vect__, NULL);
+			}
+
+			// Register succesfully transmitted photon
+			if(iesc == 1){
+				double weight = weights_temp[0];
+				double n_refl = photon->i_refl;
+
+				double xe_ = photon->exit_coords.x + photon->exit_direction.x*(description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
+				double ye_ = photon->exit_coords.y + photon->exit_direction.y*(description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
+				double ze_ = photon->exit_coords.z + photon->exit_direction.z*(description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
 				
-			double xed_ = photon->exit_direction.x;
-			double yed_ = photon->exit_direction.y;
-			double zed_ = photon->exit_direction.z;
+				double xed_ = photon->exit_direction.x;
+				double yed_ = photon->exit_direction.y;
+				double zed_ = photon->exit_direction.z;
 
-			// the electric_vector here is along polycapillary axis, better to project this to photon direction axis (i.e. result should be 1 0 or 0 1)
-			//double cosalpha = polycap_scalar(photon->start_electric_vector, photon->start_direction);
-			//double alpha = acos(cosalpha);
-			//double c_ae = 1./sin(alpha);
-			//double c_be = -1.*c_ae*cosalpha;
+				// the electric_vector here is along polycapillary axis, better to project this to photon direction axis (i.e. result should be 1 0 or 0 1)
+				//double cosalpha = polycap_scalar(photon->start_electric_vector, photon->start_direction);
+				//double alpha = acos(cosalpha);
+				//double c_ae = 1./sin(alpha);
+				//double c_be = -1.*c_ae*cosalpha;
 
-			//temp_vect__.x = photon->exit_electric_vector.x * c_ae + photon->exit_direction.x * c_be;
-			//temp_vect__.y = photon->exit_electric_vector.y * c_ae + photon->exit_direction.y * c_be;
-			//temp_vect__.z = photon->exit_electric_vector.z * c_ae + photon->exit_direction.z * c_be;
-			//polycap_norm(&temp_vect__);
+				//temp_vect__.x = photon->exit_electric_vector.x * c_ae + photon->exit_direction.x * c_be;
+				//temp_vect__.y = photon->exit_electric_vector.y * c_ae + photon->exit_direction.y * c_be;
+				//temp_vect__.z = photon->exit_electric_vector.z * c_ae + photon->exit_direction.z * c_be;
+				//polycap_norm(&temp_vect__);
 
-			//double elvx_ = round(temp_vect__.x);
-			//double elvy_ = round(temp_vect__.y);
+				//double elvx_ = round(temp_vect__.x);
+				//double elvy_ = round(temp_vect__.y);
 
-			if( weight > 0 ){
-				Ray ray_(
-					xe_, 0., ye_,
-					xed_, zed_, yed_,
-					0., 0., 0., 
-					false, energy*50677300.0, i, 
-					3.94, 0.0, 0.0,  
-					0., 0., 0.,
-					weight
-				);
-				//#pragma omp critical
-				//{
-				//	beam__.push_back(ray_);
-				//}
+				int randomN = rand_gen_();
+				int randMax = rand_gen_.max();
+
+				if(weight>0  ){ //weight > dist(rand_gen_)
+					Ray ray_(
+						xe_, 0., ye_,
+						xed_, zed_, yed_,
+						0., 0., 0., 
+						false, energy*50677300.0, i, 
+						3.94, 0.0, 0.0,  
+						0., 0., 0.,
+						weight
+					);
+					#pragma omp critical
+					{
+						beam__.push_back(ray_);
+					}
+				}
 			}
 		}
 	}
 
 	return beam__;
 }
+
+/*
+vector<Ray> PolyCapAPI::traceFastThread(arma::Mat<double> shadowBeam){
+
+	vector<Ray> beam__;
+
+	int max_threads = omp_get_max_threads();
+
+
+	for(int i = 0; i < shadowBeam.n_rows; i++){
+
+		polycap_photon* photon;
+	
+		double *weights_temp;
+		polycap_vector3 temp_vect__;
+		double energy;
+		int iesc;
+
+		//polycap_vector3 start_coords__;
+		//polycap_vector3 start_dir__;
+		//polycap_vector3 start_el_vec__;
+		//polycap_rng* rng = polycap_rng_new();
+
+		//arma::rowvec first_row_ = shadowBeam.row(0);
+
+			polycap_error *error__ = NULL;
+			arma::rowvec current_row_ = shadowBeam.row(i);
+
+			photon = polycap_photon_new(source->description,
+				{current_row_(0),current_row_(2),current_row_(1)}, 
+				{current_row_(3),current_row_(5),current_row_(4)}, 
+				{1.0,0.0,0.0}, NULL);	
+
+			//start_coords__ = {current_row_(0),current_row_(2),current_row_(1)};
+			//start_dir__ = {current_row_(3),current_row_(5),current_row_(4)};
+			//start_el_vec__ = {1.0,0.0,0.0};
+
+			energy = current_row_(10)/50677300.0 ; // in keV
+
+			//photon = polycap_source_get_photon(source, rng, NULL);
+
+			//#pragma omp critical
+			//{
+				//overwritePhoton(shadowBeam.row(i), photon); // FIXME: Ugly solution
+			//}
+
+
+			iesc = polycap_photon_launch(photon, 1, &energy, &weights_temp, false,&error__);
+
+			if(iesc == 1) {			//check whether photon is within optic exit window, different check for monocapillary case deleted
+				temp_vect__.x = photon->exit_coords.x + photon->exit_direction.x * (description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
+				temp_vect__.y = photon->exit_coords.y + photon->exit_direction.y * (description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
+				temp_vect__.z = description->profile->z[description->profile->nmax];	
+
+				iesc = polycap_photon_within_pc_boundary(description->profile->ext[description->profile->nmax],temp_vect__, NULL);
+			}
+
+			// Register succesfully transmitted photon
+			if(iesc == 1){
+				double weight = weights_temp[0];
+				double n_refl = photon->i_refl;
+
+				double xe_ = photon->exit_coords.x + photon->exit_direction.x*(description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
+				double ye_ = photon->exit_coords.y + photon->exit_direction.y*(description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
+				double ze_ = photon->exit_coords.z + photon->exit_direction.z*(description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
+				
+				double xed_ = photon->exit_direction.x;
+				double yed_ = photon->exit_direction.y;
+				double zed_ = photon->exit_direction.z;
+
+				// the electric_vector here is along polycapillary axis, better to project this to photon direction axis (i.e. result should be 1 0 or 0 1)
+				//double cosalpha = polycap_scalar(photon->start_electric_vector, photon->start_direction);
+				//double alpha = acos(cosalpha);
+				//double c_ae = 1./sin(alpha);
+				//double c_be = -1.*c_ae*cosalpha;
+
+				//temp_vect__.x = photon->exit_electric_vector.x * c_ae + photon->exit_direction.x * c_be;
+				//temp_vect__.y = photon->exit_electric_vector.y * c_ae + photon->exit_direction.y * c_be;
+				//temp_vect__.z = photon->exit_electric_vector.z * c_ae + photon->exit_direction.z * c_be;
+				//polycap_norm(&temp_vect__);
+
+				//double elvx_ = round(temp_vect__.x);
+				//double elvy_ = round(temp_vect__.y);
+
+				int randomN = rand_gen_();
+				int randMax = rand_gen_.max();
+
+				if( weight > rand_gen_() ){
+					Ray ray_(
+						xe_, 0., ye_,
+						xed_, zed_, yed_,
+						0., 0., 0., 
+						false, energy*50677300.0, i, 
+						3.94, 0.0, 0.0,  
+						0., 0., 0.,
+						weight
+					);
+					#pragma omp critical
+					{
+						beam__.push_back(ray_);
+					}
+				}
+			}
+		}
+	
+
+	return beam__;
+}
+*/
 
 /** Trace Photons through capillary optic */
 vector<Ray> PolyCapAPI::trace(arma::Mat<double> shadowBeam, int nPhotons, std::filesystem::path savePath, bool save){
