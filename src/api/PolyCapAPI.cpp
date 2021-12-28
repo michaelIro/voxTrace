@@ -3,7 +3,6 @@
 
 /** Empty Constructor */
 //PolyCapAPI::PolyCapAPI(const PolyCapAPI& polyCapAPI){
-
 //}
 
 /** Standard Constructor */
@@ -218,6 +217,20 @@ void PolyCapAPI::compareBeams(arma::Mat<double> shadowBeam){
 	polycapBeamAfter.print();
 }
 
+void PolyCapAPI::overwritePhoton(arma::rowvec shadowRay, polycap_photon *photon){
+	photon->start_coords.x = shadowRay(0); 
+	photon->start_coords.y = shadowRay(2); 							// Switch Coordinate System:  y-shadow = z-polycap  
+	photon->start_coords.z = shadowRay(1); 
+
+	photon->start_direction.x = shadowRay(3); 
+	photon->start_direction.y = shadowRay(5); 
+	photon->start_direction.z = shadowRay(4); 
+
+	photon->start_electric_vector.x = shadowRay(6); 
+	photon->start_electric_vector.y = shadowRay(8); 
+	photon->start_electric_vector.z = shadowRay(7); 
+}
+
 /** Trace Photons through capillary optic */
 vector<Ray> PolyCapAPI::traceFast(arma::Mat<double> shadowBeam){
 
@@ -230,6 +243,8 @@ vector<Ray> PolyCapAPI::traceFast(arma::Mat<double> shadowBeam){
 	//boost::mt19937 rand_gen_(seed_);
 	boost::mt19937 rand_gen_(seed_);
 	std::vector<int> seeds_;
+	std::vector<int> goodRays;
+
 	for(i =0; i< max_threads; i++)
 		seeds_.push_back(rand_gen_());
 	arma::rowvec current_row_ ;
@@ -343,12 +358,16 @@ vector<Ray> PolyCapAPI::traceFast(arma::Mat<double> shadowBeam){
 					#pragma omp critical
 					{
 						beam__.push_back(ray_);
+						goodRays.push_back(i);
 					}
 				}
 			}
 		}
 	}
 
+	
+	//for (auto ray: goodRays)
+	std::cout << goodRays.size() << std::endl;
 	return beam__;
 }
 
@@ -522,25 +541,13 @@ vector<Ray> PolyCapAPI::trace(arma::Mat<double> shadowBeam, int nPhotons, std::f
 	return polycapBeam;
 }
 
-void PolyCapAPI::overwritePhoton(arma::rowvec shadowRay, polycap_photon *photon){
-	photon->start_coords.x = shadowRay(0); 
-	photon->start_coords.y = shadowRay(2); 							// Switch Coordinate System:  y-shadow = z-polycap  
-	photon->start_coords.z = shadowRay(1); 
-
-	photon->start_direction.x = shadowRay(3); 
-	photon->start_direction.y = shadowRay(5); 
-	photon->start_direction.z = shadowRay(4); 
-
-	photon->start_electric_vector.x = shadowRay(6); 
-	photon->start_electric_vector.y = shadowRay(8); 
-	photon->start_electric_vector.z = shadowRay(7); 
-}
-
 /* 	This is a modified copy of the function polycap_source_get_transmission_efficiencies from polycap code. 
 	"For a given array of energies, and a full polycap_description, get the transmission efficiencies."
 	Can be adapted for further information about inner-capillary processes. TODO: Adapt this further */
 polycap_transmission_efficiencies* PolyCapAPI::polycap_shadow_source_get_transmission_efficiencies(polycap_source *source, int max_threads, int n_photons, bool leak_calc, polycap_progress_monitor *progress_monitor, polycap_error **error, arma::Mat<double> shadowBeam){
 	
+	int goodRays = 0; 
+
 	int i, row=0;
 	int64_t sum_iexit=0, sum_irefl=0, sum_not_entered=0, sum_not_transmitted=0;
 	int64_t *iexit_temp, *not_entered_temp, *not_transmitted_temp;
@@ -827,6 +834,7 @@ polycap_transmission_efficiencies* PolyCapAPI::polycap_shadow_source_get_transmi
 			}
 			//Register succesfully transmitted photon, as well as save start coordinates and direction
 			if(iesc == 1){
+				goodRays++;
 				iexit_temp[thread_id]++;
 				efficiencies->images->src_start_coords[0][j] = photon->src_start_coords.x;
 				efficiencies->images->src_start_coords[1][j] = photon->src_start_coords.y;
