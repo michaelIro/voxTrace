@@ -40,6 +40,7 @@ int polycap_photon_within_pc_boundary(double polycap_radius, polycap_vector3 pho
 
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_01.hpp>
+#include <thread> 
 
 #include "../base/Ray.hpp"
 

@@ -235,131 +235,102 @@ void PolyCapAPI::overwritePhoton(arma::rowvec shadowRay, polycap_photon *photon)
 vector<Ray> PolyCapAPI::traceFast(arma::Mat<double> shadowBeam){
 
 	vector<Ray> beam__;
-	int i,row=0;
+
+	int i;
 	int max_threads = omp_get_max_threads();
-	polycap_photon* photon;
-	
-	unsigned int seed_ = chrono::steady_clock::now().time_since_epoch().count();
-	//boost::mt19937 rand_gen_(seed_);
-	boost::mt19937 rand_gen_(seed_);
-	std::vector<int> seeds_;
-	std::vector<int> goodRays;
-
-	for(i =0; i< max_threads; i++)
-		seeds_.push_back(rand_gen_());
 	arma::rowvec current_row_ ;
+	polycap_photon* photon;
+	double *weights_temp;
+	polycap_vector3 temp_vect__;
+	double energy;
+	int iesc;
+	arma::Col<int> goodRays(shadowBeam.n_rows);
 
+	unsigned int seed_ = chrono::steady_clock::now().time_since_epoch().count();
+	std::vector<boost::mt19937> random_generators;
+	std::vector<boost::random::uniform_01<double>> distributions;
+    boost::mt19937 rand_gen0_(seed_);
+	for(i= 0; i < max_threads; i++){
+		boost::mt19937 rand_gen_(rand_gen0_());
+		boost::random::uniform_01<double> dist;
+		random_generators.push_back(rand_gen_);
+		distributions.push_back(dist);
+	}
 
-	#pragma omp parallel \
-		default(shared) \
-		shared(row)\
-		private(photon, rand_gen_, current_row_) \
-		num_threads(max_threads)
-		{
-			boost::random::uniform_01<double> dist;
-			rand_gen_.seed(seeds_[omp_get_thread_num()]);
+	#pragma omp parallel for \
+			default(shared) \
+			private(photon, current_row_, weights_temp, temp_vect__,energy,iesc,error) \
+			num_threads(max_threads)
+	for(i = 0; i < shadowBeam.n_rows; i++){
 
-			current_row_ = shadowBeam.row(0);
-			photon = polycap_photon_new(source->description,
-				{current_row_(0),current_row_(2),current_row_(1)}, 
-				{current_row_(3),current_row_(5),current_row_(4)}, 
-				{1.0,0.0,0.0}, NULL);	
-			//double a = dist(rand_gen_);
-			//rand_gen_.seed(12);
-			//double b = dist(rand_gen_);
-			//rand_gen_.seed(12);
-			//double c = dist(rand_gen_);
-			//rand_gen_.seed(12);
+		current_row_ = shadowBeam.row(i);
+		polycap_error *error__ = NULL;
+			
+		photon = polycap_photon_new(source->description,
+			{current_row_(0),current_row_(2),current_row_(1)}, 
+			{current_row_(3),current_row_(5),current_row_(4)}, 
+			{1.0,0.0,0.0}, NULL);	
 
-		double *weights_temp;
-		polycap_vector3 temp_vect__;
-		double energy;
-		int iesc;
-
-		//polycap_vector3 start_coords__;
-		//polycap_vector3 start_dir__;
-		//polycap_vector3 start_el_vec__;
-		//polycap_rng* rng = polycap_rng_new();
-
-		//arma::rowvec first_row_ = shadowBeam.row(0);
-
-		
-		#pragma omp for
-		for(i = 0; i < shadowBeam.n_rows; i++){
-			polycap_error *error__ = NULL;
-			current_row_ = shadowBeam.row(i);
-
-
-
-			//start_coords__ = {current_row_(0),current_row_(2),current_row_(1)};
-			//start_dir__ = {current_row_(3),current_row_(5),current_row_(4)};
-			//start_el_vec__ = {1.0,0.0,0.0};
-
-			energy = current_row_(10)/50677300.0 ; // in keV
-
-			//photon = polycap_source_get_photon(source, rng, NULL);
-
-			#pragma omp critical
-			{
-				overwritePhoton(shadowBeam.row(i), photon); // FIXME: Ugly solution
-			}
-
-
-			iesc = polycap_photon_launch(photon, 1, &energy, &weights_temp, false,&error__);
-
-			if(iesc == 1) {			//check whether photon is within optic exit window, different check for monocapillary case deleted
-				temp_vect__.x = photon->exit_coords.x + photon->exit_direction.x * (description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
-				temp_vect__.y = photon->exit_coords.y + photon->exit_direction.y * (description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
-				temp_vect__.z = description->profile->z[description->profile->nmax];	
-
-				iesc = polycap_photon_within_pc_boundary(description->profile->ext[description->profile->nmax],temp_vect__, NULL);
-			}
-
-			// Register succesfully transmitted photon
-			if(iesc == 1){
-				double weight = weights_temp[0];
-				double n_refl = photon->i_refl;
-
-				double xe_ = photon->exit_coords.x + photon->exit_direction.x*(description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
-				double ye_ = photon->exit_coords.y + photon->exit_direction.y*(description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
-				double ze_ = photon->exit_coords.z + photon->exit_direction.z*(description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
+		energy = current_row_(10)/50677300.0 ; // in keV
 				
-				double xed_ = photon->exit_direction.x;
-				double yed_ = photon->exit_direction.y;
-				double zed_ = photon->exit_direction.z;
 
-				// the electric_vector here is along polycapillary axis, better to project this to photon direction axis (i.e. result should be 1 0 or 0 1)
-				//double cosalpha = polycap_scalar(photon->start_electric_vector, photon->start_direction);
-				//double alpha = acos(cosalpha);
-				//double c_ae = 1./sin(alpha);
-				//double c_be = -1.*c_ae*cosalpha;
+		iesc = polycap_photon_launch(photon, 1, &energy, &weights_temp, false,&error__);
 
-				//temp_vect__.x = photon->exit_electric_vector.x * c_ae + photon->exit_direction.x * c_be;
-				//temp_vect__.y = photon->exit_electric_vector.y * c_ae + photon->exit_direction.y * c_be;
-				//temp_vect__.z = photon->exit_electric_vector.z * c_ae + photon->exit_direction.z * c_be;
-				//polycap_norm(&temp_vect__);
+		goodRays(i)=iesc;
 
-				//double elvx_ = round(temp_vect__.x);
-				//double elvy_ = round(temp_vect__.y);
+		//check whether photon is within optic exit window, different check for monocapillary case deleted
+		if(iesc == 1) {			
+			temp_vect__.x = photon->exit_coords.x + photon->exit_direction.x * (description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
+			temp_vect__.y = photon->exit_coords.y + photon->exit_direction.y * (description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
+			temp_vect__.z = description->profile->z[description->profile->nmax];
 
-				int randomN = rand_gen_();
-				int randMax = rand_gen_.max();
+			iesc = polycap_photon_within_pc_boundary(description->profile->ext[description->profile->nmax],temp_vect__, NULL);
+		}
 
-				if(weight>0  ){ //weight > dist(rand_gen_)
-					Ray ray_(
-						xe_, 0., ye_,
-						xed_, zed_, yed_,
-						0., 0., 0., 
-						false, energy*50677300.0, i, 
-						3.94, 0.0, 0.0,  
-						0., 0., 0.,
-						weight
-					);
-					#pragma omp critical
-					{
-						beam__.push_back(ray_);
-						goodRays.push_back(i);
-					}
+		// Register succesfully transmitted photon
+		if(iesc == 1){
+			double weight = weights_temp[0];
+			double n_refl = photon->i_refl;
+
+			double xe_ = photon->exit_coords.x + photon->exit_direction.x*(description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
+			double ye_ = photon->exit_coords.y + photon->exit_direction.y*(description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
+			double ze_ = photon->exit_coords.z + photon->exit_direction.z*(description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
+				
+			double xed_ = photon->exit_direction.x;
+			double yed_ = photon->exit_direction.y;
+			double zed_ = photon->exit_direction.z;
+
+			// the electric_vector here is along polycapillary axis, better to project this to photon direction axis (i.e. result should be 1 0 or 0 1) TODO:: not used now
+			double cosalpha = polycap_scalar(photon->start_electric_vector, photon->start_direction);
+			double alpha = acos(cosalpha);
+			double c_ae = 1./sin(alpha);
+			double c_be = -1.*c_ae*cosalpha;
+
+			temp_vect__.x = photon->exit_electric_vector.x * c_ae + photon->exit_direction.x * c_be;
+			temp_vect__.y = photon->exit_electric_vector.y * c_ae + photon->exit_direction.y * c_be;
+			temp_vect__.z = photon->exit_electric_vector.z * c_ae + photon->exit_direction.z * c_be;
+			polycap_norm(&temp_vect__);
+
+			double elvx_ = round(temp_vect__.x);
+			double elvy_ = round(temp_vect__.y);
+
+
+			double r = distributions[omp_get_thread_num()](random_generators[omp_get_thread_num()]);
+
+			if( weight > r ){ //weight > dist(rand_gen_)
+				Ray ray_(
+					xe_, 0., ye_,
+					xed_, zed_, yed_,
+					0., 0., 0., 
+					false, energy*50677300.0, i, 
+					3.94, 0.0, 0.0,  
+					0., 0., 0.,
+					weight
+				);
+				#pragma omp critical
+				{
+					beam__.push_back(ray_);
+					//goodRays.push_back(i);
 				}
 			}
 		}
@@ -367,118 +338,108 @@ vector<Ray> PolyCapAPI::traceFast(arma::Mat<double> shadowBeam){
 
 	
 	//for (auto ray: goodRays)
-	std::cout << goodRays.size() << std::endl;
+	//std::cout << goodRays.size() << std::endl;
+	//goodRays.print();
+	//goodRays.save("../test-data/out/beam/fast.csv", arma::csv_ascii);
+
 	return beam__;
+
 }
 
-/*
+
 vector<Ray> PolyCapAPI::traceFastThread(arma::Mat<double> shadowBeam){
 
 	vector<Ray> beam__;
+	int i =0;
+	polycap_photon* photon;
 
 	int max_threads = omp_get_max_threads();
+	std::mutex mu__;
 
+	auto trace_photon_ = [&shadowBeam, &i, &beam__,&photon,&mu__, this]() {
 
-	for(int i = 0; i < shadowBeam.n_rows; i++){
-
-		polycap_photon* photon;
-	
 		double *weights_temp;
 		polycap_vector3 temp_vect__;
 		double energy;
 		int iesc;
+		polycap_error *error__ = NULL;
 
-		//polycap_vector3 start_coords__;
-		//polycap_vector3 start_dir__;
-		//polycap_vector3 start_el_vec__;
-		//polycap_rng* rng = polycap_rng_new();
+		arma::rowvec current_row_ = shadowBeam.row(i);
+		photon = polycap_photon_new(source->description,
+			{current_row_(0),current_row_(2),current_row_(1)}, 
+			{current_row_(3),current_row_(5),current_row_(4)}, 
+			{1.0,0.0,0.0}, NULL);	
 
-		//arma::rowvec first_row_ = shadowBeam.row(0);
+		
+		energy = current_row_(10)/50677300.0 ; // in keV
 
-			polycap_error *error__ = NULL;
-			arma::rowvec current_row_ = shadowBeam.row(i);
+		iesc = polycap_photon_launch(photon, 1, &energy, &weights_temp, false,&error__);
 
-			photon = polycap_photon_new(source->description,
-				{current_row_(0),current_row_(2),current_row_(1)}, 
-				{current_row_(3),current_row_(5),current_row_(4)}, 
-				{1.0,0.0,0.0}, NULL);	
+		if(iesc == 1) {			//check whether photon is within optic exit window, different check for monocapillary case deleted
+			temp_vect__.x = photon->exit_coords.x + photon->exit_direction.x * (description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
+			temp_vect__.y = photon->exit_coords.y + photon->exit_direction.y * (description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
+			temp_vect__.z = description->profile->z[description->profile->nmax];	
 
-			//start_coords__ = {current_row_(0),current_row_(2),current_row_(1)};
-			//start_dir__ = {current_row_(3),current_row_(5),current_row_(4)};
-			//start_el_vec__ = {1.0,0.0,0.0};
+			iesc = polycap_photon_within_pc_boundary(description->profile->ext[description->profile->nmax],temp_vect__, NULL);
+		}
+		// Register succesfully transmitted photon
+		if(iesc == 1){
+			double weight = weights_temp[0];
+			double n_refl = photon->i_refl;
 
-			energy = current_row_(10)/50677300.0 ; // in keV
-
-			//photon = polycap_source_get_photon(source, rng, NULL);
-
-			//#pragma omp critical
-			//{
-				//overwritePhoton(shadowBeam.row(i), photon); // FIXME: Ugly solution
-			//}
-
-
-			iesc = polycap_photon_launch(photon, 1, &energy, &weights_temp, false,&error__);
-
-			if(iesc == 1) {			//check whether photon is within optic exit window, different check for monocapillary case deleted
-				temp_vect__.x = photon->exit_coords.x + photon->exit_direction.x * (description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
-				temp_vect__.y = photon->exit_coords.y + photon->exit_direction.y * (description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
-				temp_vect__.z = description->profile->z[description->profile->nmax];	
-
-				iesc = polycap_photon_within_pc_boundary(description->profile->ext[description->profile->nmax],temp_vect__, NULL);
-			}
-
-			// Register succesfully transmitted photon
-			if(iesc == 1){
-				double weight = weights_temp[0];
-				double n_refl = photon->i_refl;
-
-				double xe_ = photon->exit_coords.x + photon->exit_direction.x*(description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
-				double ye_ = photon->exit_coords.y + photon->exit_direction.y*(description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
-				double ze_ = photon->exit_coords.z + photon->exit_direction.z*(description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
+			double xe_ = photon->exit_coords.x + photon->exit_direction.x*(description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
+			double ye_ = photon->exit_coords.y + photon->exit_direction.y*(description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
+			double ze_ = photon->exit_coords.z + photon->exit_direction.z*(description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
 				
-				double xed_ = photon->exit_direction.x;
-				double yed_ = photon->exit_direction.y;
-				double zed_ = photon->exit_direction.z;
+			double xed_ = photon->exit_direction.x;
+			double yed_ = photon->exit_direction.y;
+			double zed_ = photon->exit_direction.z;
 
-				// the electric_vector here is along polycapillary axis, better to project this to photon direction axis (i.e. result should be 1 0 or 0 1)
-				//double cosalpha = polycap_scalar(photon->start_electric_vector, photon->start_direction);
-				//double alpha = acos(cosalpha);
-				//double c_ae = 1./sin(alpha);
-				//double c_be = -1.*c_ae*cosalpha;
+			// the electric_vector here is along polycapillary axis, better to project this to photon direction axis (i.e. result should be 1 0 or 0 1)
+			//double cosalpha = polycap_scalar(photon->start_electric_vector, photon->start_direction);
+			//double alpha = acos(cosalpha);
+			//double c_ae = 1./sin(alpha);
+			//double c_be = -1.*c_ae*cosalpha;
 
-				//temp_vect__.x = photon->exit_electric_vector.x * c_ae + photon->exit_direction.x * c_be;
-				//temp_vect__.y = photon->exit_electric_vector.y * c_ae + photon->exit_direction.y * c_be;
-				//temp_vect__.z = photon->exit_electric_vector.z * c_ae + photon->exit_direction.z * c_be;
-				//polycap_norm(&temp_vect__);
+			//temp_vect__.x = photon->exit_electric_vector.x * c_ae + photon->exit_direction.x * c_be;
+			//temp_vect__.y = photon->exit_electric_vector.y * c_ae + photon->exit_direction.y * c_be;
+			//temp_vect__.z = photon->exit_electric_vector.z * c_ae + photon->exit_direction.z * c_be;
+			//polycap_norm(&temp_vect__);
 
-				//double elvx_ = round(temp_vect__.x);
-				//double elvy_ = round(temp_vect__.y);
+			//double elvx_ = round(temp_vect__.x);
+			//double elvy_ = round(temp_vect__.y);
 
-				int randomN = rand_gen_();
-				int randMax = rand_gen_.max();
+			//int randomN = rand_gen_();
+			//int randMax = rand_gen_.max();
 
-				if( weight > rand_gen_() ){
-					Ray ray_(
-						xe_, 0., ye_,
-						xed_, zed_, yed_,
-						0., 0., 0., 
-						false, energy*50677300.0, i, 
-						3.94, 0.0, 0.0,  
-						0., 0., 0.,
-						weight
-					);
-					#pragma omp critical
-					{
-						beam__.push_back(ray_);
-					}
-				}
+			if( weight > 0){
+				Ray ray_(
+					xe_, 0., ye_,
+					xed_, zed_, yed_,
+					0., 0., 0., 
+					false, energy*50677300.0, i, 
+					3.94, 0.0, 0.0,  
+					0., 0., 0.,
+					weight
+				);
+
+				mu__.lock();
+				beam__.push_back(ray_);
+				mu__.unlock();
 			}
 		}
-	
+    };
+
+
+	for(i = 0; i < shadowBeam.n_rows; i++){
+		thread thread1(trace_photon_);
+		thread1.join();
+	}
+
 
 	return beam__;
 }
-*/
+
 
 /** Trace Photons through capillary optic */
 vector<Ray> PolyCapAPI::trace(arma::Mat<double> shadowBeam, int nPhotons, std::filesystem::path savePath, bool save){
@@ -546,7 +507,8 @@ vector<Ray> PolyCapAPI::trace(arma::Mat<double> shadowBeam, int nPhotons, std::f
 	Can be adapted for further information about inner-capillary processes. TODO: Adapt this further */
 polycap_transmission_efficiencies* PolyCapAPI::polycap_shadow_source_get_transmission_efficiencies(polycap_source *source, int max_threads, int n_photons, bool leak_calc, polycap_progress_monitor *progress_monitor, polycap_error **error, arma::Mat<double> shadowBeam){
 	
-	int goodRays = 0; 
+	//int goodRays = 0; 	
+	arma::Col<int> goodRays(shadowBeam.n_rows);
 
 	int i, row=0;
 	int64_t sum_iexit=0, sum_irefl=0, sum_not_entered=0, sum_not_transmitted=0;
@@ -802,59 +764,64 @@ polycap_transmission_efficiencies* PolyCapAPI::polycap_shadow_source_get_transmi
 						//std::cout << "Photo #" << row++ <<std::endl;
 						overwritePhoton(shadowBeam.row(row++), photon); // FIXME: Ugly solution
 						//	arma::rowvec myRayOrTheHighRay = shadow_source.getSingleRay();
-					}
-
+						
 					// Launch photon
 					iesc = polycap_photon_launch(photon, source->n_energies, source->energies, &weights_temp, leak_calc, NULL);
+					goodRays(row-1)=iesc;
+					}
+
+
+
 					//if iesc == 0 here a new photon should be simulated/started as the photon was absorbed within it.
 					//if iesc == 1 check whether photon is in PC exit window as photon reached end of PC
 					//if iesc == 2 a new photon should be simulated/started as the photon hit the walls -> can still leak
 					//if iesc == -2 a new photon should be simulated/started as the photon missed the optic entrance window
 					//if iesc == -1 some error occured
 
-			if(iesc == 0)
-				not_transmitted_temp[thread_id]++; //photon did not reach end of PC
-			if(iesc == 2)
-				not_entered_temp[thread_id]++; //photon never entered PC (hit capillary wall instead of opening)
-			if(iesc == 1) {
-				//check whether photon is within optic exit window
-					//different check for monocapillary case...
-				temp_vect.x = photon->exit_coords.x + photon->exit_direction.x * (description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
-				temp_vect.y = photon->exit_coords.y + photon->exit_direction.y * (description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
-				temp_vect.z = description->profile->z[description->profile->nmax];
-				if(round(sqrt(12. * photon->description->n_cap - 3.)/6.-0.5) == 0.){ //monocapillary case
-					if(sqrt((temp_vect.x)*(temp_vect.x) + (temp_vect.y)*(temp_vect.y)) > description->profile->ext[description->profile->nmax]){ 
-						iesc = 0;
-					} else {
-						iesc = 1;
+					if(iesc == 0)
+						not_transmitted_temp[thread_id]++; //photon did not reach end of PC
+					if(iesc == 2)
+						not_entered_temp[thread_id]++; //photon never entered PC (hit capillary wall instead of opening)
+					if(iesc == 1) {
+						//check whether photon is within optic exit window
+						//different check for monocapillary case...
+						temp_vect.x = photon->exit_coords.x + photon->exit_direction.x * (description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
+						temp_vect.y = photon->exit_coords.y + photon->exit_direction.y * (description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
+						temp_vect.z = description->profile->z[description->profile->nmax];
+						if(round(sqrt(12. * photon->description->n_cap - 3.)/6.-0.5) == 0.){ //monocapillary case
+							if(sqrt((temp_vect.x)*(temp_vect.x) + (temp_vect.y)*(temp_vect.y)) > description->profile->ext[description->profile->nmax]){ 
+								iesc = 0;
+							} else {
+								iesc = 1;
+							}
+						} else { //polycapillary case
+							iesc = polycap_photon_within_pc_boundary(description->profile->ext[description->profile->nmax],temp_vect, NULL);
+						}
 					}
-				} else { //polycapillary case
-					iesc = polycap_photon_within_pc_boundary(description->profile->ext[description->profile->nmax],temp_vect, NULL);
-				}
-			}
-			//Register succesfully transmitted photon, as well as save start coordinates and direction
-			if(iesc == 1){
-				goodRays++;
-				iexit_temp[thread_id]++;
-				efficiencies->images->src_start_coords[0][j] = photon->src_start_coords.x;
-				efficiencies->images->src_start_coords[1][j] = photon->src_start_coords.y;
-				efficiencies->images->pc_start_coords[0][j] = photon->start_coords.x;
-				efficiencies->images->pc_start_coords[1][j] = photon->start_coords.y;
-				efficiencies->images->pc_start_dir[0][j] = photon->start_direction.x;
-				efficiencies->images->pc_start_dir[1][j] = photon->start_direction.y;
-				//the start_electric_vector here is along polycapillary axis, better to project this to photon direction axis (i.e. result should be 1 0 or 0 1)
-				cosalpha = polycap_scalar(photon->start_electric_vector, photon->start_direction);
-				alpha = acos(cosalpha);
-				c_ae = 1./sin(alpha);
-				c_be = -1.*c_ae*cosalpha;
-				temp_vect.x = photon->start_electric_vector.x * c_ae + photon->start_direction.x * c_be;
-				temp_vect.y = photon->start_electric_vector.y * c_ae + photon->start_direction.y * c_be;
-				temp_vect.z = photon->start_electric_vector.z * c_ae + photon->start_direction.z * c_be;
-				polycap_norm(&temp_vect);
-				efficiencies->images->pc_start_elecv[0][j] = round(temp_vect.x);
-				efficiencies->images->pc_start_elecv[1][j] = round(temp_vect.y);
-			}
-			if(leak_calc) { //store potential leak and intleak events for photons that did not reach optic exit window
+
+					//Register succesfully transmitted photon, as well as save start coordinates and direction
+					if(iesc == 1){
+						//goodRays++;
+						iexit_temp[thread_id]++;
+						efficiencies->images->src_start_coords[0][j] = photon->src_start_coords.x;
+						efficiencies->images->src_start_coords[1][j] = photon->src_start_coords.y;
+						efficiencies->images->pc_start_coords[0][j] = photon->start_coords.x;
+						efficiencies->images->pc_start_coords[1][j] = photon->start_coords.y;
+						efficiencies->images->pc_start_dir[0][j] = photon->start_direction.x;
+						efficiencies->images->pc_start_dir[1][j] = photon->start_direction.y;
+						//the start_electric_vector here is along polycapillary axis, better to project this to photon direction axis (i.e. result should be 1 0 or 0 1)
+						cosalpha = polycap_scalar(photon->start_electric_vector, photon->start_direction);
+						alpha = acos(cosalpha);
+						c_ae = 1./sin(alpha);
+						c_be = -1.*c_ae*cosalpha;
+						temp_vect.x = photon->start_electric_vector.x * c_ae + photon->start_direction.x * c_be;
+						temp_vect.y = photon->start_electric_vector.y * c_ae + photon->start_direction.y * c_be;
+						temp_vect.z = photon->start_electric_vector.z * c_ae + photon->start_direction.z * c_be;
+						polycap_norm(&temp_vect);
+						efficiencies->images->pc_start_elecv[0][j] = round(temp_vect.x);
+						efficiencies->images->pc_start_elecv[1][j] = round(temp_vect.y);
+					}
+					if(leak_calc) { //store potential leak and intleak events for photons that did not reach optic exit window
 				if(iesc == 0 || iesc == 2){ 
 					// this photon did not reach end of PC or this photon hit capilary wall at optic entrance
 					// but could contain leak info to pass on to future photons,
@@ -935,176 +902,181 @@ polycap_transmission_efficiencies* PolyCapAPI::polycap_shadow_source_get_transmi
 					}
 				}
 			} // if(leak_calc)
-			if(iesc != 1) {
-				polycap_photon_free(photon); //Free photon here as a new one will be simulated 
+						if(iesc != 1) {
+							polycap_photon_free(photon); //Free photon here as a new one will be simulated 
+							free(weights_temp);
+						}
+				} while(iesc == 0 || iesc == 2 || iesc == -2 || iesc == -1); //TODO: make this function exit if polycap_photon_launch returned -1... Currently, if returned -1 due to memory shortage technically one would end up in infinite loop
+
+				if(thread_id == 0 && (double)i/((double)n_photons/(double)max_threads/10.) >= 1.){
+					//printf("%d%% Complete\t%" PRId64 " reflections\tLast reflection at z=%f, d_travel=%f\n",((j*100)/(n_photons/max_threads)),photon->i_refl,photon->exit_coords.z, photon->d_travel);
+					i=0;
+				}
+				i++;//counter just to follow % completed
+
+				//save photon->weight in thread unique array
+				for(k=0; k<source->n_energies; k++){
+					weights[k] += weights_temp[k];
+					efficiencies->images->exit_coord_weights[k+j*source->n_energies] = weights_temp[k];
+				}
+
+				//save photon exit coordinates and propagation vector
+				//Make sure to calculate exit_coord at capillary exit (Z = capillary length); currently the exit_coord is the coordinate of the last photon-wall interaction
+				//printf("** coords: %lf, %lf, %lf; length: %lf\n", photon->exit_coords.x, photon->exit_coords.y, photon->exit_coords.z, );
+				efficiencies->images->pc_exit_coords[0][j] = photon->exit_coords.x + photon->exit_direction.x*
+					(description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
+				efficiencies->images->pc_exit_coords[1][j] = photon->exit_coords.y + photon->exit_direction.y*
+					(description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
+				efficiencies->images->pc_exit_coords[2][j] = photon->exit_coords.z + photon->exit_direction.z*
+					(description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
+				efficiencies->images->pc_exit_dir[0][j] = photon->exit_direction.x;
+				efficiencies->images->pc_exit_dir[1][j] = photon->exit_direction.y;
+				// the electric_vector here is along polycapillary axis, better to project this to photon direction axis (i.e. result should be 1 0 or 0 1)
+				cosalpha = polycap_scalar(photon->start_electric_vector, photon->start_direction);
+				alpha = acos(cosalpha);
+				c_ae = 1./sin(alpha);
+				c_be = -1.*c_ae*cosalpha;
+				temp_vect.x = photon->exit_electric_vector.x * c_ae + photon->exit_direction.x * c_be;
+				temp_vect.y = photon->exit_electric_vector.y * c_ae + photon->exit_direction.y * c_be;
+				temp_vect.z = photon->exit_electric_vector.z * c_ae + photon->exit_direction.z * c_be;
+				polycap_norm(&temp_vect);
+				efficiencies->images->pc_exit_elecv[0][j] = round(temp_vect.x);
+				efficiencies->images->pc_exit_elecv[1][j] = round(temp_vect.y);
+				efficiencies->images->pc_exit_nrefl[j] = photon->i_refl;
+				efficiencies->images->pc_exit_dtravel[j] = photon->d_travel + 
+					sqrt( (efficiencies->images->pc_exit_coords[0][j] - photon->exit_coords.x)*(efficiencies->images->pc_exit_coords[0][j] - photon->exit_coords.x) + 
+					(efficiencies->images->pc_exit_coords[1][j] - photon->exit_coords.y)*(efficiencies->images->pc_exit_coords[1][j] - photon->exit_coords.y) + 
+					(description->profile->z[description->profile->nmax] - photon->exit_coords.z)*(description->profile->z[description->profile->nmax] - photon->exit_coords.z));
+
+				//Assign memory to arrays holding leak photon information (and fill them)
+				if(leak_calc){
+					n_extleak += photon->n_extleak;
+					if(n_extleak > leak_mem_size){
+						if (leak_mem_size == 0){
+							leak_mem_size = n_extleak;
+						} else {
+							leak_mem_size *= 2;
+							if (leak_mem_size < n_extleak) leak_mem_size = n_extleak; //not doing this could be dangerous at low values
+						}
+						extleak = (polycap_leak **) realloc(extleak, sizeof(struct _polycap_leak*) * leak_mem_size);
+					}
+					n_intleak += photon->n_intleak;
+					if(n_intleak > intleak_mem_size){
+						if (intleak_mem_size == 0){
+							intleak_mem_size = n_intleak;
+						} else {
+							intleak_mem_size *= 2;
+							if (intleak_mem_size < n_intleak) intleak_mem_size = n_intleak; //not doing this could be dangerous at low values
+						}
+						intleak = (polycap_leak **) realloc(intleak, sizeof(struct _polycap_leak*) * intleak_mem_size);
+					}
+
+					//Write leak photon data.
+					if(photon->n_extleak > 0){
+						for(k=0; k<photon->n_extleak; k++){
+							polycap_leak *new_leak = polycap_leak_new(photon->extleak[k]->coords, photon->extleak[k]->direction, photon->extleak[k]->elecv, photon->extleak[k]->n_refl, source->n_energies, photon->extleak[k]->weight, NULL);
+							extleak[n_extleak-photon->n_extleak+k] = new_leak;
+						}
+					}
+					if(photon->n_intleak > 0){
+						for(k=0; k<photon->n_intleak; k++){
+							polycap_leak *new_leak = polycap_leak_new(photon->intleak[k]->coords, photon->intleak[k]->direction, photon->intleak[k]->elecv, photon->intleak[k]->n_refl, source->n_energies, photon->intleak[k]->weight, NULL);
+							intleak[n_intleak-photon->n_intleak+k] = new_leak;
+						}
+					}
+				}
+
+				#pragma omp critical
+				{
+					sum_irefl += photon->i_refl;
+				}
+
+				//free photon structure (new one created for each for loop instance)
+				polycap_photon_free(photon);
 				free(weights_temp);
+			} //for(j=0; j < n_photons; j++)
+
+			#pragma omp critical
+			{
+				for(i=0; i<source->n_energies; i++) sum_weights[i] += weights[i];
+					if(leak_calc){
+						efficiencies->images->i_extleak += n_extleak;
+						efficiencies->images->i_intleak += n_intleak;
+					}
 			}
-		} while(iesc == 0 || iesc == 2 || iesc == -2 || iesc == -1); //TODO: make this function exit if polycap_photon_launch returned -1... Currently, if returned -1 due to memory shortage technically one would end up in infinite loop
 
-		if(thread_id == 0 && (double)i/((double)n_photons/(double)max_threads/10.) >= 1.){
-			//printf("%d%% Complete\t%" PRId64 " reflections\tLast reflection at z=%f, d_travel=%f\n",((j*100)/(n_photons/max_threads)),photon->i_refl,photon->exit_coords.z, photon->d_travel);
-			i=0;
-		}
-		i++;//counter just to follow % completed
+			if(leak_calc){
+				#pragma omp barrier //All threads must reach here before we continue.
+				#pragma omp single //Only one thread should allocate following memory. There is an automatic barrier at the end of this block.
+				{
+					efficiencies->images->extleak_coords[0] = (double *) realloc(efficiencies->images->extleak_coords[0], sizeof(double)* efficiencies->images->i_extleak);
+					efficiencies->images->extleak_coords[1] = (double *) realloc(efficiencies->images->extleak_coords[1], sizeof(double)* efficiencies->images->i_extleak);
+					efficiencies->images->extleak_coords[2] = (double *) realloc(efficiencies->images->extleak_coords[2], sizeof(double)* efficiencies->images->i_extleak);
+					efficiencies->images->extleak_dir[0] = (double *) realloc(efficiencies->images->extleak_dir[0], sizeof(double)* efficiencies->images->i_extleak);
+					efficiencies->images->extleak_dir[1] = (double *) realloc(efficiencies->images->extleak_dir[1], sizeof(double)* efficiencies->images->i_extleak);
+					efficiencies->images->extleak_n_refl = (int64_t *) realloc(efficiencies->images->extleak_n_refl, sizeof(int64_t)* efficiencies->images->i_extleak);
+					efficiencies->images->extleak_coord_weights = (double *) realloc(efficiencies->images->extleak_coord_weights, sizeof(double)*source->n_energies* efficiencies->images->i_extleak);
+					efficiencies->images->intleak_coords[0] = (double *) realloc(efficiencies->images->intleak_coords[0], sizeof(double)* efficiencies->images->i_intleak);
+					efficiencies->images->intleak_coords[1] = (double *) realloc(efficiencies->images->intleak_coords[1], sizeof(double)* efficiencies->images->i_intleak);
+					efficiencies->images->intleak_coords[2] = (double *) realloc(efficiencies->images->intleak_coords[2], sizeof(double)* efficiencies->images->i_intleak);
+					efficiencies->images->intleak_dir[0] = (double *) realloc(efficiencies->images->intleak_dir[0], sizeof(double)* efficiencies->images->i_intleak);
+					efficiencies->images->intleak_dir[1] = (double *) realloc(efficiencies->images->intleak_dir[1], sizeof(double)* efficiencies->images->i_intleak);
+					efficiencies->images->intleak_elecv[0] = (double *) realloc(efficiencies->images->intleak_elecv[0], sizeof(double)* efficiencies->images->i_intleak);
+					efficiencies->images->intleak_elecv[1] = (double *) realloc(efficiencies->images->intleak_elecv[1], sizeof(double)* efficiencies->images->i_intleak);
+					efficiencies->images->intleak_n_refl = (int64_t *) realloc(efficiencies->images->intleak_n_refl, sizeof(int64_t)* efficiencies->images->i_intleak);
+					efficiencies->images->intleak_coord_weights = (double *) realloc(efficiencies->images->intleak_coord_weights, sizeof(double)*source->n_energies* efficiencies->images->i_intleak);
+					leak_counter = 0;
+					intleak_counter = 0;
+				}//#pragma omp single
 
-		//save photon->weight in thread unique array
-		for(k=0; k<source->n_energies; k++){
-			weights[k] += weights_temp[k];
-			efficiencies->images->exit_coord_weights[k+j*source->n_energies] = weights_temp[k];
-		}
-		//save photon exit coordinates and propagation vector
-		//Make sure to calculate exit_coord at capillary exit (Z = capillary length); currently the exit_coord is the coordinate of the last photon-wall interaction
-//printf("** coords: %lf, %lf, %lf; length: %lf\n", photon->exit_coords.x, photon->exit_coords.y, photon->exit_coords.z, );
-		efficiencies->images->pc_exit_coords[0][j] = photon->exit_coords.x + photon->exit_direction.x*
-			(description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
-		efficiencies->images->pc_exit_coords[1][j] = photon->exit_coords.y + photon->exit_direction.y*
-			(description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
-		efficiencies->images->pc_exit_coords[2][j] = photon->exit_coords.z + photon->exit_direction.z*
-			(description->profile->z[description->profile->nmax] - photon->exit_coords.z)/photon->exit_direction.z;
-		efficiencies->images->pc_exit_dir[0][j] = photon->exit_direction.x;
-		efficiencies->images->pc_exit_dir[1][j] = photon->exit_direction.y;
-		// the electric_vector here is along polycapillary axis, better to project this to photon direction axis (i.e. result should be 1 0 or 0 1)
-		cosalpha = polycap_scalar(photon->start_electric_vector, photon->start_direction);
-		alpha = acos(cosalpha);
-		c_ae = 1./sin(alpha);
-		c_be = -1.*c_ae*cosalpha;
-		temp_vect.x = photon->exit_electric_vector.x * c_ae + photon->exit_direction.x * c_be;
-		temp_vect.y = photon->exit_electric_vector.y * c_ae + photon->exit_direction.y * c_be;
-		temp_vect.z = photon->exit_electric_vector.z * c_ae + photon->exit_direction.z * c_be;
-		polycap_norm(&temp_vect);
-		efficiencies->images->pc_exit_elecv[0][j] = round(temp_vect.x);
-		efficiencies->images->pc_exit_elecv[1][j] = round(temp_vect.y);
-		efficiencies->images->pc_exit_nrefl[j] = photon->i_refl;
-		efficiencies->images->pc_exit_dtravel[j] = photon->d_travel + 
-			sqrt( (efficiencies->images->pc_exit_coords[0][j] - photon->exit_coords.x)*(efficiencies->images->pc_exit_coords[0][j] - photon->exit_coords.x) + 
-			(efficiencies->images->pc_exit_coords[1][j] - photon->exit_coords.y)*(efficiencies->images->pc_exit_coords[1][j] - photon->exit_coords.y) + 
-			(description->profile->z[description->profile->nmax] - photon->exit_coords.z)*(description->profile->z[description->profile->nmax] - photon->exit_coords.z));
+				#pragma omp critical //continue with all threads, but one at a time...
+				{
+					for(k=0; k < n_extleak; k++){
+						efficiencies->images->extleak_coords[0][leak_counter] = extleak[k]->coords.x;
+						efficiencies->images->extleak_coords[1][leak_counter] = extleak[k]->coords.y;
+						efficiencies->images->extleak_coords[2][leak_counter] = extleak[k]->coords.z;
+						efficiencies->images->extleak_dir[0][leak_counter] = extleak[k]->direction.x;
+						efficiencies->images->extleak_dir[1][leak_counter] = extleak[k]->direction.y;
+						efficiencies->images->extleak_n_refl[leak_counter] = extleak[k]->n_refl;
+						for(l=0; l < source->n_energies; l++)
+							efficiencies->images->extleak_coord_weights[leak_counter*source->n_energies+l] = extleak[k]->weight[l];
+						leak_counter++;
+					}
+					for(k=0; k < n_intleak; k++){
+						efficiencies->images->intleak_coords[0][intleak_counter] = intleak[k]->coords.x;
+						efficiencies->images->intleak_coords[1][intleak_counter] = intleak[k]->coords.y;
+						efficiencies->images->intleak_coords[2][intleak_counter] = intleak[k]->coords.z;
+						efficiencies->images->intleak_dir[0][intleak_counter] = intleak[k]->direction.x;
+						efficiencies->images->intleak_dir[1][intleak_counter] = intleak[k]->direction.y;
+						efficiencies->images->intleak_elecv[0][intleak_counter] = intleak[k]->elecv.x;
+						efficiencies->images->intleak_elecv[1][intleak_counter] = intleak[k]->elecv.y;
+						efficiencies->images->intleak_n_refl[intleak_counter] = intleak[k]->n_refl;
+						for(l=0; l < source->n_energies; l++)
+							efficiencies->images->intleak_coord_weights[intleak_counter*source->n_energies+l] = intleak[k]->weight[l];
+						intleak_counter++;
+					}
+				}//#pragma omp critical
+			}
 
-		//Assign memory to arrays holding leak photon information (and fill them)
-		if(leak_calc){
-			n_extleak += photon->n_extleak;
-			if(n_extleak > leak_mem_size){
-				if (leak_mem_size == 0){
-					leak_mem_size = n_extleak;
-				} else {
-					leak_mem_size *= 2;
-					if (leak_mem_size < n_extleak) leak_mem_size = n_extleak; //not doing this could be dangerous at low values
+			if(extleak){
+				for(k = 0; k < n_extleak; k++){
+					polycap_leak_free(extleak[k]);
 				}
-				extleak = (polycap_leak **) realloc(extleak, sizeof(struct _polycap_leak*) * leak_mem_size);
+				free(extleak);
+				extleak = NULL;
 			}
-			n_intleak += photon->n_intleak;
-			if(n_intleak > intleak_mem_size){
-				if (intleak_mem_size == 0){
-					intleak_mem_size = n_intleak;
-				} else {
-					intleak_mem_size *= 2;
-					if (intleak_mem_size < n_intleak) intleak_mem_size = n_intleak; //not doing this could be dangerous at low values
+
+			if(intleak){
+				for(k = 0; k < n_intleak; k++){
+					polycap_leak_free(intleak[k]);
 				}
-				intleak = (polycap_leak **) realloc(intleak, sizeof(struct _polycap_leak*) * intleak_mem_size);
+				free(intleak);
+				intleak = NULL;
 			}
-
-			//Write leak photon data.
-			if(photon->n_extleak > 0){
-				for(k=0; k<photon->n_extleak; k++){
-					polycap_leak *new_leak = polycap_leak_new(photon->extleak[k]->coords, photon->extleak[k]->direction, photon->extleak[k]->elecv, photon->extleak[k]->n_refl, source->n_energies, photon->extleak[k]->weight, NULL);
-					extleak[n_extleak-photon->n_extleak+k] = new_leak;
-				}
-			}
-			if(photon->n_intleak > 0){
-				for(k=0; k<photon->n_intleak; k++){
-					polycap_leak *new_leak = polycap_leak_new(photon->intleak[k]->coords, photon->intleak[k]->direction, photon->intleak[k]->elecv, photon->intleak[k]->n_refl, source->n_energies, photon->intleak[k]->weight, NULL);
-					intleak[n_intleak-photon->n_intleak+k] = new_leak;
-				}
-			}
-		}
-
-		#pragma omp critical
-		{
-		sum_irefl += photon->i_refl;
-		}
-
-		//free photon structure (new one created for each for loop instance)
-		polycap_photon_free(photon);
-		free(weights_temp);
-	} //for(j=0; j < n_photons; j++)
-
-	#pragma omp critical
-	{
-	for(i=0; i<source->n_energies; i++) sum_weights[i] += weights[i];
-	if(leak_calc){
-		efficiencies->images->i_extleak += n_extleak;
-		efficiencies->images->i_intleak += n_intleak;
-	}
-	}
-
-	if(leak_calc){
-		#pragma omp barrier //All threads must reach here before we continue.
-		#pragma omp single //Only one thread should allocate following memory. There is an automatic barrier at the end of this block.
-		{
-		efficiencies->images->extleak_coords[0] = (double *) realloc(efficiencies->images->extleak_coords[0], sizeof(double)* efficiencies->images->i_extleak);
-		efficiencies->images->extleak_coords[1] = (double *) realloc(efficiencies->images->extleak_coords[1], sizeof(double)* efficiencies->images->i_extleak);
-		efficiencies->images->extleak_coords[2] = (double *) realloc(efficiencies->images->extleak_coords[2], sizeof(double)* efficiencies->images->i_extleak);
-		efficiencies->images->extleak_dir[0] = (double *) realloc(efficiencies->images->extleak_dir[0], sizeof(double)* efficiencies->images->i_extleak);
-		efficiencies->images->extleak_dir[1] = (double *) realloc(efficiencies->images->extleak_dir[1], sizeof(double)* efficiencies->images->i_extleak);
-		efficiencies->images->extleak_n_refl = (int64_t *) realloc(efficiencies->images->extleak_n_refl, sizeof(int64_t)* efficiencies->images->i_extleak);
-		efficiencies->images->extleak_coord_weights = (double *) realloc(efficiencies->images->extleak_coord_weights, sizeof(double)*source->n_energies* efficiencies->images->i_extleak);
-		efficiencies->images->intleak_coords[0] = (double *) realloc(efficiencies->images->intleak_coords[0], sizeof(double)* efficiencies->images->i_intleak);
-		efficiencies->images->intleak_coords[1] = (double *) realloc(efficiencies->images->intleak_coords[1], sizeof(double)* efficiencies->images->i_intleak);
-		efficiencies->images->intleak_coords[2] = (double *) realloc(efficiencies->images->intleak_coords[2], sizeof(double)* efficiencies->images->i_intleak);
-		efficiencies->images->intleak_dir[0] = (double *) realloc(efficiencies->images->intleak_dir[0], sizeof(double)* efficiencies->images->i_intleak);
-		efficiencies->images->intleak_dir[1] = (double *) realloc(efficiencies->images->intleak_dir[1], sizeof(double)* efficiencies->images->i_intleak);
-		efficiencies->images->intleak_elecv[0] = (double *) realloc(efficiencies->images->intleak_elecv[0], sizeof(double)* efficiencies->images->i_intleak);
-		efficiencies->images->intleak_elecv[1] = (double *) realloc(efficiencies->images->intleak_elecv[1], sizeof(double)* efficiencies->images->i_intleak);
-		efficiencies->images->intleak_n_refl = (int64_t *) realloc(efficiencies->images->intleak_n_refl, sizeof(int64_t)* efficiencies->images->i_intleak);
-		efficiencies->images->intleak_coord_weights = (double *) realloc(efficiencies->images->intleak_coord_weights, sizeof(double)*source->n_energies* efficiencies->images->i_intleak);
-		leak_counter = 0;
-		intleak_counter = 0;
-		}//#pragma omp single
-		#pragma omp critical //continue with all threads, but one at a time...
-		{
-		for(k=0; k < n_extleak; k++){
-			efficiencies->images->extleak_coords[0][leak_counter] = extleak[k]->coords.x;
-			efficiencies->images->extleak_coords[1][leak_counter] = extleak[k]->coords.y;
-			efficiencies->images->extleak_coords[2][leak_counter] = extleak[k]->coords.z;
-			efficiencies->images->extleak_dir[0][leak_counter] = extleak[k]->direction.x;
-			efficiencies->images->extleak_dir[1][leak_counter] = extleak[k]->direction.y;
-			efficiencies->images->extleak_n_refl[leak_counter] = extleak[k]->n_refl;
-			for(l=0; l < source->n_energies; l++)
-				efficiencies->images->extleak_coord_weights[leak_counter*source->n_energies+l] = extleak[k]->weight[l];
-			leak_counter++;
-		}
-		for(k=0; k < n_intleak; k++){
-			efficiencies->images->intleak_coords[0][intleak_counter] = intleak[k]->coords.x;
-			efficiencies->images->intleak_coords[1][intleak_counter] = intleak[k]->coords.y;
-			efficiencies->images->intleak_coords[2][intleak_counter] = intleak[k]->coords.z;
-			efficiencies->images->intleak_dir[0][intleak_counter] = intleak[k]->direction.x;
-			efficiencies->images->intleak_dir[1][intleak_counter] = intleak[k]->direction.y;
-			efficiencies->images->intleak_elecv[0][intleak_counter] = intleak[k]->elecv.x;
-			efficiencies->images->intleak_elecv[1][intleak_counter] = intleak[k]->elecv.y;
-			efficiencies->images->intleak_n_refl[intleak_counter] = intleak[k]->n_refl;
-			for(l=0; l < source->n_energies; l++)
-				efficiencies->images->intleak_coord_weights[intleak_counter*source->n_energies+l] = intleak[k]->weight[l];
-			intleak_counter++;
-		}
-		}//#pragma omp critical
-	}
-	if(extleak){
-		for(k = 0; k < n_extleak; k++){
-			polycap_leak_free(extleak[k]);
-		}
-		free(extleak);
-		extleak = NULL;
-	}
-	if(intleak){
-		for(k = 0; k < n_intleak; k++){
-			polycap_leak_free(intleak[k]);
-		}
-		free(intleak);
-		intleak = NULL;
-	}
-	polycap_rng_free(rng);
-	free(weights);
-} 
+		
+			polycap_rng_free(rng);
+			free(weights);
+		} 
 
 	// add all started photons together
 	for(i=0; i < max_threads; i++){
@@ -1136,5 +1108,8 @@ polycap_transmission_efficiencies* PolyCapAPI::polycap_shadow_source_get_transmi
 	free(iexit_temp);
 	free(not_entered_temp);
 	free(not_transmitted_temp);
+
+	goodRays.save("../test-data/out/beam/slow.csv", arma::csv_ascii);
+
 	return efficiencies;
 }

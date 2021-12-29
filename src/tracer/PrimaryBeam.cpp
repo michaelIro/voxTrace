@@ -10,14 +10,14 @@ PrimaryBeam::PrimaryBeam(Shadow3API& shadowSource, PolyCapAPI& polyCap){
 
 	srand(time(NULL)); 
 
-	for(int i = 640 ; i < 1000; i ++){
+	for(int i = 1 ; i < 500; i ++){
 
 		std::chrono::steady_clock::time_point t0_ = std::chrono::steady_clock::now();
 
 		vector<XRBeam> beams_;
 		int	counter_ = 0;
 		bool fresh_ = false;
-		int max_iter_ = 25;
+		int max_iter_ = 16;
 		std::mutex mu_;
 
 		auto shadow_lambda_ = [&shadowSource, &fresh_, &counter_, max_iter_]() {
@@ -41,11 +41,13 @@ PrimaryBeam::PrimaryBeam(Shadow3API& shadowSource, PolyCapAPI& polyCap){
 					//PolyCapAPI myPrimaryPolycap((char*) "../test-data/in/polycap/pc-246-descr.txt");
 					PolyCapAPI myPrimaryPolycap(polyCap);
 					XRBeam tracedBeam(
-						myPrimaryPolycap.trace(shadow_beam_ ,100000,"../test-data/out/beam/beam-"+std::to_string(counter_)+".hdf5",false)
+						//myPrimaryPolycap.trace(shadow_beam_ ,100000,"../test-data/out/beam/beam-"+std::to_string(counter_)+".hdf5",false)
+						myPrimaryPolycap.traceFast(shadow_beam_ )
 					);	
 					
 					mu_.lock();
-					beams_.push_back(XRBeam::probabilty(tracedBeam));
+					//beams_.push_back(XRBeam::probabilty(tracedBeam));
+					beams_.push_back(tracedBeam);
 					mu_.unlock();
 
 					counter_++;
@@ -62,7 +64,7 @@ PrimaryBeam::PrimaryBeam(Shadow3API& shadowSource, PolyCapAPI& polyCap){
 		std::chrono::steady_clock::time_point t1_ = std::chrono::steady_clock::now();
 
 		XRBeam beam_ = XRBeam::merge(beams_);
-		beam_.getMatrix().save(arma::hdf5_name("/media/miro/Data/Shadow-Beam/Transmission/PrimaryBeam-1keV-"+std::to_string(i)+".h5","my_data"));
+		beam_.getMatrix().save(arma::hdf5_name("/media/miro/Data/Shadow-Beam/Fast/PrimaryBeam-"+std::to_string(i)+".h5","my_data"));
 		
 		std::cout << "Beam size: " << beam_.getRays().size() << std::endl;
 
