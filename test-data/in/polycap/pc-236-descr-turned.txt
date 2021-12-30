@@ -1,0 +1,14 @@
+Polycapillary-Parameter-Input-File: Secondary Polycapillary
+4.03;				//optic length in cm
+0.3175;				//external radius upstream, at entrance window, in cm
+0.095;			    //external radius downstream, at exit window, in cm
+0.000325;			//single capillary radius, at optic entrance, in cm
+0.0000975;			//single capillary radius, at optic exit, in cm
+100000000.0;  		//focal distance on entrance window side, in cm
+0.49;		        //focal distance on exit window side, in cm
+2;					//amount of elements in optic material
+[2]={8,14};			//polycapillary optic material composition: atomic numbers 
+[2]={53.0,47.0};	//polycapillary optic material composition: corresponding weight percentages SiO2
+2.23;				//optic material density, in g/cm^3 
+5.;					//surface roughness in Angstrom
+240000.;			//number of capillaries in the optic

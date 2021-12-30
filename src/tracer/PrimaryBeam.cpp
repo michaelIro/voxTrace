@@ -42,7 +42,7 @@ PrimaryBeam::PrimaryBeam(Shadow3API& shadowSource, PolyCapAPI& polyCap){
 					PolyCapAPI myPrimaryPolycap(polyCap);
 					XRBeam tracedBeam(
 						//myPrimaryPolycap.trace(shadow_beam_ ,100000,"../test-data/out/beam/beam-"+std::to_string(counter_)+".hdf5",false)
-						myPrimaryPolycap.traceFast(shadow_beam_ )
+						myPrimaryPolycap.traceFast(shadow_beam_)
 					);	
 					
 					mu_.lock();
@@ -73,9 +73,11 @@ PrimaryBeam::PrimaryBeam(Shadow3API& shadowSource, PolyCapAPI& polyCap){
 		std::cout << "t1 - t0 = " << std::chrono::duration_cast<std::chrono::microseconds>(t1_ - t0_).count() << "[µs]"  << std::endl;
 		std::cout << "t2 - t1 = " << std::chrono::duration_cast<std::chrono::microseconds>(t2_ - t1_).count() << "[µs]" << std::endl;
 	}
+}
 
-	//double randomN = ((double) rand()) / ((double) RAND_MAX);
 	/*
+
+		//double randomN = ((double) rand()) / ((double) RAND_MAX);
 	int threadNum = 4;
 	int raysPerThread = 8000000;
 	vector<int> randomNumbers;
@@ -107,8 +109,7 @@ PrimaryBeam::PrimaryBeam(Shadow3API& shadowSource, PolyCapAPI& polyCap){
 
 	arma::Mat<double> temp_;
     //temp_.load(arma::hdf5_name("/media/miro/Data/Shadow-Beam/PrimaryBeam.h5", "my_data"));
-	*/
-	/*	#pragma omp parallel for
+	#pragma omp parallel for
 	for(int i = 0; i < threadNum; i++){
 		Shadow3API shadowCopy_ = (*shadowSource);
 		shadowCopy_.trace(raysPerThread/threadNum,randomNumbers[i+1]);
@@ -124,7 +125,5 @@ PrimaryBeam::PrimaryBeam(Shadow3API& shadowSource, PolyCapAPI& polyCap){
 		temp.print();
 		(*polyCap).trace(temp, 10);
 	}
+		//myPrimaryBeam.primaryTransform(70.0, 70.0,0.0, 0.51, 45.0);
 	*/
-	//myPrimaryBeam.primaryTransform(70.0, 70.0,0.0, 0.51, 45.0);
-
-}

@@ -15,8 +15,8 @@
 class PrimaryBeam{
 
 	private:
-		//Shadow3API* shadowSource_;
-		//PolyCapAPI* polyCap_;
+		//Shadow3API& shadowSource_;
+		//PolyCapAPI& polyCap_;
 
 	public:
 
