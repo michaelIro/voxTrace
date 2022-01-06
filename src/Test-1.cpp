@@ -18,7 +18,7 @@ int main() {
 	std::cout << "START: Test-1" << std::endl;
 
 	Shadow3API shadow_((char*) "../test-data/in/shadow3");
-	PolyCapAPI pc1_((char*) "../test-data/in/polycap/pc-246-descr.txt");	
+	PolyCapAPI pc1_((char*) "../test-data/in/polycap/pc-236-descr-turned.txt");	
 
 	PrimaryBeam primary_(shadow_, pc1_);
 

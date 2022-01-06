@@ -244,7 +244,7 @@ vector<Ray> PolyCapAPI::traceFast(arma::Mat<double> shadowBeam){
 	polycap_vector3 temp_vect__;
 	double energy;
 	int iesc;
-	arma::Col<int> goodRays(shadowBeam.n_rows);
+	//arma::Col<int> goodRays(shadowBeam.n_rows);
 
 	unsigned int seed_ = chrono::steady_clock::now().time_since_epoch().count();
 	std::vector<boost::mt19937> random_generators;
@@ -274,9 +274,9 @@ vector<Ray> PolyCapAPI::traceFast(arma::Mat<double> shadowBeam){
 		energy = current_row_(10)/50677300.0 ; // in keV
 				
 
-		iesc = polycap_photon_launch(photon, 1, &energy, &weights_temp, false,&error__);
+		iesc = polycap_photon_launch(photon, 1, &energy, &weights_temp, false, &error__);
 
-		goodRays(i)=iesc;
+		//goodRays(i)=iesc;
 
 		//check whether photon is within optic exit window, different check for monocapillary case deleted
 		if(iesc == 1) {			
@@ -334,6 +334,10 @@ vector<Ray> PolyCapAPI::traceFast(arma::Mat<double> shadowBeam){
 				}
 			}
 		}
+
+		polycap_photon_free(photon);
+		free(weights_temp);
+		//free(temp_vect__);
 	}
 
 	

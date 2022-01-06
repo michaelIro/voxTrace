@@ -10,7 +10,7 @@ PrimaryBeam::PrimaryBeam(Shadow3API& shadowSource, PolyCapAPI& polyCap){
 
 	srand(time(NULL)); 
 
-	for(int i = 1 ; i < 500; i ++){
+	for(int i = 4 ; i < 50; i ++){
 
 		std::chrono::steady_clock::time_point t0_ = std::chrono::steady_clock::now();
 
@@ -64,7 +64,7 @@ PrimaryBeam::PrimaryBeam(Shadow3API& shadowSource, PolyCapAPI& polyCap){
 		std::chrono::steady_clock::time_point t1_ = std::chrono::steady_clock::now();
 
 		XRBeam beam_ = XRBeam::merge(beams_);
-		beam_.getMatrix().save(arma::hdf5_name("/media/miro/Data/Shadow-Beam/Fast/PrimaryBeam-"+std::to_string(i)+".h5","my_data"));
+		beam_.getMatrix().save(arma::hdf5_name("/media/miro/Data/Shadow-Beam/Fast/PC-236/PrimaryBeam-"+std::to_string(i)+".h5","my_data"));
 		
 		std::cout << "Beam size: " << beam_.getRays().size() << std::endl;
 

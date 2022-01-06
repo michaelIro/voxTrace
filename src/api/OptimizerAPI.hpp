@@ -5,6 +5,7 @@
 #include <ensmallen.hpp>
 
 #include <gsl/gsl_sf_bessel.h>
+#include <gsl/gsl_multimin.h>
 
 #define OPTIM_ENABLE_ARMA_WRAPPERS
 #include "optim.hpp"
@@ -13,6 +14,7 @@ class OptimizerAPI{
 
     public:
         OptimizerAPI();
+
 
 };
 

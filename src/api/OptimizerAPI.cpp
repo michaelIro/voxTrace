@@ -13,7 +13,7 @@
 #include "OptimizerAPI.hpp"
 
 // Ackley function
-double ackley_fn(const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data)
+double evaluate(const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data)
 {
     const double x = vals_inp(0);
     const double y = vals_inp(1);
@@ -35,7 +35,8 @@ OptimizerAPI::OptimizerAPI(){
 
     std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
 
-    bool success = optim::de(xn,ackley_fn,nullptr);
+    bool success = optim::de(xn,evaluate,nullptr);
+    //bool success2 = optim::pso(xn,evaluate,nullptr);
 
     std::chrono::time_point<std::chrono::system_clock> end = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed_seconds = end-start;
@@ -50,7 +51,12 @@ OptimizerAPI::OptimizerAPI(){
     arma::cout << "\nde: solution to Ackley test:\n" << xn << arma::endl;
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
     //ens::RosenbrockFunction f;
-    ens::DE optimizer(200, 1000, 0.6, 0.8, 1e-5);
+    ens::DE         optimizerDE(200, 1000, 0.6, 0.8, 1e-5);
+    ens::SA<>       optimizerSA(ens::ExponentialSchedule(), 1000000, 1000., 1000, 100, 1e-10, 3, 1.5, 0.5, 0.3);
+    ens::CNE        optimizerCNE(200, 10000, 0.2, 0.2, 0.3, 1e-5);
+    ens::LBestPSO   optimizerPSO(64, 50, 60, 3000, 400, 1e-30, 2.05, 2.05);
+    ens::SPSA       optimizerSPSA(0.1, 0.102, 0.16, 0.3, 100000, 1e-5);
     //optimizer.Optimize(ackley_fn,xn);
 }
+
 

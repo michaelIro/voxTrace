@@ -14,45 +14,8 @@
 #include "tracer/Tracer.hpp"
 
 int main() {
-
-//{
 //---------------------------------------------------------------------------------------------
 
-	//Shadow3API myShadowSource((char*) "../test-data/in/shadow3");
-	//myShadowSource.trace(10000000);
-
-	//arma::Mat<double> myShadowBeam = myShadowSource.getBeamMatrix();
-	//myShadowBeam.save("../test-data/out/beam/shadowBeam.csv", arma::csv_ascii);
-	//std::cout << "Shadow-Beam: " << std::endl;
-	//myShadowBeam.print();
-
-//---------------------------------------------------------------------------------------------
-
-	//PolyCapAPI myPrimaryPolycap((char*) "../test-data/in/polycap/pc-246-descr.txt");
-	//vector<Ray> myPrimaryCapBeam = myPrimaryPolycap.trace(myShadowBeam,100000,(char*) "../test-data/in/polycap/pc-246.hdf5");
-
-	arma::Mat<double> myPrimaryCapBeam1;
-	arma::Mat<double> myPrimaryCapBeam;
-	myPrimaryCapBeam.load(arma::hdf5_name("/media/miro/Data/Shadow-Beam/Single/PrimaryBeam-0.h5","my_data"));
-	myPrimaryCapBeam1.load(arma::hdf5_name("/media/miro/Data/Shadow-Beam/Single/PrimaryBeam-1.h5","my_data"));
-	XRBeam myPrimaryBeam(myPrimaryCapBeam);
-	XRBeam myPrimaryBeam1(myPrimaryCapBeam1);
-	std::vector<XRBeam> beamVec = {myPrimaryBeam,myPrimaryBeam1};
-
-	myPrimaryBeam = XRBeam::merge(beamVec);
-	//myPrimaryBeam.getMatrix().save("../test-data/out/beam/primaryBeam.csv", arma::csv_ascii);
-	myPrimaryBeam.primaryTransform(70.0, 70.0,0.0, 0.51, 45.0);
-
-	//myPrimaryBeam.print();
-
-//---------------------------------------------------------------------------------------------
-
-	//some test comment
-	//OptimizerAPI myOptimizer;
-
-//---------------------------------------------------------------------------------------------
-	//}
-	
 	vector<vector<vector<Material>>> myMat;
     ChemElement cu(29);
     ChemElement sn(50);
@@ -80,6 +43,20 @@ int main() {
 	//sample_.print();
 
 //---------------------------------------------------------------------------------------------
+
+	arma::Mat<double> myPrimaryCapBeam;
+	myPrimaryCapBeam.load(arma::hdf5_name("/media/miro/Data/Shadow-Beam/Single/PrimaryBeam-0.h5","my_data"));
+
+	XRBeam myPrimaryBeam(myPrimaryCapBeam);
+
+	//std::vector<XRBeam> beamVec = {myPrimaryBeam,myPrimaryBeam1};
+	//myPrimaryBeam = XRBeam::merge(beamVec);
+	//myPrimaryBeam.getMatrix().save("../test-data/out/beam/primaryBeam.csv", arma::csv_ascii);
+	
+	myPrimaryBeam.primaryTransform(70.0, 70.0,0.0, 0.51, 45.0);
+
+//---------------------------------------------------------------------------------------------
+
 
 	Tracer tracer_(myPrimaryBeam, sample_);
 	//vector<XRBeam> tracedBeams;
