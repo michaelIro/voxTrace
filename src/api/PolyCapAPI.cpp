@@ -456,10 +456,10 @@ vector<Ray> PolyCapAPI::trace(arma::Mat<double> shadowBeam, int nPhotons, std::f
 	int n_photons = nPhotons;		// simulate nPhotons succesfully transmitted photons (excluding leak events)
 	bool leak_calc = false;			// choose to perform leak photon calculations or not. Leak calculations take significantly more time
 
-	efficiencies = polycap_shadow_source_get_transmission_efficiencies(source, n_threads, n_photons, leak_calc, NULL, &error, shadowBeam);
+	efficiencies = polycap_source_get_transmission_efficiencies(source, n_threads, n_photons, leak_calc, NULL, &error);
 
 	vector<Ray> polycapBeam;
-	
+	/*
 	int rayCounter = 0;
 	for( int i = 0; i < efficiencies->images->i_exit; i++ ){
 		if( efficiencies->images->exit_coord_weights[i] >0){
@@ -492,7 +492,7 @@ vector<Ray> PolyCapAPI::trace(arma::Mat<double> shadowBeam, int nPhotons, std::f
 				);
 			polycapBeam.push_back(ray_);
 		}
-	}
+	}*/
 
 	if(save == true)
 		polycap_transmission_efficiencies_write_hdf5(efficiencies, savePath.c_str(), NULL);

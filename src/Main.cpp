@@ -45,7 +45,7 @@ int main() {
 //---------------------------------------------------------------------------------------------
 
 	arma::Mat<double> myPrimaryCapBeam;
-	myPrimaryCapBeam.load(arma::hdf5_name("/media/miro/Data/Shadow-Beam/Single/PrimaryBeam-0.h5","my_data"));
+	myPrimaryCapBeam.load(arma::hdf5_name("/media/miro/Data/Shadow-Beam/Fast/PC-246/PrimaryBeam-1.h5","my_data"));
 
 	XRBeam myPrimaryBeam(myPrimaryCapBeam);
 
@@ -95,10 +95,10 @@ int main() {
 //---------------------------------------------------------------------------------------------
 	//oneBeamToRuleThemAll.load("../test-data/out/beam/fluorescenceBeam.csv", arma::csv_ascii);
 	PolyCapAPI mySecondaryPolycap((char*) "../test-data/in/polycap/pc-236-descr.txt");	
-	XRBeam myDetectorBeam1(mySecondaryPolycap.trace(fluorescence_.getMatrix(),2,(char*) "../test-data/in/polycap/pc-236.hdf5",true));
+	//XRBeam myDetectorBeam1(mySecondaryPolycap.trace(fluorescence_.getMatrix(),2,(char*) "../test-data/in/polycap/pc-236.hdf5",true));
 	XRBeam myDetectorBeam(mySecondaryPolycap.traceFast(fluorescence_.getMatrix()));
 	int finalBeamsN = myDetectorBeam.getRays().size();
-	int finalBeamsN1 = myDetectorBeam1.getRays().size();
+	//int finalBeamsN1 = myDetectorBeam1.getRays().size();
 /***********************************************************************************/
     return 0;
 }
