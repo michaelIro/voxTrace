@@ -2,6 +2,7 @@
 #include "cuda/MyDummy.cuh"
 //#include "api/PlotAPI.hpp"
 #include "base/XRBeam.hpp"
+#include "api/PolyCapAPI.hpp"
 
 int main() {
 	std::cout << "START: Test-3" << std::endl;
@@ -20,15 +21,18 @@ int main() {
 
 //---------------------------------------------------------------------------------------------
 
-    vector<XRBeam> beams_;
-    for(int i = 1; i < 15; i++){
-        arma::Mat<double> beam_;
-        beam_.load(arma::hdf5_name("/media/miro/Data/Shadow-Beam/Fast/PC-236/PrimaryBeam-"+std::to_string(i)+".h5","my_data")); 
-        XRBeam temp_(beam_);
-        beams_.push_back(temp_);
-    }
-    XRBeam total_ = XRBeam::merge(beams_);
-    total_.getMatrix().save(arma::hdf5_name("/media/miro/Data/Shadow-Beam/Fast/PC-236/PrimaryBeam-Total-15.h5","my_data")); 
+
+    arma::Mat<double> temp_;
+    temp_.load(arma::hdf5_name("../test-data/out/beam/fluorescenceBeam.h5","my_data"));
+	XRBeam fluorescence_(temp_);
+    std::cout << "Detector size:" << fluorescence_.getRays().size() << std::endl;
+
+//---------------------------------------------------------------------------------------------
+
+	PolyCapAPI mySecondaryPolycap((char*) "../test-data/in/polycap/pc-236-descr.txt");	
+	//XRBeam myDetectorBeam(mySecondaryPolycap.trace(fluorescence_.getMatrix(),2,(char*) "../test-data/out/beam/detectorBeam.hdf5",false));
+	XRBeam myDetectorBeam(mySecondaryPolycap.traceFast(fluorescence_.getMatrix()));
+	std::cout << "Detector size:" << myDetectorBeam.getRays().size() << std::endl;
 
     std::cout << "END: Test-3" << std::endl;
     return 0;

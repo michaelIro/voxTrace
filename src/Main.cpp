@@ -43,7 +43,7 @@ int main() {
 //---------------------------------------------------------------------------------------------
 
 std::vector<XRBeam> beams_;
-for(int i= 0; i < 100; i++){
+for(int i= 1; i < 100; i++){
 
 
 	arma::Mat<double> myPrimaryCapBeam;
@@ -77,7 +77,7 @@ for(int i= 0; i < 100; i++){
 //---------------------------------------------------------------------------------------------
 
 	PolyCapAPI mySecondaryPolycap((char*) "../test-data/in/polycap/pc-236-descr.txt");	
-	//XRBeam myDetectorBeam1(mySecondaryPolycap.trace(fluorescence_.getMatrix(),2,(char*) "../test-data/in/polycap/pc-236.hdf5",true));
+	//XRBeam myDetectorBeam(mySecondaryPolycap.trace(fluorescence_.getMatrix(),2,(char*) "../test-data/out/beam/detectorBeam.hdf5",false));
 	XRBeam myDetectorBeam(mySecondaryPolycap.traceFast(fluorescence_.getMatrix()));
 	std::cout << "Detector size:" << myDetectorBeam.getRays().size() << std::endl;
 

@@ -268,6 +268,7 @@ vector<Ray> PolyCapAPI::traceFast(arma::Mat<double> shadowBeam){
 			
 		photon = polycap_photon_new(source->description,
 			{current_row_(0),current_row_(2),current_row_(1)}, 
+			//{0.0,0.0,0.0},
 			{current_row_(3),current_row_(5),current_row_(4)}, 
 			{1.0,0.0,0.0}, NULL);	
 
