@@ -28,10 +28,9 @@ void Tracer::start(){
 	}
 	
 	secondary_= *(new XRBeam(tracedRays));
-	//beam_ = tracedRays;
 
 	std::cout << "END: voxTrace - Tracer()" << std::endl;
-	std::cout << "#Interactions: "<< ia << std::endl;	
+	std::cout << "#Interactions: "<< ia << " " << secondary_.getRays().size() << std::endl;	
 }
 
 /*********************************/

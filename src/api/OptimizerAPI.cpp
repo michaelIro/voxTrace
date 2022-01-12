@@ -26,6 +26,8 @@ double evaluate(const arma::vec& vals_inp, arma::vec* grad_out, void* opt_data)
 
 /*Empty constructor*/
 OptimizerAPI::OptimizerAPI(){
+
+/*
  ///////////////////////////////////////////////////////////////////////////////////////////////////////
     double x0 = 5.0;
     double y0 = gsl_sf_bessel_J0 (x0);
@@ -50,6 +52,8 @@ OptimizerAPI::OptimizerAPI(){
 
     arma::cout << "\nde: solution to Ackley test:\n" << xn << arma::endl;
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
+*/
+    
     //ens::RosenbrockFunction f;
     ens::DE         optimizerDE(200, 1000, 0.6, 0.8, 1e-5);
     ens::SA<>       optimizerSA(ens::ExponentialSchedule(), 1000000, 1000., 1000, 100, 1e-10, 3, 1.5, 0.5, 0.3);
@@ -57,6 +61,7 @@ OptimizerAPI::OptimizerAPI(){
     ens::LBestPSO   optimizerPSO(64, 50, 60, 3000, 400, 1e-30, 2.05, 2.05);
     ens::SPSA       optimizerSPSA(0.1, 0.102, 0.16, 0.3, 100000, 1e-5);
     //optimizer.Optimize(ackley_fn,xn);
+    
 }
 
 

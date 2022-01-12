@@ -137,7 +137,7 @@ void XRBeam::secondaryTransform(double x0, double y0, double z0, double d, doubl
 			double dfac_= 0.49 / yd_;
 			double rin_= 0.1; //actually 0.095
 			double r_spot_ = sqrt( (xd_*dfac_)*(xd_*dfac_) + (zd_*dfac_)*(zd_*dfac_));
-			//if(r_spot_ < rin_){
+			if(r_spot_ < rin_){
 				rays__.push_back(*(new Ray(
 					x0_, y0_, z0_,
 					xd_, yd_, zd_,
@@ -147,7 +147,7 @@ void XRBeam::secondaryTransform(double x0, double y0, double z0, double d, doubl
 					ray.getPPolX(),ray.getPPolY(),ray.getPPolZ(), 
 					ray.getProb()
 				)));
-			//}
+			}
 		}
 	}
 	rays_=rays__;

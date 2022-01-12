@@ -58,7 +58,7 @@ target_compile_options(Test-1 PUBLIC -DARMA_USE_HDF5 -O3)
 target_compile_options(Test-2 PUBLIC -DARMA_USE_HDF5 -O3)
 target_compile_options(Test-3 PUBLIC -DARMA_USE_HDF5 -lcuda -O3)
 target_compile_options(Test-4 PUBLIC -DARMA_USE_HDF5 -O3)
-target_compile_options(Main PUBLIC -DARMA_USE_HDF5 -O3)
+target_compile_options(Main PUBLIC -DARMA_USE_HDF5) #-O3
 ######################################################################################## future acceleration options
 #find_package(HDF5 REQUIRED)
 #find_package(BLAS REQUIRED)      # These 

@@ -15,15 +15,13 @@
 
 int main() {
 //---------------------------------------------------------------------------------------------
-
-	vector<vector<vector<Material>>> myMat;
     ChemElement cu(29);
     ChemElement sn(50);
 	ChemElement pb(82);
 	map<ChemElement* const,double> bronzeMap{{&cu,0.7},{&sn,0.2},{&pb,0.1}};
 
 	//arma::field<Material> myMaterials(11,11,11); TODO: change vec<vec<vec>> to field
-		
+	vector<vector<vector<Material>>> myMat;	
 	for(int i = 0; i < 11; i++){
 		vector<vector<Material>> myMat1;
 		for(int j = 0; j < 11; j++){
@@ -44,8 +42,12 @@ int main() {
 
 //---------------------------------------------------------------------------------------------
 
+std::vector<XRBeam> beams_;
+for(int i= 0; i < 100; i++){
+
+
 	arma::Mat<double> myPrimaryCapBeam;
-	myPrimaryCapBeam.load(arma::hdf5_name("/media/miro/Data/Shadow-Beam/Fast/PC-246/PrimaryBeam-1.h5","my_data"));
+	myPrimaryCapBeam.load(arma::hdf5_name("/media/miro/Data/Shadow-Beam/Fast/PC-246/PrimaryBeam-"+std::to_string(i)+".h5","my_data"));
 
 	XRBeam myPrimaryBeam(myPrimaryCapBeam);
 
@@ -54,51 +56,31 @@ int main() {
 	//myPrimaryBeam.getMatrix().save("../test-data/out/beam/primaryBeam.csv", arma::csv_ascii);
 	
 	myPrimaryBeam.primaryTransform(70.0, 70.0,0.0, 0.51, 45.0);
+	std::cout << "Primary size:" << myPrimaryBeam.getRays().size() << std::endl;
 
 //---------------------------------------------------------------------------------------------
 
-
 	Tracer tracer_(myPrimaryBeam, sample_);
-	//vector<XRBeam> tracedBeams;
-	//for(int i= 0; i<1; i++){
 	tracer_.start();
-		//tracedBeams.push_back(tracer_.getBeam());
-		//std::cout<< i<< std::endl;
-	//}
-
-	//vector<Ray> superBeam;
-	//for(XRBeam xb: tracedBeams)
-	//	for(Ray ray: xb.getRays())
-	//		superBeam.push_back(ray);
-
 
 //---------------------------------------------------------------------------------------------
 
 	XRBeam fluorescence_= tracer_.getSecondaryBeam();
 	fluorescence_.secondaryTransform(70.0, 70.0,0.0, 0.49, 45.0);
-
-	//if(outermosti==0)
-		//oneBeamToRuleThemAll = fluorescence_.getMatrix();
-	//else	
-	//	oneBeamToRuleThemAll = arma::join_cols(oneBeamToRuleThemAll,fluorescence_.getMatrix());
-	
-	//std::cout << std::endl << std::endl << "Iteration #-" << outermosti << std::endl << std::endl;
-//}
-
-
+	beams_.push_back(fluorescence_);
+}
+	XRBeam fluorescence_ = XRBeam::merge(beams_);
+	std::cout << "Secondary size:" << fluorescence_.getRays().size() << std::endl;
 	//fluorescence_.getMatrix().save("../test-data/out/beam/fluorescenceBeam.csv", arma::csv_ascii);
-	//fluorescence_.print();
-	//arma::Mat<double> temp_;
-	//temp_.load("../test-data/out/beam/fluorescenceBeam.csv", arma::csv_ascii);
-	//XRBeam fluorescence_(temp_);
+	fluorescence_.getMatrix().save(arma::hdf5_name("../test-data/out/beam/fluorescenceBeam.h5","my_data"));
 
 //---------------------------------------------------------------------------------------------
-	//oneBeamToRuleThemAll.load("../test-data/out/beam/fluorescenceBeam.csv", arma::csv_ascii);
+
 	PolyCapAPI mySecondaryPolycap((char*) "../test-data/in/polycap/pc-236-descr.txt");	
 	//XRBeam myDetectorBeam1(mySecondaryPolycap.trace(fluorescence_.getMatrix(),2,(char*) "../test-data/in/polycap/pc-236.hdf5",true));
 	XRBeam myDetectorBeam(mySecondaryPolycap.traceFast(fluorescence_.getMatrix()));
-	int finalBeamsN = myDetectorBeam.getRays().size();
-	//int finalBeamsN1 = myDetectorBeam1.getRays().size();
+	std::cout << "Detector size:" << myDetectorBeam.getRays().size() << std::endl;
+
 /***********************************************************************************/
     return 0;
 }
