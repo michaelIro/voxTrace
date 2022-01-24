@@ -125,19 +125,25 @@ void XRBeam::secondaryTransform(double x0, double y0, double z0, double d, doubl
 	for(Ray ray: rays_){
 		if((ray.getStartZ()>=0.0) && (ray.getDirZ()<0.0)){
 
-			double x0_=ray.getStartX()-x0;
-			double y0_=cos(beta)*(ray.getStartY()-y0)-sin(beta)*(ray.getStartZ()-z0);
-			double z0_=sin(beta)*(ray.getStartY()-y0)+cos(beta)*(ray.getStartZ()-z0);
+			double x0_ = ray.getStartX() - x0;
+			double y0_ = cos(beta)*(ray.getStartY()-y0)-sin(beta)*(ray.getStartZ()-z0);
+			double z0_ = sin(beta)*(ray.getStartY()-y0)+cos(beta)*(ray.getStartZ()-z0);
 
 			double xd_ = ray.getDirX(); 
 			double yd_ = cos(beta)*ray.getDirY()-sin(beta)*ray.getDirZ();
 			double zd_ = sin(beta)*ray.getDirY()+cos(beta)*ray.getDirZ();
 
 
-			double dfac_= 0.49 / yd_;
+			double dfac_= (0.49-y0_) / yd_;
 			double rin_= 0.1; //actually 0.095
-			double r_spot_ = sqrt( (xd_*dfac_)*(xd_*dfac_) + (zd_*dfac_)*(zd_*dfac_));
-			
+
+			x0_= x0_ + dfac_ * xd_;
+			y0_= 0.0;
+			z0_= z0_ + dfac_ * zd_;
+
+			//double r_spot_ = sqrt( (xd_*dfac_)*(xd_*dfac_) + (zd_*dfac_)*(zd_*dfac_));
+			double r_spot_ = sqrt( (x0_*x0_) + (z0_*z0_) );
+
 			if(r_spot_ < rin_){
 				rays__.push_back(*(new Ray(
 					x0_, y0_, z0_,
@@ -170,7 +176,7 @@ arma::Mat<double> XRBeam::getMatrix() const{
 			ray.getStartX(),ray.getStartY(),ray.getStartZ(),
 			ray.getDirX(),ray.getDirY(),ray.getDirZ(),
 			ray.getSPolX(),ray.getSPolY(),ray.getSPolZ(),
-			(double) ray.getFlag(), ray.getEnergyKeV(),(double) ray.getIndex(),
+			(double) ray.getFlag(), ray.getWaveNumber(),(double) ray.getIndex(),
 			ray.getOpticalPath(),ray.getSPhase(),ray.getPPhase(),
 			ray.getPPolX(),ray.getPPolY(),ray.getPPolZ(),
 			ray.getProb()};

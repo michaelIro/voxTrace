@@ -20,11 +20,6 @@ depends on have different licences:
     - Shadow3: an open source ray tracing code for modeling optical systems (MIT Licence)
     - PolyCap: a C library to calculate X-ray transmission through polycapillaries (GNU General Public Licence)
 
-
-    <!--- GSL - GNU Scientific Library                                                                      (mostly GNU General Public Licence)
-    - OptimLib: a lightweight C++ library of numerical optimization methods for nonlinear functions.    (Apache 2.0) -->
-
-
 ## Installation
 voxTrace can be installed/run in various ways on different systems. To optimize your general workflow when
 working on the quantification of confocal measurements i reccomend one of the following two ways:
@@ -39,3 +34,7 @@ In both cases i would recommend setting up the nodejs-Web-GUI i made for this pr
 ### Optional Instrucion Video
 If you are new to Linux or have problems installing some of the dependency packages please follow the instructions 
 below or watch this video i made with the instructions for setting up your system: https://github.com
+
+
+GSL - GNU Scientific Library                                                                      (mostly GNU General Public Licence)
+OptimLib: a lightweight C++ library of numerical optimization methods for nonlinear functions.    (Apache 2.0) -->
