@@ -1,5 +1,5 @@
 Polycapillary-Parameter-Input-File: Primary Polycapillary
-3.94;				//optic length in cm
+4.94;				//optic length in cm
 0.37;				//external radius upstream, at entrance window, in cm
 0.1075;				//external radius downstream, at exit window, in cm
 0.0004025; 			//single capillary radius, at optic entrance, in cm
