@@ -1,6 +1,6 @@
 #########################################################################################
 # sets the minimum required version of CMake itself 
-cmake_minimum_required(VERSION 3.18)
+cmake_minimum_required(VERSION 3.15)
 
 # sets the project name and version number
 project(voxTrace VERSION 1.0)
@@ -8,7 +8,7 @@ project(voxTrace VERSION 1.0)
 # sets the C++ standard to C++20
 set(CMAKE_CXX_STANDARD 20)
 #########################################################################################
-#add_subdirectory(${CMAKE_SOURCE_DIR}/src/base)
-add_library(vt.tracer Tracer.cpp PrimaryBeam.cpp)
-target_link_libraries(vt.tracer XRayLibAPI Shadow3API PlotAPI PolyCapAPI OptimizerAPI vt.base)
-#target_link_libraries(Tests XRayLibAPI Shadow3API PlotAPI PolyCapAPI OptimizerAPI vt.base vt.tracer)
+##add_subdirectory(${CMAKE_SOURCE_DIR}/src/base)
+#add_library(vt.tracer Tracer.cpp PrimaryBeam.cpp)
+#target_link_libraries(vt.tracer XRayLibAPI Shadow3API PlotAPI PolyCapAPI OptimizerAPI vt.base)
+##target_link_libraries(Tests XRayLibAPI Shadow3API PlotAPI PolyCapAPI OptimizerAPI vt.base vt.tracer)

@@ -1,6 +1,6 @@
 #########################################################################################
 # sets the minimum required version of CMake itself 
-cmake_minimum_required(VERSION 3.18)
+cmake_minimum_required(VERSION 3.15)
 
 # Tells CMake to use pkg-config (The standard installations of both X-Ray-Lib and Polycap are easier to link using this)
 include(FindPkgConfig)
@@ -17,26 +17,30 @@ add_library(PlotAPI PlotAPI.cpp)
 add_library(PolyCapAPI PolyCapAPI.cpp)
 add_library(OptimizerAPI OptimizerAPI.cpp)
 #########################################################################################
+include_directories(${HOME}/Software/3rd-Party/Install/**)
 # XrayLib: a library for interactions of X-rays with matter => https://github.com/tschoonj/xraylib
 pkg_check_modules(XRAYLIB REQUIRED libxrl)
+#find_package(xraylib)
 
 target_link_libraries(XRayLibAPI ${XRAYLIB_LIBRARIES})
 target_include_directories(XRayLibAPI PUBLIC ${XRAYLIB_INCLUDE_DIRS})
 target_compile_options(XRayLibAPI PUBLIC ${XRAYLIB_CFLAGS_OTHER})
 #########################################################################################
 # Shadow3: an open source ray tracing code for modeling optical systems (MIT Licence) => https://github.com/PaNOSC-ViNYL/shadow3
-find_path(SHADOW_INCLUDE_DIR src/c/shadow_bind_cpp.hpp PATHS /home/miro/Software/3rd-party/shadow3 /home/miro/software/3rd-party/shadow3)
-find_library(SHADOW_CPP_LIBRARY libshadow3c++.a)      #PATHS /path/to/shadow3/src
-find_library(SHADOW_C_LIBRARY libshadow3c.a) 
-find_library(SHADOW_LIBRARY libshadow3.a) 
-#message(STATUS ${SHADOW_INCLUDE_DIR} "\t" ${SHADOW_LIBRARY} "\t" ${SHADOW_C_LIBRARY} "\t" ${SHADOW_CPP_LIBRARY})
+find_path(SHADOW_INCLUDE_DIR src/c/shadow_bind_cpp.hpp PATHS /home/fs71764/miro/Software/3rd-Party/Download/shadow3 /home/fs71764/miro/Software/3rd-Party/Download/shadow3/src) #PATHS /path/to/shadow3/src /home/miro/Software/3rd-party/shadow3 /home/miro/software/3rd-party/shadow3 
 
-target_include_directories(Shadow3API PUBLIC ${SHADOW_INCLUDE_DIR}/src ${SHADOW_INCLUDE_DIR}/src/c ${SHADOW_INCLUDE_DIR}/src/def)
+find_library(SHADOW_CPP_LIBRARY libshadow3c++.a PATHS /home/fs71764/miro/Software/3rd-Party/Install/lib/)      
+find_library(SHADOW_C_LIBRARY libshadow3c.a PATHS /home/fs71764/miro/Software/3rd-Party/Install/lib/) 
+find_library(SHADOW_LIBRARY libshadow3.a PATHS /home/fs71764/miro/Software/3rd-Party/Install/lib/) 
+
+#message(STATUS ${SHADOW_INCLUDE_DIR} "\t" ${SHADOW_LIBRARY} "\t" ${SHADOW_C_LIBRARY} "\t" ${SHADOW_CPP_LIBRARY})
+#message(${CMAKE_SOURCE_DIR})
+#target_include_directories(Shadow3API PUBLIC ${SHADOW_INCLUDE_DIR}/src ${SHADOW_INCLUDE_DIR}/src/c ${SHADOW_INCLUDE_DIR}/src/def)
 target_link_libraries(Shadow3API ${SHADOW_CPP_LIBRARY} ${SHADOW_C_LIBRARY} ${SHADOW_LIBRARY})
-target_link_libraries(Shadow3API gfortran)
+#target_link_libraries(Shadow3API gfortran)
 #########################################################################################
 # SciPlot: a C++ scientific plotiing library powerd by gnupolot (MIT License)
-find_package(sciplot)
+find_package(sciplot PATHS /home/home/fs71764/miro/Software/3rd-Party/Install)
 if (SCIPLOT_FOUND)
   include_directories(${SCIPLOT_INCLUDE_DIRS})
   target_link_libraries (PlotAPI ${SCIPLOT_LIBRARIES})
@@ -58,14 +62,16 @@ target_compile_options(PolyCapAPI PRIVATE ${OpenMP_CXX_FLAGS} ${OpenMP_C_FLAGS})
 target_link_libraries(PolyCapAPI Shadow3API)
 #########################################################################################
 # Ensmallen: a flexible C++ library for efficient numerical optimization (3-clause BSD licence)
-find_package(Ensmallen REQUIRED)
+find_package(Ensmallen REQUIRED PATHS /home/fs71764/miro/Software/3rd-Party/Install/include) #PATHS /home/fs71764/miro/Software/3rd-Party/Install
 if (ENSMALLEN_FOUND)
+  message(STATUS ${ENSMALLEN_INCLUDE_DIRS} "WHOOOP-WHOOP - MYMAN - OIDA")
   include_directories(${ENSMALLEN_INCLUDE_DIRS})
   target_link_libraries (OptimizerAPI ${ENSMALLEN_LIBRARIES})
 endif (ENSMALLEN_FOUND)
 
-# ALTERNATIVES FOR ENSMALLEN
+message(STATUS ${ENSMALLEN_INCLUDE_DIRS} "WHOOOP-WHOOP")
 
+# ALTERNATIVES FOR ENSMALLEN
 # GSL - GNU Scientific Library (mostly GNU General Public Licence)
 #find_package(GSL REQUIRED)
 #if (GSL_FOUND)

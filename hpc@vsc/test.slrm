@@ -1,0 +1,13 @@
+#!/bin/bash
+#
+#SBATCH -J seasonal_predictions
+#SBATCH -N 1
+##SBATCH --partition=mem_0096
+##SBATCH --qos=mem_0096   
+#SBATCH --ntasks-per-node=48
+#SBATCH --ntasks-per-core=2
+#SBATCH --mail-type=BEGIN
+#SBATCH --mail-user=michael.iro@tuwien.ac.at
+
+
+hostname
