@@ -27,8 +27,9 @@ int main() {
 
     for(int i = 5; i < 6; i++){
         //double i = 6.5;
-        arma::Col<double> eneCol(shadowBeam_.n_rows, arma::fill::value(energies[i]*50677300.0));
-        shadowBeam_.col(10) = eneCol; 
+        
+        //arma::Col<double> eneCol(shadowBeam_.n_rows, arma::fill::value(energies[i]*50677300.0));
+        //shadowBeam_.col(10) = eneCol; 
 
         XRBeam beam_( pc1_.traceFast(shadowBeam_) );
 

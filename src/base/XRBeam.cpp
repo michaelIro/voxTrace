@@ -172,14 +172,14 @@ arma::Mat<double> XRBeam::getMatrix() const{
 	int i =0;
 	for(auto ray: rays_){
 		//arma::rowvec row_ = 
-		rays__.row(i++)={
+		rays__.row(i++)=arma::rowvec({
 			ray.getStartX(),ray.getStartY(),ray.getStartZ(),
 			ray.getDirX(),ray.getDirY(),ray.getDirZ(),
 			ray.getSPolX(),ray.getSPolY(),ray.getSPolZ(),
 			(double) ray.getFlag(), ray.getWaveNumber(),(double) ray.getIndex(),
 			ray.getOpticalPath(),ray.getSPhase(),ray.getPPhase(),
 			ray.getPPolX(),ray.getPPolY(),ray.getPPolZ(),
-			ray.getProb()};
+			ray.getProb()});
 	}
 		
 	return rays__;
