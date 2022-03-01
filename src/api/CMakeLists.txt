@@ -2,15 +2,15 @@
 # sets the minimum required version of CMake itself 
 cmake_minimum_required(VERSION 3.15)
 
-# Tells CMake to use pkg-config (The standard installations of both X-Ray-Lib and Polycap are easier to link using this)
-include(FindPkgConfig)
-
 # sets the project name and version number
 project(voxTrace VERSION 1.0)
 
 # sets the C++ standard to C++20
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_VERBOSE_MAKEFILE on)
+set(CMAKE_CXX_STANDARD 20)
+#########################################################################################
+# Tells CMake to use pkg-config (The standard installations of both X-Ray-Lib and Polycap are easier to link using this)
+include(FindPkgConfig)
+#set(CMAKE_VERBOSE_MAKEFILE on)
 #########################################################################################
 add_library(XRayLibAPI XRayLibAPI.cpp)
 add_library(Shadow3API Shadow3API.cpp)
@@ -43,7 +43,7 @@ target_link_libraries(Shadow3API gfortran)
 # SciPlot: a C++ scientific plotiing library powerd by gnupolot (MIT License)
 find_package(sciplot REQUIRED PATHS /home/fs71764/miro/Software/3rd-Party/Install/share/sciplot)
 if (SCIPLOT_FOUND)
-  message(STATUS "THIS IS SCIPLOT....." ${SCIPLOT_INCLUDE_DIRS})
+  message(STATUS "SCI-PLOT: " ${SCIPLOT_INCLUDE_DIRS})
   include_directories(${SCIPLOT_INCLUDE_DIRS})
   target_link_libraries (PlotAPI ${SCIPLOT_LIBRARIES})
 endif (SCIPLOT_FOUND)
@@ -73,7 +73,7 @@ target_link_libraries(PolyCapAPI Shadow3API)
 # Ensmallen: a flexible C++ library for efficient numerical optimization (3-clause BSD licence)
 find_package(Ensmallen REQUIRED PATHS /home/fs71764/miro/Software/3rd-Party/Install/lib/cmake/ensmallen) #PATHS /home/fs71764/miro/Software/3rd-Party/Install
 if (ENSMALLEN_FOUND)
-  #message(STATUS ${ENSMALLEN_INCLUDE_DIRS} "WHOOOP-WHOOP - MYMAN - OIDA")
+  message(STATUS "ENSMALLEN: " ${ENSMALLEN_INCLUDE_DIRS})
   include_directories(${ENSMALLEN_INCLUDE_DIRS})
   target_link_libraries (OptimizerAPI ${ENSMALLEN_LIBRARIES})
 endif (ENSMALLEN_FOUND)
