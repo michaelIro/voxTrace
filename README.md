@@ -5,10 +5,10 @@ For a detailed documentation see ...
 
 If you use this code for your scientific work please refer to this paper ... in your publications.
 
-## A short statement by the author, concerning licencing: 
+## A short statement by the author, concerning licensing: 
 This codes is supposed to be free to use in a way that you can basically use it
 in any way you want, without any warranty from my side. I therefore chose the 
-MIT Licence (see [LICENSE](LICENSE)). Nevertheless, before using/redistributing this code in 
+MIT License (see [LICENSE](LICENSE)). Nevertheless, before using/redistributing this code in 
 a commercial way you should notice that some of the packages this code naturally 
 depends on have different licences:
 
