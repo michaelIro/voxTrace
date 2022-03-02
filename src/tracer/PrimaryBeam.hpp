@@ -21,7 +21,7 @@ class PrimaryBeam{
 	public:
 
   		PrimaryBeam() = delete;
-		PrimaryBeam(Shadow3API& shadowSource, PolyCapAPI& polyCap, int job_id, int rand_seed);
+		PrimaryBeam(Shadow3API& shadowSource, PolyCapAPI& polyCap, int job_id, int rand_seed, int n_sh_rays, int n_iter, int n_files);
 };
 
 #endif

@@ -6,29 +6,31 @@
  * @param shadowSource
  * @param polyCap
 */
-PrimaryBeam::PrimaryBeam(Shadow3API& shadowSource, PolyCapAPI& polyCap, int job_id, int rand_seed){
+PrimaryBeam::PrimaryBeam(Shadow3API& shadowSource, PolyCapAPI& polyCap, int job_id, int rand_seed, int n_sh_rays, int n_iter, int n_files){
 
 	//srand(time(NULL)); 
 	srand(rand_seed);
-	std::cout << "Job ID: " << job_id << " Random Seed: " << rand_seed << std::endl;
+	std::cout << "Job ID: " << job_id << "\tRandom Seed: " << rand_seed;
+	std::cout << "\t#Shadow-Rays: " << n_sh_rays << "\t#ITER: " << n_iter;
+	std::cout << "\t#Files " << n_files << std::endl;
 
-	for(int i = 0; i < 50; i ++){
+	for(int i = 0; i < n_files; i ++){
 		
 		std::chrono::steady_clock::time_point t0_ = std::chrono::steady_clock::now();
 
 		vector<XRBeam> beams_;
 		int	counter_ = 0;
 		bool fresh_ = false;
-		int max_iter_ = 16;
+		int max_iter_ = n_iter;
 		std::mutex mu_;
 
-		auto shadow_lambda_ = [&shadowSource, &fresh_, &counter_, max_iter_]() {
+		auto shadow_lambda_ = [&shadowSource, &fresh_, &counter_, max_iter_,n_sh_rays]() {
 			while(counter_ < max_iter_){
 				if(fresh_ == true)
 					std::this_thread::sleep_for(std::chrono::milliseconds(1)); 
 				else{
 					Shadow3API shadow_source_copy_(shadowSource);
-					shadowSource.trace(10000000,rand());
+					shadowSource.trace(n_sh_rays,rand());
 					fresh_ = true;
 				}
 			}
