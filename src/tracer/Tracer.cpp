@@ -41,7 +41,7 @@ Ray* Tracer::traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample 
 		return ray;
 		
 	double tIn;
-	double rayEnergy = (*ray).getEnergyKeV();	
+	double rayEnergy = (*ray).getEnergyKeV() /50677300.0;	 // FIXME: SOMETHING WRONG WITH ENERGY / 50677... should not be here
 	double muLin = (*currentVoxel).getMaterial().getMuLin(rayEnergy);
 	double intersectionLength = (*currentVoxel).intersect(ray,nextVoxel,&tIn);
 	double randomN = ((double) rand()) / ((double) RAND_MAX);

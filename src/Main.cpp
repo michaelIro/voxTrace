@@ -1,5 +1,7 @@
 //!	Main function
 #include <iostream>
+#include <string>
+#include <filesystem>
 
 #include "api/OptimizerAPI.hpp"
 #include "api/PlotAPI.hpp"
@@ -41,15 +43,21 @@ int main() {
 	//sample_.print();
 
 //---------------------------------------------------------------------------------------------
+	//std::cout << "JKLLKJÖL" << std::endl;
+    std::string path = "/media/miro/Data/Documents/TU Wien/VSC-BEAM/";
 
-std::vector<XRBeam> beams_;
-for(int i= 1; i < 100; i++){
-
+	std::vector<XRBeam> beams_;
+    for (const auto & file : std::filesystem::directory_iterator(path)){
+        //cout << file.path() << endl;
+	//for(int i= 1; i < 3; i++){
+	std::string pathname = file.path();
 
 	arma::Mat<double> myPrimaryCapBeam;
-	myPrimaryCapBeam.load(arma::hdf5_name("/media/miro/Data/Shadow-Beam/Fast/PC-246/PrimaryBeam-"+std::to_string(i)+".h5","my_data"));
-
+	//myPrimaryCapBeam.load(arma::hdf5_name("/media/miro/Data/Documents/TU Wien/Shadow-Beam/Fast/PC-246/PrimaryBeam-"+std::to_string(i)+".h5","my_data"));
+	//myPrimaryCapBeam.load(arma::hdf5_name("/media/miro/Data/Documents/TU Wien/VSC-BEAM/PrimaryBeam-"+std::to_string(i)+"-0.h5","my_data"));
+	myPrimaryCapBeam.load(arma::hdf5_name(file.path(),"my_data"));
 	XRBeam myPrimaryBeam(myPrimaryCapBeam);
+	//myPrimaryBeam.print();
 
 	//std::vector<XRBeam> beamVec = {myPrimaryBeam,myPrimaryBeam1};
 	//myPrimaryBeam = XRBeam::merge(beamVec);
@@ -80,6 +88,7 @@ for(int i= 1; i < 100; i++){
 	//XRBeam myDetectorBeam(mySecondaryPolycap.trace(fluorescence_.getMatrix(),2,(char*) "../test-data/out/beam/detectorBeam.hdf5",false));
 	XRBeam myDetectorBeam(mySecondaryPolycap.traceFast(fluorescence_.getMatrix()));
 	std::cout << "Detector size:" << myDetectorBeam.getRays().size() << std::endl;
+	
 
 /***********************************************************************************/
     return 0;
