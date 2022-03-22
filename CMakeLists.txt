@@ -11,6 +11,20 @@ set(CMAKE_CXX_STANDARD 20)
 link_directories(/home/fs71764/miro/Software/3rd-Party/Install/lib /opt/sw/spack-0.12.1/opt/spack/linux-centos7-x86_64/gcc-4.8.5/gcc-9.1.0-mj7s6dgfnhgi2n42fyxgmitnuslcyol3/bin/gfortran)
 #list(APPEND CMAKE_PREFIX_PATH "$HOME/Software/3rd-Party/Install/xraylib")
 #########################################################################################
+enable_language(CUDA)
+#include(CheckLanguage)
+#check_language(CUDA)
+
+if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
+  set(CMAKE_CUDA_ARCHITECTURES 75)      #TODO: Change do all or all-major in CMake 3.23
+endif()
+
+if(NOT DEFINED CMAKE_CUDA_STANDARD)
+    set(CMAKE_CUDA_STANDARD 11)
+    set(CMAKE_CUDA_STANDARD_REQUIRED ON)
+endif()
+#########################################################################################
+#########################################################################################
 # add the executable
 add_executable(Test-1 src/Test-1.cpp)
 add_executable(Test-2 src/Test-2.cpp)
@@ -21,7 +35,7 @@ add_executable(Main src/Main.cpp)
 target_link_libraries(Main XRayLibAPI Shadow3API PlotAPI PolyCapAPI OptimizerAPI vt.base vt.tracer)   #vt.tracer
 target_link_libraries(Test-1 XRayLibAPI Shadow3API PlotAPI PolyCapAPI OptimizerAPI vt.base vt.tracer) #vt.tracer
 target_link_libraries(Test-2 XRayLibAPI Shadow3API PlotAPI PolyCapAPI OptimizerAPI vt.base vt.tracer)
-target_link_libraries(Test-3 XRayLibAPI Shadow3API PlotAPI PolyCapAPI OptimizerAPI vt.base vt.tracer) #vt.tracer vt.cuda
+target_link_libraries(Test-3 XRayLibAPI Shadow3API PlotAPI PolyCapAPI OptimizerAPI vt.base vt.tracer vt.cuda) #vt.tracer vt.cuda
 target_link_libraries(Test-4 XRayLibAPI Shadow3API PlotAPI PolyCapAPI OptimizerAPI vt.base vt.tracer) #vt.tracer
 #########################################################################################
 add_subdirectory(src/api)

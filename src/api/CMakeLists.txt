@@ -28,7 +28,7 @@ target_compile_options(XRayLibAPI PUBLIC ${XRAYLIB_CFLAGS_OTHER})
 #message(STATUS ${XRAYLIB_LIBRARIES} "   WIR SIND HIER   " ${XRAYLIB_INCLUDE_DIRS} "    " ${XRAYLIB_CFLAGS_OTHER})
 #########################################################################################
 # Shadow3: an open source ray tracing code for modeling optical systems (MIT Licence) => https://github.com/PaNOSC-ViNYL/shadow3
-find_path(SHADOW_INCLUDE_DIR src/c/shadow_bind_cpp.hpp PATHS /home/fs71764/miro/Software/3rd-Party/Download/shadow3 /home/fs71764/miro/Software/3rd-Party/Download/shadow3) #PATHS /path/to/shadow3/src /home/miro/Software/3rd-party/shadow3 /home/miro/software/3rd-party/shadow3 
+find_path(SHADOW_INCLUDE_DIR src/c/shadow_bind_cpp.hpp PATHS /home/fs71764/miro/Software/3rd-Party/Download/shadow3 /home/miro/Software/3rd-party/shadow3) #PATHS /path/to/shadow3/src /home/miro/Software/3rd-party/shadow3 /home/miro/software/3rd-party/shadow3 
 
 find_library(SHADOW_CPP_LIBRARY libshadow3c++.a PATHS /home/fs71764/miro/Software/3rd-Party/Install/lib/)      
 find_library(SHADOW_C_LIBRARY libshadow3c.a PATHS /home/fs71764/miro/Software/3rd-Party/Install/lib/) 
