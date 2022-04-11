@@ -21,7 +21,7 @@ if(NOT DEFINED CMAKE_CUDA_STANDARD)
     set(CMAKE_CUDA_STANDARD_REQUIRED ON)
 endif()
 #########################################################################################
-add_library(vt.cuda MyDummy.cu)
+add_library(vt.cuda GPUTracer.cu)
 #########################################################################################
 #set_target_properties(CudaAPI PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 #target_include_directories(vt.cuda PUBLIC)

@@ -8,7 +8,7 @@
 
 #include "./ChemElement.hpp"
 #include "./Voxel.hpp"
-#include "../io/Scan.hpp"
+//#include "../io/Scan.hpp"
 
 
 using namespace std;
@@ -29,7 +29,7 @@ class Sample{
 	public:
 		Sample();
 		Sample(double x, double y, double z, double xL, double yL, double zL, double xLV, double yLV, double zLV, vector<vector<vector<Material>>> materials_);
-		Sample(Scan scan_): Sample(0.,0.,0.,scan_.getLengths()[0],scan_.getLengths()[1],scan_.getLengths()[2],15.,15.,15.,scan_.getMaterials()){};
+		//Sample(Scan scan_): Sample(0.,0.,0.,scan_.getLengths()[0],scan_.getLengths()[1],scan_.getLengths()[2],15.,15.,15.,scan_.getMaterials()){};
 		//Sample(const Sample &sample, double *problem);
 
 		double getXPos() const;
