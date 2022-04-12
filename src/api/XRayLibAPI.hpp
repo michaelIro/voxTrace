@@ -46,6 +46,7 @@ class XRayLibAPI{
         static double CS_Tot(int z, double energy);
         static double CS_Phot(int z, double energy);
         static double CS_Ray(int z, double energy);
+        static double CS_Compt(int z, double energy);
         static double CS_Phot_Part(int z, int shell, double energy); 
         static double CS_FluorL(int z, int shell, double energy);
 
