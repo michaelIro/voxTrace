@@ -201,10 +201,10 @@ double ChemElement::getThetaRayl(double energy, double randomN){
 }
 
 // Estimate memory size of ChemElement
-size_t ChemElement::getMemorySize() const{
+/*size_t ChemElement::getMemorySize() const{
 	size_t size = sizeof(ChemElement);
 	size += name_.capacity();
 	size += symbol_.capacity();
 	size += description_.capacity();
 	return size;
-}
+}*/
