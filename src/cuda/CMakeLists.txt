@@ -1,6 +1,6 @@
 #########################################################################################
 # sets the minimum required version of CMake itself 
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.18)
 
 # sets the project name and version number
 project(voxTrace VERSION 1.0)
@@ -8,20 +8,21 @@ project(voxTrace VERSION 1.0)
 # sets the C++ standard to C++20
 set(CMAKE_CXX_STANDARD 20)
 #########################################################################################
-enable_language(CUDA)
-#include(CheckLanguage)
-#check_language(CUDA)
+#find_package(CUDA REQUIRED)
+#include_directories(${CUDAToolkit_INCLUDE_DIR})
+#if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
+#  set(CMAKE_CUDA_ARCHITECTURES 75)      #TODO: Change do all or all-major in CMake 3.23
+#endif()
 
-if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
-  set(CMAKE_CUDA_ARCHITECTURES 75)      #TODO: Change do all or all-major in CMake 3.23
-endif()
-
-if(NOT DEFINED CMAKE_CUDA_STANDARD)
-    set(CMAKE_CUDA_STANDARD 11)
-    set(CMAKE_CUDA_STANDARD_REQUIRED ON)
-endif()
+#if(NOT DEFINED CMAKE_CUDA_STANDARD)
+#    set(CMAKE_CUDA_STANDARD 11)
+#    set(CMAKE_CUDA_STANDARD_REQUIRED ON)
+#endif()
 #########################################################################################
-add_library(vt.cuda GPUTracer.cu)
+#SET(CUDA_INCLUDE_DIRS "/usr/local/cuda/include" ${CUDA_INCLUDE_DIRS})
+#SET(CUDA_LIBRARIES ${CUDA_LIBRARIES} "/usr/local/cuda/lib64/libcudart.so" "/usr/lib64/libcuda.so" "/usr/local/cuda/lib64/libcublas.so")
+
+add_library(vt.cuda RayGPU.cu ChemElementGPU.cu MaterialGPU.cu VoxelGPU.cu SampleGPU.cu TracerGPU.cu)
 #########################################################################################
 #set_target_properties(CudaAPI PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 #target_include_directories(vt.cuda PUBLIC)
@@ -29,4 +30,8 @@ add_library(vt.cuda GPUTracer.cu)
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lcudart")
 #set_target_properties(vt.cuda PROPERTIES CUDA_ARCHITECTURES "35;50;72")
 target_link_libraries(vt.cuda XRayLibAPI)
+#SET(CUDA_PROPAGATE_HOST_FLAGS ON)
+#set_property(TARGET vt.cuda PROPERTY CUDA_SEPARABLE_COMPILATION ON)
+#SET(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} --verbose -dlink -Xcompiler -fvisibility=hidden)
+#add_compile_options()
 #target_link_libraries(Tests XRayLibAPI Shadow3API PlotAPI PolyCapAPI OptimizerAPI vt.base vt.tracer)

@@ -1,6 +1,6 @@
 #########################################################################################
 # sets the minimum required version of CMake itself 
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.18)
 
 # sets the project name and version
 project(voxTrace VERSION 1.0)
@@ -12,11 +12,9 @@ link_directories(/home/fs71764/miro/Software/3rd-Party/Install/lib /opt/sw/spack
 #list(APPEND CMAKE_PREFIX_PATH "$HOME/Software/3rd-Party/Install/xraylib")
 #########################################################################################
 enable_language(CUDA)
-#include(CheckLanguage)
-#check_language(CUDA)
 
 if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
-  set(CMAKE_CUDA_ARCHITECTURES 75)      #TODO: Change do all or all-major in CMake 3.23
+  set(CMAKE_CUDA_ARCHITECTURES 86)      #TODO: Change do all or all-major in CMake 3.23
 endif()
 
 if(NOT DEFINED CMAKE_CUDA_STANDARD)
@@ -77,20 +75,6 @@ endif(NOT HDF5_FOUND)
 #find_package(LAPACK REQUIRED)    #
 #find_package(OpenACC REQUIRED)   #
 #find_package(MPI REQUIRED)
-#find_package(CUDA REQUIRED)
-#########################################################################################
-#enable_language(CUDA)
-##include(CheckLanguage)
-##check_language(CUDA)
-
-#if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
-#  set(CMAKE_CUDA_ARCHITECTURES 75)      #TODO: Change do all or all-major in CMake 3.23
-#endif()
-
-#if(NOT DEFINED CMAKE_CUDA_STANDARD)
-#    set(CMAKE_CUDA_STANDARD 11)
-#    set(CMAKE_CUDA_STANDARD_REQUIRED ON)
-#endif()
 ######################################################################################## end of finding libraries
 target_compile_options(Test-1 PUBLIC -DARMA_USE_HDF5)#-O3
 target_compile_options(Test-2 PUBLIC -DARMA_USE_HDF5) #-O3
