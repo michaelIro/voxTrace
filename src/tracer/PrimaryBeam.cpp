@@ -70,7 +70,7 @@ PrimaryBeam::PrimaryBeam(Shadow3API& shadowSource, PolyCapAPI& polyCap, int job_
 		XRBeam beam_ = XRBeam::merge(beams_);
 		//std::cout << "Here we are!" << std::endl;
 		std::cout << ("./out/PrimaryBeam-"+std::to_string(job_id)+"-"+std::to_string(i)+".h5") << std::endl;
-		beam_.getMatrix().save(arma::hdf5_name("./out/PrimaryBeam-"+std::to_string(job_id)+"-"+std::to_string(i)+".h5","my_data"));
+		beam_.getMatrix().save(arma::hdf5_name("../test-data/out/PrimaryBeam-"+std::to_string(job_id)+"-"+std::to_string(i)+".h5","my_data"));
 		
 		std::cout << "Beam size: " << beam_.getRays().size() << std::endl;
 
