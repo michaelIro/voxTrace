@@ -31,7 +31,7 @@ class SampleGPU{
 	public:
 		__host__ __device__ SampleGPU(){ };
 
-		__host__ __device__ SampleGPU(float x, float y, float z, float xL, float yL, float zL, float xLV, float yLV, float zLV, int xN_, int yN_, int zN_, VoxelGPU* voxels, VoxelGPU *oobVoxel){
+		__host__ __device__ SampleGPU(float x, float y, float z, float xL, float yL, float zL, float xLV, float yLV, float zLV, int xN, int yN, int zN, VoxelGPU* voxels, VoxelGPU *oobVoxel){
 	
     		x_ = x;
 			y_ = y;
@@ -133,25 +133,32 @@ class SampleGPU{
 		__device__ VoxelGPU* getOOBVoxel() const {return oobVoxel_;};
 
 		__device__ VoxelGPU* findStartVoxel(RayGPU *ray){
+  
+  			//printf("Jambalaya!\n");
 
-			float x_in = (*ray).getStartX();
-			float y_in = (*ray).getStartY();
-			float z_in = (*ray).getStartZ();
+			float x_in = ray->getStartX();
+			float y_in = ray->getStartY();
+			float z_in = ray->getStartZ();
+
+						  //printf("%f\n",x_in);			  
+						  //printf("%f\n",y_in);
+						  //printf("%f\n",z_in);
 
 			// Check if the ray is a primary ray -> If so, calculate coordinates of Voxel which is touched first by the ray from the top. 
-			if((*ray).getStartZ() < getZPos()){
-				float t = ( getZPos()-(*ray).getStartZ() ) / (*ray).getDirZ();
-				x_in += t*(*ray).getDirX();
-				y_in += t*(*ray).getDirY();
-				z_in += t*(*ray).getDirZ();
+			if(ray->getStartZ() < getZPos()){
+				float t = ( getZPos()-ray->getStartZ() ) / ray->getDirZ();
+				x_in += t*ray->getDirX();
+				y_in += t*ray->getDirY();
+				z_in += t*ray->getDirZ();
 			}
 
 			// Check if ray hits the sample from the top direction -> If not, calculate coordinates of Voxel which is touched first by the ray from the side. 
 			if( (x_in<0.) || (y_in<0.) || (z_in<0.) ){
-				float t = ( getYPos()-(*ray).getStartY() ) / (*ray).getDirY();
-				x_in = (*ray).getStartX() + t*(*ray).getDirX();
-				y_in = (*ray).getStartY() + t*(*ray).getDirY();
-				z_in = (*ray).getStartZ() + t*(*ray).getDirZ();
+				//printf("Jambalaya! The wrongness is before.\n");
+				float t = ( getYPos()-ray->getStartY() ) / ray->getDirY();
+				x_in = ray->getStartX() + t*ray->getDirX();
+				y_in = ray->getStartY() + t*ray->getDirY();
+				z_in = ray->getStartZ() + t*ray->getDirZ();
 			}
 				
 			return getVoxel(x_in,y_in,z_in);

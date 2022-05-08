@@ -2,9 +2,12 @@
 #ifndef TRACER_GPU_H
 #define TRACER_GPU_H
 
+#define ARMA_ALLOW_FAKE_GCC 
+
 #include <iostream>
 #include <math.h>
 #include <armadillo>
+#include <filesystem>
 
 #include "../cuda/RayGPU.cu"
 #include "../cuda/ChemElementGPU.cu"
@@ -21,7 +24,9 @@ class TracerGPU{
 
 	public:
 
-		static void callTrace(); 
+		static void callTrace(); 	//arma::Mat<double>& beam_
+		static void callAdd();
+		static void callTest();
 
 		__device__ static RayGPU* traceForward(RayGPU* ray, VoxelGPU* currentVoxel, int* nextVoxel, SampleGPU *sample, curandState_t *localState);
 

@@ -111,6 +111,22 @@ class RayGPU {
 	__host__ __device__ int getIANum() const {return iaNum_;};
 	__host__ __device__ float getProb() const {return prob_;};
 
+	__host__ __device__ void primaryTransform(float x0, float y0, float z0, float d, float alpha){
+
+		float alpha_ = alpha / 180 * M_PI;
+
+		float x0_ = x0 + getStartX();
+		float y0_ = y0 - d * cos(alpha_) + cos(alpha_)*getStartY()-sin(alpha_)*getStartZ();
+		float z0_ = z0 - d * sin(alpha_) + sin(alpha_)*getStartY()+cos(alpha_)*getStartZ();
+
+		float xd_ = getDirX(); 
+		float yd_ = cos(alpha_)*getDirY()-sin(alpha_)*getDirZ();
+		float zd_ = sin(alpha_)*getDirY()+cos(alpha_)*getDirZ();
+
+		setStartCoordinates(x0_,y0_,z0_);
+		setEndCoordinates(xd_,yd_,zd_);
+	}
+
 	__host__ void print() const { 
 		std::cout << "Ray " << q_ << "\t Energy: \t" << getEnergyKeV() << " keV \t Memory-Size: " << memory_size_ << " Byte"<<std::endl;
 		//std::cout << "Start: \t" << x0_ << "\t" << y0_ << "\t" << z0_ << std::endl;
