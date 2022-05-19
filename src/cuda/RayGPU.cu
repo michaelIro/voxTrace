@@ -115,16 +115,56 @@ class RayGPU {
 
 		float alpha_ = alpha / 180 * M_PI;
 
-		float x0_ = x0 + getStartX();
-		float y0_ = y0 - d * cos(alpha_) + cos(alpha_)*getStartY()-sin(alpha_)*getStartZ();
-		float z0_ = z0 - d * sin(alpha_) + sin(alpha_)*getStartY()+cos(alpha_)*getStartZ();
+		float x0__ = x0 + getStartX();
+		float y0__ = y0 - d * cos(alpha_) + cos(alpha_)*getStartY()-sin(alpha_)*getStartZ();
+		float z0__ = z0 - d * sin(alpha_) + sin(alpha_)*getStartY()+cos(alpha_)*getStartZ();
 
-		float xd_ = getDirX(); 
-		float yd_ = cos(alpha_)*getDirY()-sin(alpha_)*getDirZ();
-		float zd_ = sin(alpha_)*getDirY()+cos(alpha_)*getDirZ();
+		float xd__ = getDirX(); 
+		float yd__ = cos(alpha_)*getDirY()-sin(alpha_)*getDirZ();
+		float zd__ = sin(alpha_)*getDirY()+cos(alpha_)*getDirZ();
 
-		setStartCoordinates(x0_,y0_,z0_);
-		setEndCoordinates(xd_,yd_,zd_);
+		setStartCoordinates(x0__,y0__,z0__);
+		setEndCoordinates(xd__,yd__,zd__);
+	}
+
+	__host__ __device__ void secondaryTransform(float x0, float y0, float z0, float d, float beta){
+		
+		beta = beta / 180 * M_PI;
+
+		if((getStartZ()>=0.0) && (getDirZ()<0.0)){
+
+			float x0__ = getStartX() - x0;
+			float y0__ = cos(beta)*(getStartY()-y0)-sin(beta)*(getStartZ()-z0);
+			float z0__ = sin(beta)*(getStartY()-y0)+cos(beta)*(getStartZ()-z0);
+
+			float xd__ = getDirX(); 
+			float yd__ = cos(beta)*getDirY()-sin(beta)*getDirZ();
+			float zd__ = sin(beta)*getDirY()+cos(beta)*getDirZ();
+
+
+			float dfac_= (0.49-y0__) / yd__;
+			float rin_= 0.1; //actually 0.095
+
+			x0__= x0__ + dfac_ * xd__;
+			y0__= 0.0;
+			z0__= z0__ + dfac_ * zd__;
+
+			//float r_spot_ = sqrt( (xd_*dfac_)*(xd_*dfac_) + (zd_*dfac_)*(zd_*dfac_));
+			float r_spot_ = sqrt( (x0__*x0__) + (z0__*z0__) );
+
+			if(r_spot_ < rin_){
+				setStartCoordinates(x0__,y0__,z0__);
+				setEndCoordinates(xd__,yd__,zd__);
+				setIAFlag(true);
+			}
+			else{
+				setIAFlag(false);
+			}
+		}
+		else{
+			setIAFlag(false);
+		}
+
 	}
 
 	__host__ void print() const { 

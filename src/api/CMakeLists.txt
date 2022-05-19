@@ -13,10 +13,10 @@ include(FindPkgConfig)
 #set(CMAKE_VERBOSE_MAKEFILE on)
 #########################################################################################
 add_library(XRayLibAPI XRayLibAPI.cpp)
-#add_library(Shadow3API Shadow3API.cpp)
-#add_library(PlotAPI PlotAPI.cpp)
-#add_library(PolyCapAPI PolyCapAPI.cpp)
-#add_library(OptimizerAPI OptimizerAPI.cpp)
+add_library(Shadow3API Shadow3API.cpp)
+add_library(PolyCapAPI PolyCapAPI.cpp)
+add_library(PlotAPI PlotAPI.cpp)
+add_library(OptimizerAPI OptimizerAPI.cpp)
 #########################################################################################
 #include_directories(${HOME}/Software/3rd-Party/Install/**)
 # XrayLib: a library for interactions of X-rays with matter => https://github.com/tschoonj/xraylib
@@ -28,55 +28,54 @@ target_compile_options(XRayLibAPI PUBLIC ${XRAYLIB_CFLAGS_OTHER})
 #message(STATUS ${XRAYLIB_LIBRARIES} "   WIR SIND HIER   " ${XRAYLIB_INCLUDE_DIRS} "    " ${XRAYLIB_CFLAGS_OTHER})
 #########################################################################################
 # Shadow3: an open source ray tracing code for modeling optical systems (MIT Licence) => https://github.com/PaNOSC-ViNYL/shadow3
-#find_path(SHADOW_INCLUDE_DIR src/c/shadow_bind_cpp.hpp PATHS /home/fs71764/miro/Software/3rd-Party/Download/shadow3 /home/miro/Software/3rd-party/shadow3) #PATHS /path/to/shadow3/src /home/miro/Software/3rd-party/shadow3 /home/miro/software/3rd-party/shadow3 
+find_path(SHADOW_INCLUDE_DIR src/c/shadow_bind_cpp.hpp PATHS /home/fs71764/miro/Software/3rd-Party/Download/shadow3 /home/miro/Software/3rd-party/shadow3) #PATHS /path/to/shadow3/src /home/miro/Software/3rd-party/shadow3 /home/miro/software/3rd-party/shadow3 
 
-#find_library(SHADOW_CPP_LIBRARY libshadow3c++.a PATHS /home/fs71764/miro/Software/3rd-Party/Install/lib/)      
-#find_library(SHADOW_C_LIBRARY libshadow3c.a PATHS /home/fs71764/miro/Software/3rd-Party/Install/lib/) 
-#find_library(SHADOW_LIBRARY libshadow3.a PATHS /home/fs71764/miro/Software/3rd-Party/Install/lib/) 
+find_library(SHADOW_CPP_LIBRARY libshadow3c++.a PATHS /home/fs71764/miro/Software/3rd-Party/Install/lib/)      
+find_library(SHADOW_C_LIBRARY libshadow3c.a PATHS /home/fs71764/miro/Software/3rd-Party/Install/lib/) 
+find_library(SHADOW_LIBRARY libshadow3.a PATHS /home/fs71764/miro/Software/3rd-Party/Install/lib/) 
 
 #message(STATUS ${SHADOW_INCLUDE_DIR} "\t" ${SHADOW_LIBRARY} "\t" ${SHADOW_C_LIBRARY} "\t" ${SHADOW_CPP_LIBRARY})
 #message(${CMAKE_SOURCE_DIR})
-#target_include_directories(Shadow3API PUBLIC ${SHADOW_INCLUDE_DIR}/src ${SHADOW_INCLUDE_DIR}/src/c ${SHADOW_INCLUDE_DIR}/src/def)
-#target_link_libraries(Shadow3API ${SHADOW_CPP_LIBRARY} ${SHADOW_C_LIBRARY} ${SHADOW_LIBRARY})
-#target_link_libraries(Shadow3API gfortran)
-#########################################################################################
-# SciPlot: a C++ scientific plotiing library powerd by gnupolot (MIT License)
-#find_package(sciplot REQUIRED PATHS /home/fs71764/miro/Software/3rd-Party/Install/share/sciplot)
-#if (SCIPLOT_FOUND)
-#  message(STATUS "SCI-PLOT: " ${SCIPLOT_INCLUDE_DIRS})
-#  include_directories(${SCIPLOT_INCLUDE_DIRS})
-#  target_link_libraries (PlotAPI ${SCIPLOT_LIBRARIES})
-#endif (SCIPLOT_FOUND)
+target_include_directories(Shadow3API PUBLIC ${SHADOW_INCLUDE_DIR}/src ${SHADOW_INCLUDE_DIR}/src/c ${SHADOW_INCLUDE_DIR}/src/def)
+target_link_libraries(Shadow3API ${SHADOW_CPP_LIBRARY} ${SHADOW_C_LIBRARY} ${SHADOW_LIBRARY})
+target_link_libraries(Shadow3API gfortran)
 #########################################################################################
 # PolyCap: a C library to calculate X-ray transmission through polycapillaries => https://github.com/PieterTack/polycap
-#pkg_check_modules(POLYCAP REQUIRED libpolycap)
-#target_link_libraries(PolyCapAPI ${POLYCAP_LIBRARIES})
-#target_include_directories(PolyCapAPI PUBLIC ${POLYCAP_INCLUDE_DIRS})
-#target_compile_options(PolyCapAPI PUBLIC ${XPOLYCAP_CFLAGS_OTHER})
+pkg_check_modules(POLYCAP REQUIRED libpolycap)
+target_link_libraries(PolyCapAPI ${POLYCAP_LIBRARIES})
+target_include_directories(PolyCapAPI PUBLIC ${POLYCAP_INCLUDE_DIRS})
+target_compile_options(PolyCapAPI PUBLIC ${XPOLYCAP_CFLAGS_OTHER})
 
-#message(STATUS "POLYCAP_LIBRARIES: "${POLYCAP_LIBRARIES} "   DIRS   " ${POLYCAP_INCLUDE_DIRS} "   FLAGS: " ${POLYCAP_CFLAGS_OTHER})
+message(STATUS "POLYCAP_LIBRARIES: "${POLYCAP_LIBRARIES} "   DIRS   " ${POLYCAP_INCLUDE_DIRS} "   FLAGS: " ${POLYCAP_CFLAGS_OTHER})
 
-#find_package(OpenMP REQUIRED)
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
-#target_link_libraries(PolyCapAPI  OpenMP::OpenMP_CXX)
-#target_link_libraries(PolyCapAPI  OpenMP::OpenMP_C)
+find_package(OpenMP REQUIRED)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
+target_link_libraries(PolyCapAPI  OpenMP::OpenMP_CXX)
+target_link_libraries(PolyCapAPI  OpenMP::OpenMP_C)
 
-#target_compile_options(PolyCapAPI PRIVATE ${OpenMP_CXX_FLAGS} ${OpenMP_C_FLAGS})
+target_compile_options(PolyCapAPI PRIVATE ${OpenMP_CXX_FLAGS} ${OpenMP_C_FLAGS})
 
-#target_link_libraries(PolyCapAPI Shadow3API)
+target_link_libraries(PolyCapAPI Shadow3API)
 
-#find_package(Boost REQUIRED)
-#include_directories( ${Boost_INCLUDE_DIR} )
-#TARGET_LINK_LIBRARIES(PolyCapAPI LINK_PUBLIC ${Boost_LIBRARIES} )
-
+find_package(Boost REQUIRED)
+include_directories( ${Boost_INCLUDE_DIR} )
+TARGET_LINK_LIBRARIES(PolyCapAPI LINK_PUBLIC ${Boost_LIBRARIES} )
+#########################################################################################
+# SciPlot: a C++ scientific plotiing library powerd by gnupolot (MIT License)
+find_package(sciplot REQUIRED PATHS /home/fs71764/miro/Software/3rd-Party/Install/share/sciplot)
+if (SCIPLOT_FOUND)
+  message(STATUS "SCI-PLOT: " ${SCIPLOT_INCLUDE_DIRS})
+  include_directories(${SCIPLOT_INCLUDE_DIRS})
+  target_link_libraries (PlotAPI ${SCIPLOT_LIBRARIES})
+endif (SCIPLOT_FOUND)
 #########################################################################################
 # Ensmallen: a flexible C++ library for efficient numerical optimization (3-clause BSD licence)
-#find_package(Ensmallen REQUIRED PATHS /home/fs71764/miro/Software/3rd-Party/Install/lib/cmake/ensmallen) #PATHS /home/fs71764/miro/Software/3rd-Party/Install
-#if (ENSMALLEN_FOUND)
-#  message(STATUS "ENSMALLEN: " ${ENSMALLEN_INCLUDE_DIRS})
-#  include_directories(${ENSMALLEN_INCLUDE_DIRS})
-#  target_link_libraries (OptimizerAPI ${ENSMALLEN_LIBRARIES})
-#endif (ENSMALLEN_FOUND)
+find_package(Ensmallen REQUIRED PATHS /home/fs71764/miro/Software/3rd-Party/Install/lib/cmake/ensmallen) #PATHS /home/fs71764/miro/Software/3rd-Party/Install
+if (ENSMALLEN_FOUND)
+  message(STATUS "ENSMALLEN: " ${ENSMALLEN_INCLUDE_DIRS})
+  include_directories(${ENSMALLEN_INCLUDE_DIRS})
+  target_link_libraries (OptimizerAPI ${ENSMALLEN_LIBRARIES})
+endif (ENSMALLEN_FOUND)
 
 #message(STATUS ${ENSMALLEN_INCLUDE_DIRS} "WHOOOP-WHOOP")
 

@@ -16,11 +16,19 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=t
 /** GPU kernel function to initialize the random states */
 __global__ void init(unsigned int seed, curandState_t* states) 
 {
-  curand_init(seed, 					// the seed can be the same for each core, here we pass the time in from the CPU 
-              blockIdx.x, 				// the sequence number should be different for each core (unless you want all cores to get the same sequence of numbers for some reason - use thread id!
-              0, 						// the offset is how much extra we advance in the sequence for each call, can be 0 
+  curand_init(seed, 					      // the seed can be the same for each core, here we pass the time in from the CPU 
+              blockIdx.x, 				  // the sequence number should be different for each core (unless you want all cores to get the same sequence of numbers for some reason - use thread id!
+              0, 						        // the offset is how much extra we advance in the sequence for each call, can be 0 
               &states[blockIdx.x]);
 }
+
+/** GPU kernel function to create RayGPU objects from armadillo matrix 
+__global__ void raygen(RayGPU* rays,  arma::Mat<double> beam_) 
+{
+      int i = blockIdx
+		  rays[i] = RayGPU(beam_(i,0),beam_(i,1),beam_(i,2),beam_(i,3),beam_(i,4),beam_(i,5),beam_(i,6),beam_(i,7),beam_(i,8),beam_(i,9),
+	  		beam_(i,10),beam_(i,11),beam_(i,12),beam_(i,13),beam_(i,14),beam_(i,15),beam_(i,16),beam_(i,17),beam_(i,18));
+}*/ 
 
 // Kernel function to add the elements of two arrays
 __global__ void add(int n, float *x, float *y)
@@ -33,15 +41,11 @@ __global__ void add(int n, float *x, float *y)
 __global__ void trace(RayGPU *rays, SampleGPU* sample, curandState_t *states)
 {
 	RayGPU*	currentRay = &rays[blockIdx.x];
+  currentRay->primaryTransform(70.0, 70.0,0.0, 0.51, 45.0);
 	VoxelGPU* currentVoxel = sample->findStartVoxel(currentRay);
-
-  //if(threadIdx.x == 0)
-    printf("%d\n", currentVoxel->getY0());
-
 	int nextVoxel = 13;	
-	*currentRay = *TracerGPU::traceForward(currentRay, currentVoxel,&nextVoxel, sample,&states[threadIdx.x]);
-
-
+	*currentRay = *TracerGPU::traceForward(currentRay, currentVoxel,&nextVoxel, sample,&states[blockIdx.x]);
+  currentRay->secondaryTransform(70.0, 70.0,0.0, 0.49, 45.0);
 	//printf("BlockIDX: %p ThreadIDX: %p\n",blockIdx.x,threadIdx.x);
 	//printf("ThreadIDX %p\n",threadIdx.x);
 }
@@ -75,23 +79,19 @@ __device__  RayGPU* TracerGPU::traceForward(RayGPU* ray, VoxelGPU* currentVoxel,
 		return ray;
 		
 	float tIn;
-	float rayEnergy = ray->getEnergyKeV() /50677300.0;	 // FIXME: SOMETHING WRONG WITH ENERGY / 50677... should not be here
+	float rayEnergy = ray->getEnergyKeV();
 	float muLin = currentVoxel->getMaterial()->CS_Tot_Lin(rayEnergy);
 	float intersectionLength = currentVoxel->intersect(ray,nextVoxel,&tIn);
-	float randomN = curand_uniform (localState);
+	float randomN = curand_uniform(localState);
 
 	// Interaction in this Voxel?
-	if(exp(-muLin*intersectionLength) < randomN){
+	if(expf(-muLin*intersectionLength) < curand_uniform(localState)){
 
-		//(*ia)++;
-
-		// Selection of chemical Element to interact with		
-		randomN = curand_uniform (localState);
-		ChemElementGPU* interactingElement = currentVoxel->getMaterial()->getInteractingElement(rayEnergy,randomN);
+		// Selection of chemical Element to interact with	
+		ChemElementGPU* interactingElement = currentVoxel->getMaterial()->getInteractingElement(rayEnergy,curand_uniform(localState));
 
 		// Selection of interaction type
-		randomN = curand_uniform (localState);
-		int interactionType = interactingElement->getInteractionType(rayEnergy,randomN);
+		int interactionType = interactingElement->getInteractionType(rayEnergy,curand_uniform(localState));
 
 		if(interactionType == 0){ // Photo-Absorption
 			
@@ -109,20 +109,20 @@ __device__  RayGPU* TracerGPU::traceForward(RayGPU* ray, VoxelGPU* currentVoxel,
 			else{ // X-ray-Fluorescence
 
 				randomN = curand_uniform (localState);
-				int myLine = (*interactingElement).getTransition(myShell, randomN);
+				int myLine = interactingElement->getTransition(myShell, randomN);
 
 				randomN = curand_uniform (localState);
 				float phi = 2*M_PI*randomN;
 
 				randomN = curand_uniform (localState);
-				float theta = acos(2*randomN-1);
+				float theta = acosf(2*randomN-1);
 
 				randomN = curand_uniform (localState);
 				float l = intersectionLength*randomN + tIn;
 
-				float xNew = (*ray).getStartX()+(*ray).getDirX()*l;
-				float yNew = (*ray).getStartY()+(*ray).getDirY()*l;
-				float zNew = (*ray).getStartZ()+(*ray).getDirZ()*l;
+				float xNew = ray->getStartX()+ray->getDirX()*l;
+				float yNew = ray->getStartY()+ray->getDirY()*l;
+				float zNew = ray->getStartZ()+ray->getDirZ()*l;
 				
 				ray->rotate(phi,theta);
 				ray->setStartCoordinates(xNew,yNew,zNew);
@@ -137,7 +137,7 @@ __device__  RayGPU* TracerGPU::traceForward(RayGPU* ray, VoxelGPU* currentVoxel,
 			float phi = 2*M_PI*randomN;
 				
 			randomN = curand_uniform (localState);
-			float theta = (*interactingElement).getThetaRayl(rayEnergy,randomN);	
+			float theta = interactingElement->getThetaRayl(rayEnergy,randomN);	
 	
 			ray->rotate(phi,theta);
 
@@ -157,7 +157,7 @@ __device__  RayGPU* TracerGPU::traceForward(RayGPU* ray, VoxelGPU* currentVoxel,
 			float phi = 2*M_PI*randomN;
 
 			randomN = curand_uniform (localState);
-			float theta = (*interactingElement).getThetaCompt(rayEnergy,randomN);	
+			float theta = interactingElement->getThetaCompt(rayEnergy,randomN);	
 
 			ray->rotate(phi,theta);
 
@@ -249,43 +249,61 @@ void TracerGPU::callTrace(){
   *oobVoxel = VoxelGPU(-1.,-1.,-1.,-1.,-1.,-1.,&(materials[0]));
   *sample = SampleGPU(x_, y_,  z_, xL_,  yL_, zL_,  xLV_,  yLV_,  zLV_, xN_, yN_,  zN_, voxels, oobVoxel);
 
-  std::string path = "/tank/data/";
+  //std::string path = "/tank/data/";
+  std::string path = "/media/miro/Data/Documents/TU Wien/VSC-BEAM/";
 
   for (const auto & file : std::filesystem::directory_iterator(path)){
-	std::string pathname = file.path();
-	std::cout << pathname << std::endl;
+	  std::string pathname = file.path();
+	  std::cout << pathname << std::endl;
 
-	arma::Mat<double> beam_;	// = new arma::Mat<double>();
-  	beam_.load(arma::hdf5_name(pathname, "my_data")); 
-  	//std::cout << "beam_.n_rows: " << beam_.n_rows << std::endl;
-  	int N = beam_.n_rows;
+	  arma::Mat<double> beam_;	// = new arma::Mat<double>();
+    beam_.load(arma::hdf5_name(pathname, "my_data")); 
+    std::cout << "beam_.n_rows: " << beam_.n_rows << std::endl;
+    int N = beam_.n_rows;
 
-  	curandState_t* states;
-  	cudaMallocManaged(&states, N*sizeof(curandState_t));
 
-  	init<<<N, 1>>>(time(0), states);
+    curandState_t* states;
+    cudaMallocManaged(&states, N*sizeof(curandState_t));
 
-  	RayGPU* rays;
-  	cudaMallocManaged(&rays, beam_.n_rows*sizeof(RayGPU));
+    init<<<N, 1>>>(time(0), states);
 
-  	for(int i = 0; i < beam_.n_rows; i++){
-		rays[i] = RayGPU(beam_(i,0),beam_(i,1),beam_(i,2),beam_(i,3),beam_(i,4),beam_(i,5),beam_(i,6),beam_(i,7),beam_(i,8),beam_(i,9),
-			beam_(i,10),beam_(i,11),beam_(i,12),beam_(i,13),beam_(i,14),beam_(i,15),beam_(i,16),beam_(i,17),beam_(i,18));
-    rays[i].primaryTransform(70.0, 70.0,0.0, 0.51, 45.0);
-  	}
+    RayGPU* rays;
+    int success=0;
 
-	//std::cout << "HERE" << std::endl;
+    cudaMallocManaged(&rays, beam_.n_rows*sizeof(RayGPU));
+    //cudaMallocManaged(&s_rays, beam_.n_rows*sizeof(RayGPU));
+	  clock_t begin = clock();
 
-  	trace<<<N,1>>>(rays,sample, states);
+    for(int i = 0; i < beam_.n_rows; i++){
+		  rays[i] = RayGPU(beam_(i,0),beam_(i,1),beam_(i,2),beam_(i,3),beam_(i,4),beam_(i,5),beam_(i,6),beam_(i,7),beam_(i,8),beam_(i,9),
+	  		beam_(i,10),beam_(i,11),beam_(i,12),beam_(i,13),beam_(i,14),beam_(i,15),beam_(i,16),beam_(i,17),beam_(i,18));
+    }
 
-  	cudaDeviceSynchronize();
+    clock_t middle = clock();
 
-	for(int i = 0; i < beam_.n_rows; i++){
-		if(rays[i].getIANum() != 0)
-			rays[i].print();
-	}
 
-	cudaFree(rays);
+    //std::chrono::steady_clock::time_point t1_ = std::chrono::steady_clock::now();
+
+    //std::cout << "READ FILE FOR: " << t1_-t0_ << std::endl;
+
+    trace<<<N,1>>>(rays,sample, states);
+
+
+    cudaDeviceSynchronize();
+
+    clock_t end = clock();
+    double time_spent = (double)(end - middle) / CLOCKS_PER_SEC;
+    double time_spent1 = (double)(middle - begin) / CLOCKS_PER_SEC;
+    printf("Read: %f Trace: %f\n", time_spent, time_spent1);
+
+	  for(int i = 0; i < beam_.n_rows; i++){
+			//p_rays[i].secondaryTransform(70.0, 70.0,0.0, 0.49, 45.0);
+      if(rays[i].getIAFlag())
+        success++;
+	  }
+    std::cout << "sucess: " << success << std::endl;
+
+	  cudaFree(rays);
   }
  
   //free all memory cuda

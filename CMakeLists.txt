@@ -25,23 +25,22 @@ endif()
 #set(CMAKE_VERBOSE_MAKEFILE ON)
 #set(CUDA_VERBOSE_BUILD ON)
 #set(CUDA_NVCC_FLAGS_DEBUG "-g -G -O0")
-#########################################################################################
-# add the executable
-#add_executable(Test-1 src/Test-1.cpp)
-#add_executable(Test-2 src/Test-2.cpp)
+######################################################################################### add the executables
+add_executable(Test-1 src/Test-1.cpp)
+add_executable(Test-2 src/Test-2.cpp)
 add_executable(Test-3 src/Test-3.cpp)
-#add_executable(Test-4 src/Test-4.cpp)
-#add_executable(Main src/Main.cpp)
+add_executable(Test-4 src/Test-4.cpp)
+add_executable(Main src/Main.cpp)
 #########################################################################################
-#target_link_libraries(Main XRayLibAPI Shadow3API PlotAPI PolyCapAPI OptimizerAPI vt.base vt.tracer)   #vt.tracer
-#target_link_libraries(Test-1 XRayLibAPI Shadow3API PlotAPI PolyCapAPI OptimizerAPI vt.base vt.tracer) #vt.tracer
-#target_link_libraries(Test-2 XRayLibAPI Shadow3API PlotAPI PolyCapAPI OptimizerAPI vt.base vt.tracer)
+target_link_libraries(Main XRayLibAPI Shadow3API PlotAPI PolyCapAPI OptimizerAPI vt.base vt.tracer)   #vt.tracer
+target_link_libraries(Test-1 XRayLibAPI Shadow3API PlotAPI PolyCapAPI OptimizerAPI vt.base vt.tracer) #vt.tracer
+target_link_libraries(Test-2 XRayLibAPI Shadow3API PlotAPI PolyCapAPI OptimizerAPI vt.base vt.tracer)
 target_link_libraries(Test-3 XRayLibAPI vt.cuda) #vt.tracer vt.cuda
-#target_link_libraries(Test-4 XRayLibAPI Shadow3API PlotAPI PolyCapAPI OptimizerAPI vt.base vt.tracer) #vt.tracer
+target_link_libraries(Test-4 XRayLibAPI Shadow3API PlotAPI PolyCapAPI OptimizerAPI vt.base vt.tracer) #vt.tracer
 #########################################################################################
 add_subdirectory(src/api)
-#add_subdirectory(src/base)
-#add_subdirectory(src/tracer)
+add_subdirectory(src/base)
+add_subdirectory(src/tracer)
 add_subdirectory(src/cuda)
 #add_subdirectory(docs)
 ######################################################################################### find installed libraries: Armadillo
@@ -50,11 +49,11 @@ find_package(Armadillo REQUIRED)
 if (ARMADILLO_FOUND)
   message(STATUS "ARMADILLO: " ${ARMADILLO_INCLUDE_DIRS})
   include_directories(${ARMADILLO_INCLUDE_DIRS})
-  #target_link_libraries (Test-1 ${ARMADILLO_LIBRARIES})
-  #target_link_libraries (Test-2 ${ARMADILLO_LIBRARIES})
+  target_link_libraries (Test-1 ${ARMADILLO_LIBRARIES})
+  target_link_libraries (Test-2 ${ARMADILLO_LIBRARIES})
   target_link_libraries (Test-3 ${ARMADILLO_LIBRARIES})
-  #target_link_libraries (Test-4 ${ARMADILLO_LIBRARIES})
-  #target_link_libraries (Main ${ARMADILLO_LIBRARIES})
+  target_link_libraries (Test-4 ${ARMADILLO_LIBRARIES})
+  target_link_libraries (Main ${ARMADILLO_LIBRARIES})
 endif (ARMADILLO_FOUND)
 if(NOT ARMADILLO_FOUND)
     message(FATAL_ERROR "Armadillo was not found! Check if it is installed on your System. If it isn't, go to http://arma.sourceforge.net/ and follow the instrucions.")
@@ -64,23 +63,21 @@ find_package(HDF5 REQUIRED)
 if (HDF5_FOUND)
   message(STATUS "HDF-5: " ${HDF5_INCLUDE_DIRS})
   include_directories(${HDF5_INCLUDE_DIRS})
-  #target_link_libraries (Main ${HDF5_LIBRARIES})
-  #target_link_libraries (Test-1 ${HDF5_LIBRARIES})
-  #target_link_libraries (Test-2 ${HDF5_LIBRARIES})
+  target_link_libraries (Main ${HDF5_LIBRARIES})
+  target_link_libraries (Test-1 ${HDF5_LIBRARIES})
+  target_link_libraries (Test-2 ${HDF5_LIBRARIES})
   target_link_libraries (Test-3 ${HDF5_LIBRARIES})
-  #target_link_libraries (Test-4 ${HDF5_LIBRARIES})
+  target_link_libraries (Test-4 ${HDF5_LIBRARIES})
 endif (HDF5_FOUND)
 if(NOT HDF5_FOUND)
     message(FATAL_ERROR "HDF-5 was not found! Check if it is installed on your System.")
 endif(NOT HDF5_FOUND)
 ######################################################################################## end of finding libraries
-#target_compile_options(Test-1 PUBLIC -DARMA_USE_HDF5)#-O3
-#target_compile_options(Test-2 PUBLIC -DARMA_USE_HDF5) #-O3
+target_compile_options(Test-1 PUBLIC -DARMA_USE_HDF5)#-O3
+target_compile_options(Test-2 PUBLIC -DARMA_USE_HDF5) #-O3
 target_compile_options(Test-3 PUBLIC -DARMA_USE_HDF5 -O0) #-lcuda -O3
-#target_compile_options(Test-4 PUBLIC -DARMA_USE_HDF5) #-O3
-#target_compile_options(Main PUBLIC -DARMA_USE_HDF5) #-O3
-
-
+target_compile_options(Test-4 PUBLIC -DARMA_USE_HDF5) #-O3
+target_compile_options(Main PUBLIC -DARMA_USE_HDF5) #-O3
 ######################################################################################## future acceleration options
 #find_package(BLAS REQUIRED)      # These 
 #find_package(LAPACK REQUIRED)    #

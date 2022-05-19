@@ -5,12 +5,10 @@
 
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
+
 #include "../cuda/ChemElementGPU.cu"
 #include "../cuda/MaterialGPU.cu"
 #include "../cuda/VoxelGPU.cu"
-#include <thrust/host_vector.h>
-#include <thrust/device_vector.h>
-
 
 class SampleGPU{
 
@@ -94,7 +92,6 @@ class SampleGPU{
 			}
 		};
 
-
 		__device__ float getXPos() const {return x_;};
 		__device__ float getYPos() const {return y_;};
 		__device__ float getZPos() const {return z_;};
@@ -133,16 +130,10 @@ class SampleGPU{
 		__device__ VoxelGPU* getOOBVoxel() const {return oobVoxel_;};
 
 		__device__ VoxelGPU* findStartVoxel(RayGPU *ray){
-  
-  			//printf("Jambalaya!\n");
 
 			float x_in = ray->getStartX();
 			float y_in = ray->getStartY();
 			float z_in = ray->getStartZ();
-
-						  //printf("%f\n",x_in);			  
-						  //printf("%f\n",y_in);
-						  //printf("%f\n",z_in);
 
 			// Check if the ray is a primary ray -> If so, calculate coordinates of Voxel which is touched first by the ray from the top. 
 			if(ray->getStartZ() < getZPos()){
@@ -154,7 +145,6 @@ class SampleGPU{
 
 			// Check if ray hits the sample from the top direction -> If not, calculate coordinates of Voxel which is touched first by the ray from the side. 
 			if( (x_in<0.) || (y_in<0.) || (z_in<0.) ){
-				//printf("Jambalaya! The wrongness is before.\n");
 				float t = ( getYPos()-ray->getStartY() ) / ray->getDirY();
 				x_in = ray->getStartX() + t*ray->getDirX();
 				y_in = ray->getStartY() + t*ray->getDirY();

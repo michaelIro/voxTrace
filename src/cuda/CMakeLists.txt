@@ -6,18 +6,19 @@ cmake_minimum_required(VERSION 3.18)
 project(voxTrace VERSION 1.0)
 
 # sets the C++ standard to C++20
-#set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 20)
 #########################################################################################
-#enable_language(CUDA)
+enable_language(CUDA)
 
-#if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
-#  set(CMAKE_CUDA_ARCHITECTURES 86)      #TODO: Change do all or all-major in CMake 3.23
-#endif()
+if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
+  set(CMAKE_CUDA_ARCHITECTURES 75)      #TODO: Change do all or all-major in CMake 3.23
+endif()
 
-#if(NOT DEFINED CMAKE_CUDA_STANDARD)
-#    set(CMAKE_CUDA_STANDARD 11)
-#    set(CMAKE_CUDA_STANDARD_REQUIRED ON)
-#endif()
+if(NOT DEFINED CMAKE_CUDA_STANDARD)
+    set(CMAKE_CUDA_STANDARD 17)
+    set(CMAKE_CUDA_STANDARD_REQUIRED ON)
+endif()
+
 
 #set(CMAKE_CXX_FLAGS "-g -G")
 #set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} --verbose -dlink -Xcompiler -fvisibility=hidden -g)

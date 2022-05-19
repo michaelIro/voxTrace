@@ -244,7 +244,7 @@ ALL_LDFLAGS += $(addprefix -Xlinker ,$(LDFLAGS))
 ALL_LDFLAGS += $(addprefix -Xlinker ,$(EXTRA_LDFLAGS))
 
 # Common includes and paths for CUDA
-INCLUDES  := -I$(CUDA_PATH)/include -I/usr/include/xraylib #-I../../../Common 
+INCLUDES  := -I$(CUDA_PATH)/include -I/usr/include/xraylib -I/usr/local/include/polycap #-I../../../Common 
 LIBRARIES := -L$(CUDA_PATH)/lib64 -L/home/miro/Software/1st-party/voxTrace/build/src/api -L/usr/lib/x86_64-linux-gnu
 
 ################################################################################
@@ -271,9 +271,9 @@ ifneq ($(HIGHEST_SM),)
 GENCODE_FLAGS += -gencode arch=compute_$(HIGHEST_SM),code=compute_$(HIGHEST_SM)
 endif
 endif
-
-ALL_CCFLAGS += --threads 0 --std=c++17 -lcudart -l:libXRayLibAPI.a -l:libxrl.a -larmadillo
-
+##########################################################
+ALL_CCFLAGS += --std=c++17 -lcudart -l:libXRayLibAPI.a -l:libxrl.a -larmadillo #-lpolycap -l:libPolyCapAPI.a -Xcompiler -fopenmp #--threads 0 
+##########################################################
 ifeq ($(SAMPLE_ENABLED),0)
 EXEC ?= @echo "[@]"
 endif
