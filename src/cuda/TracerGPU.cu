@@ -40,6 +40,7 @@ __global__ void add(int n, float *x, float *y)
 // Kernel function to trace rays
 __global__ void trace(RayGPU *rays, SampleGPU* sample, curandState_t *states)
 {
+  //int pos = (blockIdx.x-1)*256 + threadIdx.x;
 	RayGPU*	currentRay = &rays[blockIdx.x];
   currentRay->primaryTransform(70.0, 70.0,0.0, 0.51, 45.0);
 	VoxelGPU* currentVoxel = sample->findStartVoxel(currentRay);
@@ -96,8 +97,7 @@ __device__  RayGPU* TracerGPU::traceForward(RayGPU* ray, VoxelGPU* currentVoxel,
 		if(interactionType == 0){ // Photo-Absorption
 			
 			// Selection of excited shell
-			randomN = curand_uniform (localState);
-			int myShell = interactingElement->getExcitedShell(rayEnergy,randomN);
+			int myShell = interactingElement->getExcitedShell(rayEnergy,curand_uniform(localState));
 			
 			randomN = curand_uniform (localState);
 			if(randomN > interactingElement->Fluor_Y(myShell)){ // Auger-Effect
@@ -179,7 +179,7 @@ __device__  RayGPU* TracerGPU::traceForward(RayGPU* ray, VoxelGPU* currentVoxel,
 	}
 
 
-	if((*ray).getFlag()){
+	if(ray->getFlag()){
 		return traceForward(ray, currentVoxel,nextVoxel,sample,localState);
 	}
 	else {
@@ -189,9 +189,6 @@ __device__  RayGPU* TracerGPU::traceForward(RayGPU* ray, VoxelGPU* currentVoxel,
 }
 
 void TracerGPU::callTrace(){
-
-  //int n_threads = 3;
-  //int n_blocks = 3;
 
   int n_elements = 3;
 
@@ -229,6 +226,8 @@ void TracerGPU::callTrace(){
   ChemElementGPU sn(50);
   ChemElementGPU pb(82);
 
+  size_t a= cu.getMemorySize();
+
   elements[0] = cu;
   elements[1] = sn;
   elements[2] = pb;
@@ -236,9 +235,9 @@ void TracerGPU::callTrace(){
   for(int i = 0; i < xN_; i++){
     for(int j = 0; j < yN_; j++){
       for(int k = 0; k < zN_; k++){
-        weights[i*yN_*zN_*3+j*zN_*3+k*3+0] = 0.9;
-        weights[i*yN_*zN_*3+j*zN_*3+k*3+1] = 0.05;
-        weights[i*yN_*zN_*3+j*zN_*3+k*3+2] = 0.05;
+        weights[i*yN_*zN_*3+j*zN_*3+k*3+0] = 0.7;
+        weights[i*yN_*zN_*3+j*zN_*3+k*3+1] = 0.2;
+        weights[i*yN_*zN_*3+j*zN_*3+k*3+2] = 0.1;
 
         materials[i*yN_*zN_+j*zN_+k] = MaterialGPU(n_elements, elements, &weights[i*yN_*zN_*3+j*zN_*3+k*3+0]);
         voxels[i*yN_*zN_+j*zN_+k] = VoxelGPU(x_+i*xLV_, y_+j*yLV_, z_+k*zLV_, xLV_, yLV_, zLV_,&materials[i*yN_*zN_+j*zN_+k]);
@@ -249,17 +248,21 @@ void TracerGPU::callTrace(){
   *oobVoxel = VoxelGPU(-1.,-1.,-1.,-1.,-1.,-1.,&(materials[0]));
   *sample = SampleGPU(x_, y_,  z_, xL_,  yL_, zL_,  xLV_,  yLV_,  zLV_, xN_, yN_,  zN_, voxels, oobVoxel);
 
-  //std::string path = "/tank/data/";
-  std::string path = "/media/miro/Data/Documents/TU Wien/VSC-BEAM/";
+  std::string path = "/tank/data/";
+  //std::string path = "/media/miro/Data/Documents/TU Wien/VSC-BEAM/";
 
   for (const auto & file : std::filesystem::directory_iterator(path)){
 	  std::string pathname = file.path();
 	  std::cout << pathname << std::endl;
+    
+    clock_t begin = clock();
 
 	  arma::Mat<double> beam_;	// = new arma::Mat<double>();
     beam_.load(arma::hdf5_name(pathname, "my_data")); 
     std::cout << "beam_.n_rows: " << beam_.n_rows << std::endl;
     int N = beam_.n_rows;
+    int threads = 1024;
+    int blocks= N/threads;
 
 
     curandState_t* states;
@@ -268,11 +271,7 @@ void TracerGPU::callTrace(){
     init<<<N, 1>>>(time(0), states);
 
     RayGPU* rays;
-    int success=0;
-
     cudaMallocManaged(&rays, beam_.n_rows*sizeof(RayGPU));
-    //cudaMallocManaged(&s_rays, beam_.n_rows*sizeof(RayGPU));
-	  clock_t begin = clock();
 
     for(int i = 0; i < beam_.n_rows; i++){
 		  rays[i] = RayGPU(beam_(i,0),beam_(i,1),beam_(i,2),beam_(i,3),beam_(i,4),beam_(i,5),beam_(i,6),beam_(i,7),beam_(i,8),beam_(i,9),
@@ -281,10 +280,9 @@ void TracerGPU::callTrace(){
 
     clock_t middle = clock();
 
+        int* interactions;
+    cudaMallocManaged(&interactions, 5*sizeof(RayGPU));
 
-    //std::chrono::steady_clock::time_point t1_ = std::chrono::steady_clock::now();
-
-    //std::cout << "READ FILE FOR: " << t1_-t0_ << std::endl;
 
     trace<<<N,1>>>(rays,sample, states);
 
@@ -292,16 +290,16 @@ void TracerGPU::callTrace(){
     cudaDeviceSynchronize();
 
     clock_t end = clock();
-    double time_spent = (double)(end - middle) / CLOCKS_PER_SEC;
-    double time_spent1 = (double)(middle - begin) / CLOCKS_PER_SEC;
-    printf("Read: %f Trace: %f\n", time_spent, time_spent1);
+    double time_spent_to_read = (double)(middle - begin) / CLOCKS_PER_SEC;
+    double time_spent_to_trace= (double)(end - middle) / CLOCKS_PER_SEC;
+    printf("Read / Prepare: %f s \t Trace: %f s\n", time_spent_to_read, time_spent_to_trace);
 
+    int success=0;
 	  for(int i = 0; i < beam_.n_rows; i++){
-			//p_rays[i].secondaryTransform(70.0, 70.0,0.0, 0.49, 45.0);
       if(rays[i].getIAFlag())
         success++;
 	  }
-    std::cout << "sucess: " << success << std::endl;
+    std::cout << "Size at 2nd-Polycap-Entry: " << success << std::endl;
 
 	  cudaFree(rays);
   }

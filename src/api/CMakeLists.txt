@@ -10,7 +10,7 @@ set(CMAKE_CXX_STANDARD 20)
 #########################################################################################
 # Tells CMake to use pkg-config (The standard installations of both X-Ray-Lib and Polycap are easier to link using this)
 include(FindPkgConfig)
-#set(CMAKE_VERBOSE_MAKEFILE on)
+set(CMAKE_VERBOSE_MAKEFILE on)
 #########################################################################################
 add_library(XRayLibAPI XRayLibAPI.cpp)
 add_library(Shadow3API Shadow3API.cpp)
@@ -61,7 +61,8 @@ find_package(Boost REQUIRED)
 include_directories( ${Boost_INCLUDE_DIR} )
 TARGET_LINK_LIBRARIES(PolyCapAPI LINK_PUBLIC ${Boost_LIBRARIES} )
 #########################################################################################
-# SciPlot: a C++ scientific plotiing library powerd by gnupolot (MIT License)
+###### SciPlot: a C++ scientific plotiing library powerd by gnupolot (MIT License) ######
+#########################################################################################
 find_package(sciplot REQUIRED PATHS /home/fs71764/miro/Software/3rd-Party/Install/share/sciplot)
 if (SCIPLOT_FOUND)
   message(STATUS "SCI-PLOT: " ${SCIPLOT_INCLUDE_DIRS})
@@ -76,8 +77,6 @@ if (ENSMALLEN_FOUND)
   include_directories(${ENSMALLEN_INCLUDE_DIRS})
   target_link_libraries (OptimizerAPI ${ENSMALLEN_LIBRARIES})
 endif (ENSMALLEN_FOUND)
-
-#message(STATUS ${ENSMALLEN_INCLUDE_DIRS} "WHOOOP-WHOOP")
 
 # ALTERNATIVES FOR ENSMALLEN
 # GSL - GNU Scientific Library (mostly GNU General Public Licence)

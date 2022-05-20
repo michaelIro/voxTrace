@@ -3,10 +3,7 @@
 
 /** Chemical-Element-Object for GPU */
 
-//#include <cuda.h>
-//#include <cuda_runtime.h>
-
-#include <math.h>
+//#include <math.h>
 #include <device_launch_parameters.h>
 #include "../api/XRayLibAPI.hpp"
 
@@ -16,7 +13,7 @@ class ChemElementGPU {
 		float a_;																	// Atomic Mass number [g/mol]
 		float rho_;																	// Density at room temperature [g/cm³]
 
-		static constexpr float energy_resolution = 0.1;								// Resolution of the energy grid [keV] -> 0.01 keV
+		static constexpr float energy_resolution = 0.2;								// Resolution of the energy grid [keV] -> 0.01 keV
 		static constexpr float max_energy = 20.0;									// Maximum energy of the energy grid [keV] -> 40 keV
 		static constexpr int energy_entries = (int)(max_energy/energy_resolution);	// Number of energy grid entries
 
@@ -29,12 +26,12 @@ class ChemElementGPU {
 		static constexpr int max_shell = shell_entries;								// Maximum shell number
 
 		float cs_tot[energy_entries];
-		float cs_phot[energy_entries];
+		float cs_phot_prob[energy_entries];
 		float cs_ray_prob[energy_entries];
 		float cs_compt_prob[energy_entries];
 
-		float cs_fluor_l[energy_entries][shell_entries];
-		float cs_phot_part[energy_entries][shell_entries];
+		//float cs_fluor_l[energy_entries][shell_entries];
+		float cs_phot_part[shell_entries][energy_entries];
 
 		float dcs_rayl[energy_entries][angle_entries];
 		float dcs_comp[energy_entries][angle_entries];
@@ -44,22 +41,20 @@ class ChemElementGPU {
 
 		float fluor_yield[shell_entries];
 		float auger_yield[shell_entries];
-
-		int shell_lines[shell_entries][2]= {
-			{0,28},																		// K lines
-			{29,57},{85,112},{113,135},													// L lines	
+/*
+		int shell_lines[shell_entries][2]= { {0,28}, {29,57},{85,112},{113,135},		// L lines	// K lines
 			{136,157},{158,179},{180,199},{200,218},									// M lines
 			{219,236},{237,253},{254,269},{270,284},{285,298},{299,311},{312,323},		// N lines
 			{321,334},{335,344},{345,353},{354,361},{362,368},{369,371},{372,373},		// O lines
 			{374,377},{378,380},{381,382}												// P lines
-		};
+		};*/
 
 		__host__ void discretize(){
 			for(int i=1; i<=energy_entries; i++){
 				float e = i*energy_resolution;
 
 				cs_tot[i] = XRayLibAPI::CS_Tot(z_,e);
-				cs_phot[i] = XRayLibAPI::CS_Phot(z_,e) / XRayLibAPI::CS_Tot(z_,e);
+				cs_phot_prob[i] = XRayLibAPI::CS_Phot(z_,e) / XRayLibAPI::CS_Tot(z_,e);
 				cs_ray_prob[i] = XRayLibAPI::CS_Ray(z_,e) / XRayLibAPI::CS_Tot(z_,e);
 				cs_compt_prob[i] = XRayLibAPI::CS_Compt(z_,e) / XRayLibAPI::CS_Tot(z_,e);
 
@@ -76,14 +71,13 @@ class ChemElementGPU {
 
 				for(int j = 0; j < energy_entries; j++){
 					float e = j*energy_resolution;
-
-					cs_fluor_l[i][j] = XRayLibAPI::CS_FluorL(z_,j,e);
-					cs_phot_part[i][j] = XRayLibAPI::CS_Phot_Part(z_,j,e) / XRayLibAPI::CS_Tot(z_,e);
+					//cs_fluor_l[i][j] = XRayLibAPI::CS_FluorL(z_,j,e);
+					cs_phot_part[i][j] = XRayLibAPI::CS_Phot_Part(z_,i,e) / XRayLibAPI::CS_Phot(z_,e);
 				}
 			}
 
 			for(int i = 0; i < 382; i++){
-				line_energies[i] = XRayLibAPI::LineE(z_,i);
+				line_energies[i] = XRayLibAPI::LineE(z_,i*-1-1);
 				rad_rate[i] = XRayLibAPI::RadRate(z_,i*-1-1);
 			}
 		};
@@ -113,11 +107,11 @@ class ChemElementGPU {
 		__device__ float Line_Energy(int line) const {return line_energies[line];};
 
 		__device__ float CS_Tot(float energy) const { return interpolate(energy, energy_resolution, cs_tot);};
-		__device__ float CS_Phot(float energy) const { return interpolate(energy, energy_resolution, cs_phot);};
-		__device__ float CS_Rayl(float energy) const { return interpolate(energy, energy_resolution, cs_ray_prob);};
-		__device__ float CS_Compt(float energy) const { return interpolate(energy, energy_resolution, cs_compt_prob);};
-		__device__ float CS_Fluor_Line(int shell, float energy) const {return interpolate(energy,energy_resolution, cs_fluor_l[shell]);}; 
-		__device__ float CS_Phot_Part(int shell, float energy) const {return interpolate(energy,energy_resolution, cs_phot_part[shell]);};
+		__device__ float CS_Phot_Prob(float energy) const { return interpolate(energy, energy_resolution, cs_phot_prob);};
+		__device__ float CS_Rayl_Prob(float energy) const { return interpolate(energy, energy_resolution, cs_ray_prob);};
+		__device__ float CS_Compt_Prob(float energy) const { return interpolate(energy, energy_resolution, cs_compt_prob);};
+		//__device__ float CS_Fluor_Line(int shell, float energy) const {return interpolate(energy,energy_resolution, cs_fluor_l[shell]);}; 
+		__device__ float CS_Phot_Part_Prob(int shell, float energy) const {return interpolate(energy,energy_resolution, cs_phot_part[shell]);};
 
 		//__device__ float DCS_Rayl(float energy, float angle) const {return dinterpolate(energy, energy_resolution,angle, angle_resolution, dcs_rayl);};
 		//__device__ float DCS_Compt(float energy, float angle) const {return dinterpolate(energy, energy_resolution,angle, angle_resolution, dcs_comp);};
@@ -125,9 +119,9 @@ class ChemElementGPU {
 		// "Decisions" with random number
 		__device__ int getInteractionType(float energy, float randomN) const{
 	
-			float tot = CS_Tot(energy);
-			float phot = CS_Phot(energy) / tot;
-			float photRayleigh = (CS_Phot(energy) + CS_Rayl(energy)) / tot;
+			//float tot = CS_Tot(energy);
+			float phot = CS_Phot_Prob(energy);
+			float photRayleigh = (CS_Phot_Prob(energy) + CS_Rayl_Prob(energy));
 
 			if(randomN <= phot) return 0;
 			else if(randomN <= photRayleigh) return 1;
@@ -139,11 +133,11 @@ class ChemElementGPU {
 			int shell_;
 			float temp_= 0.;
 			float sum_ = 0.;
-			float cs_tot = CS_Phot(energy);
+			float cs_tot = CS_Phot_Prob(energy);
 
 			if(cs_tot!=0.0)
 			for(shell_ = 0; shell_ < max_shell; shell_++){
-				temp_= CS_Phot_Part(shell_, energy) / cs_tot;
+				temp_= CS_Phot_Part_Prob(shell_, energy);
 				sum_ += temp_;
 				if(sum_ > randomN) break;
 			}
@@ -168,7 +162,7 @@ class ChemElementGPU {
 			float x =0.;
 			for(int i=0; i<arraysize; i++){
 				x = ((float)i)/((float)(stepsize));
-				theta[i]= 2*asin(x*photLambda);
+				theta[i]= 2*asinf(x*photLambda);
 				prob[i] = DCS_Compt(energy,theta[i]);
 
 				if((isnan(prob[i]))) break;
@@ -207,7 +201,7 @@ class ChemElementGPU {
 			float x =0.;
 			for(int i=0; i<arraysize; i++){
 				x = ((float)i)/((float)(stepsize));
-				theta[i]= 2*asin(x*photLambda);
+				theta[i]= 2*asinf(x*photLambda);
 				prob[i] = DCS_Rayl(energy,theta[i]);
 
 				if((isnan(prob[i]))) break;
@@ -231,22 +225,37 @@ class ChemElementGPU {
 			};
 
 		__device__ int getTransition(int shell, float randomN) const { 
-			int dimensions = 0;
 
-			for(int i = shell_lines[shell][0]; i <= shell_lines[shell][1]; i++)
-				if(Rad_Rate(i*-1-1)>0.0)
+			int shell_lines[shell_entries][2]= { 
+				{0,28}, 																	// K lines
+				{29,57},{85,112},{113,135},													// L lines	
+				{136,157},{158,179},{180,199},{200,218},									// M lines
+				{219,236},{237,253},{254,269},{270,284},{285,298},{299,311},{312,323},		// N lines
+				{321,334},{335,344},{345,353},{354,361},{362,368},{369,371},{372,373},		// O lines
+				{374,377},{378,380},{381,382}												// P lines
+			};
+			int dimensions = 0;
+			//int i1 = shell_lines[shell][0];
+			//int i2 = shell_lines[shell][1];
+
+			for(int i = shell_lines[shell][0]; i <= shell_lines[shell][1]; i++){
+				if(Rad_Rate(i)>0.0)
 					dimensions++;
+			}
+			if(dimensions !=0){
+
+
 				
-			int* line_ratios_line = new int[dimensions];
-			float* line_ratios_ratio = new float[dimensions];	
+			int* line_ratios_line;
+			float* line_ratios_ratio;	
+			cudaMalloc(&line_ratios_line, sizeof(int)*dimensions);
+			cudaMalloc(&line_ratios_ratio, sizeof(float)*dimensions);
 
 			int c = 0;
 			for(int i = shell_lines[shell][0]; i <= shell_lines[shell][1]; i++){
-				//int lineInput = myLine*-1-1;
-				//int line = i;
-				float ratio = Rad_Rate(i*-1-1);
-				if (Rad_Rate(i*-1-1)>0.0) {
-					line_ratios_line[c]=i*-1-1;
+				float ratio = Rad_Rate(i);
+				if (Rad_Rate(i)>0.0) {
+					line_ratios_line[c]=i;
 					line_ratios_ratio[c]=ratio;	
 					c++;
 				}
@@ -260,7 +269,12 @@ class ChemElementGPU {
 				myLine = line_ratios_line[i];
 				if(mySum>randomN) break; 	
 			}
-			return myLine;
+			
+			cudaFree(line_ratios_line);
+			cudaFree(line_ratios_ratio);
+				return myLine;
+			}
+			return 0;
 		};
 
 		// Helper functions
@@ -329,8 +343,8 @@ class ChemElementGPU {
 				float y1 = dcs_rayl[i1-1][0];
 				float y2 = dcs_rayl[i1][0];
 
-				//return y1 + (y2-y1)/(x2-x1)*(energy-x1);
-				return 0.0;
+				return y1 + (y2-y1)/(x2-x1)*(energy-x1);
+				//return 0.0;
 			}
 
 
@@ -369,8 +383,8 @@ class ChemElementGPU {
 				float y1 = dcs_comp[i1-1][0];
 				float y2 = dcs_comp[i1][0];
 
-				//return y1 + (y2-y1)/(x2-x1)*(energy-x1);
-				return 0.0;
+				return y1 + (y2-y1)/(x2-x1)*(energy-x1);
+				//return 0.0;
 			}
 
 

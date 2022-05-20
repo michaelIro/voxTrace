@@ -75,7 +75,7 @@ int main() {
 
 	XRBeam fluorescence_= tracer_.getSecondaryBeam();
 	fluorescence_.secondaryTransform(70.0, 70.0,0.0, 0.49, 45.0);
-	std::cout << "Detector size:" << fluorescence_.getRays().size() << std::endl;
+	std::cout << "Size at 2nd-Polycap-Entry:" << fluorescence_.getRays().size() << std::endl;
 	beams_.push_back(fluorescence_);
 }
 	XRBeam fluorescence_ = XRBeam::merge(beams_);

@@ -5,9 +5,9 @@
 // Memory-Estimation: 1 instance of Ray approx. 133 byte => 10⁶ Rays approx. 133 MB 
 
 #include <iostream>
-#include <math.h> 
-#include <cuda.h>
-#include <cuda_runtime.h>
+//#include <math.h> 
+//#include <cuda.h>
+//#include <cuda_runtime.h>
 #include <device_launch_parameters.h>
 
 
@@ -76,9 +76,9 @@ class RayGPU {
 	__host__ __device__ void setIANum(int iaNum) {iaNum_=iaNum;};
 
 	__host__ __device__ void rotate(float phi, float theta){
-			float diX = cos(theta)*cos(phi)*dirX_ - sin(phi)*dirY_ + sin(theta)*cos(phi)*dirZ_;
-			float diY = cos(theta)*sin(phi)*dirX_ + cos(phi)*dirY_ + sin(theta)*sin(phi)*dirZ_;
-			float diZ = -sin(theta)*dirX_+cos(theta)*dirZ_;
+			float diX = cosf(theta)*cosf(phi)*dirX_ - sinf(phi)*dirY_ + sinf(theta)*cosf(phi)*dirZ_;
+			float diY = cosf(theta)*sinf(phi)*dirX_ + cosf(phi)*dirY_ + sinf(theta)*sinf(phi)*dirZ_;
+			float diZ = -sinf(theta)*dirX_+cosf(theta)*dirZ_;
 			dirX_=diX;
 			dirY_=diY;
 			dirZ_=diZ;
@@ -111,48 +111,48 @@ class RayGPU {
 	__host__ __device__ int getIANum() const {return iaNum_;};
 	__host__ __device__ float getProb() const {return prob_;};
 
-	__host__ __device__ void primaryTransform(float x0, float y0, float z0, float d, float alpha){
+	__device__ void primaryTransform(float x0, float y0, float z0, float d, float alpha){
 
 		float alpha_ = alpha / 180 * M_PI;
 
 		float x0__ = x0 + getStartX();
-		float y0__ = y0 - d * cos(alpha_) + cos(alpha_)*getStartY()-sin(alpha_)*getStartZ();
-		float z0__ = z0 - d * sin(alpha_) + sin(alpha_)*getStartY()+cos(alpha_)*getStartZ();
+		float y0__ = y0 - d * cosf(alpha_) + cosf(alpha_)*getStartY()-sinf(alpha_)*getStartZ();
+		float z0__ = z0 - d * sinf(alpha_) + sinf(alpha_)*getStartY()+cosf(alpha_)*getStartZ();
 
 		float xd__ = getDirX(); 
-		float yd__ = cos(alpha_)*getDirY()-sin(alpha_)*getDirZ();
-		float zd__ = sin(alpha_)*getDirY()+cos(alpha_)*getDirZ();
+		float yd__ = cosf(alpha_)*getDirY()-sinf(alpha_)*getDirZ();
+		float zd__ = sinf(alpha_)*getDirY()+cosf(alpha_)*getDirZ();
 
 		setStartCoordinates(x0__,y0__,z0__);
 		setEndCoordinates(xd__,yd__,zd__);
 	}
 
-	__host__ __device__ void secondaryTransform(float x0, float y0, float z0, float d, float beta){
+	__device__ void secondaryTransform(float x0, float y0, float z0, float d, float beta){
 		
-		beta = beta / 180 * M_PI;
+		float beta_ = beta / 180 * M_PI;
 
 		if((getStartZ()>=0.0) && (getDirZ()<0.0)){
 
 			float x0__ = getStartX() - x0;
-			float y0__ = cos(beta)*(getStartY()-y0)-sin(beta)*(getStartZ()-z0);
-			float z0__ = sin(beta)*(getStartY()-y0)+cos(beta)*(getStartZ()-z0);
+			float y0__ = cosf(beta_)*(getStartY()-y0)-sinf(beta_)*(getStartZ()-z0);
+			float z0__ = sinf(beta_)*(getStartY()-y0)+cosf(beta_)*(getStartZ()-z0);
 
 			float xd__ = getDirX(); 
-			float yd__ = cos(beta)*getDirY()-sin(beta)*getDirZ();
-			float zd__ = sin(beta)*getDirY()+cos(beta)*getDirZ();
+			float yd__ = cosf(beta_)*getDirY()-sinf(beta_)*getDirZ();
+			float zd__ = sinf(beta_)*getDirY()+cosf(beta_)*getDirZ();
 
 
-			float dfac_= (0.49-y0__) / yd__;
-			float rin_= 0.1; //actually 0.095
+			float dfac__= (0.49-y0__) / yd__;
+			float rin__= 0.1; //actually 0.095
 
-			x0__= x0__ + dfac_ * xd__;
+			x0__= x0__ + dfac__ * xd__;
 			y0__= 0.0;
-			z0__= z0__ + dfac_ * zd__;
+			z0__= z0__ + dfac__ * zd__;
 
 			//float r_spot_ = sqrt( (xd_*dfac_)*(xd_*dfac_) + (zd_*dfac_)*(zd_*dfac_));
-			float r_spot_ = sqrt( (x0__*x0__) + (z0__*z0__) );
+			float r_spot__ = sqrt( (x0__*x0__) + (z0__*z0__) );
 
-			if(r_spot_ < rin_){
+			if(r_spot__ < rin__){
 				setStartCoordinates(x0__,y0__,z0__);
 				setEndCoordinates(xd__,yd__,zd__);
 				setIAFlag(true);

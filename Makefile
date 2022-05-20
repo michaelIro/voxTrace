@@ -244,8 +244,8 @@ ALL_LDFLAGS += $(addprefix -Xlinker ,$(LDFLAGS))
 ALL_LDFLAGS += $(addprefix -Xlinker ,$(EXTRA_LDFLAGS))
 
 # Common includes and paths for CUDA
-INCLUDES  := -I$(CUDA_PATH)/include -I/usr/include/xraylib -I/usr/local/include/polycap #-I../../../Common 
-LIBRARIES := -L$(CUDA_PATH)/lib64 -L/home/miro/Software/1st-party/voxTrace/build/src/api -L/usr/lib/x86_64-linux-gnu
+INCLUDES  := -I$(CUDA_PATH)/include -I/usr/include/xraylib -I/usr/local/include/polycap -I/usr/include/easyRNG #-I../../../Common 
+LIBRARIES := -L$(CUDA_PATH)/lib64 -L/home/miro/Software/1st-party/voxTrace/build/src/api -L/home/miro/Software/1st-party/voxTrace/build/src/base -L/usr/lib/x86_64-linux-gnu
 
 ################################################################################
 
@@ -272,7 +272,7 @@ GENCODE_FLAGS += -gencode arch=compute_$(HIGHEST_SM),code=compute_$(HIGHEST_SM)
 endif
 endif
 ##########################################################
-ALL_CCFLAGS += --std=c++17 -lcudart -l:libXRayLibAPI.a -l:libxrl.a -larmadillo #-lpolycap -l:libPolyCapAPI.a -Xcompiler -fopenmp #--threads 0 
+ALL_CCFLAGS += --std=c++17 -lcudart -l:libXRayLibAPI.a -l:libxrl.a -larmadillo -l:libPolyCapAPI.a -lpolycap -lstdc++ -Xcompiler -fopenmp -l:libvt.base.a # -l:libPolyCapAPI.a -Xcompiler -fopenmp #--threads 0 
 ##########################################################
 ifeq ($(SAMPLE_ENABLED),0)
 EXEC ?= @echo "[@]"
@@ -317,7 +317,7 @@ TracerGPU.o: $(SRC_DIR)/TracerGPU.cu $(SRC_DIR)/TracerGPU.cuh
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $(BUILD_DIR)/$@ -dc $<
 
 Test-3.o: src/Test-3.cpp
-	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $(BUILD_DIR)/$@ -dc $<
+	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $(BUILD_DIR)/$@ -dc $< 
 
 Test-3: $(BUILD_DIR)/*.o
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $(BUILD_DIR)/$@ $+ $(LIBRARIES) $(ALL_CCFLAGS) 

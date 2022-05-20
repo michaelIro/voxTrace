@@ -43,6 +43,7 @@ int polycap_photon_within_pc_boundary(double polycap_radius, polycap_vector3 pho
 #include <thread> 
 
 #include "../base/Ray.hpp"
+//#include "../base/RayGPU.hpp"
 
 class PolyCapAPI{
   private: 
