@@ -2,15 +2,10 @@
 #include <cuda_runtime.h>
 #define ARMA_ALLOW_FAKE_GCC
 #include <armadillo>
-#include "api/PolyCapAPI.hpp"
-//#include <polycap-private.h>
-//#define __STDC_FORMAT_MACROS
-//#include <inttypes.h>
-#include <omp.h>
 
-//#include <boost/random/mersenne_twister.hpp>
-//#include <boost/random/uniform_01.hpp>
-//#include <thread> 
+#include "api/PolyCapAPI.hpp"
+
+#include <omp.h>
 
 #include "cuda/RayGPU.cu"
 #include "cuda/ChemElementGPU.cu"
