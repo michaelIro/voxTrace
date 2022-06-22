@@ -38,7 +38,8 @@ class MaterialGPU {
 		__device__ float CS_Tot(float energy) const{
 			float cs_tot_= 0.;
 			for(int i = 0; i < num_elements_; i++)
-        		cs_tot_ += elements_[i].CS_Tot(energy)*weights_[i];
+        		cs_tot_ += weights_[i]*elements_[i].CS_Tot(energy);
+
 			return cs_tot_;
 		}
 		
@@ -52,8 +53,9 @@ class MaterialGPU {
 			for(int i = 0; i < num_elements_; i++){
 				sum += elements_[i].CS_Tot(energy)*weights_[i]/muMassTot;
 
-				if(sum > randomN)
+				if(sum >= randomN){
 					return &(elements_[i]);	
+				}	
 			}
 
 			return &(elements_[num_elements_-1]);

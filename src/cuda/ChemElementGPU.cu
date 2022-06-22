@@ -41,7 +41,8 @@ class ChemElementGPU {
 
 		float fluor_yield[shell_entries];
 		float auger_yield[shell_entries];
-/*
+
+		/*
 		int shell_lines[shell_entries][2]= { {0,28}, {29,57},{85,112},{113,135},		// L lines	// K lines
 			{136,157},{158,179},{180,199},{200,218},									// M lines
 			{219,236},{237,253},{254,269},{270,284},{285,298},{299,311},{312,323},		// N lines
@@ -120,11 +121,11 @@ class ChemElementGPU {
 		__device__ int getInteractionType(float energy, float randomN) const{
 	
 			//float tot = CS_Tot(energy);
-			float phot = CS_Phot_Prob(energy);
-			float photRayleigh = (CS_Phot_Prob(energy) + CS_Rayl_Prob(energy));
+			//float phot = CS_Phot_Prob(energy);
+			//float photRayleigh = (CS_Phot_Prob(energy) + CS_Rayl_Prob(energy));
 
-			if(randomN <= phot) return 0;
-			else if(randomN <= photRayleigh) return 1;
+			if(randomN <= CS_Phot_Prob(energy)) return 0;
+			else if(randomN <= (CS_Phot_Prob(energy) + CS_Rayl_Prob(energy))) return 1;
 			else return 2;
 		};
 
@@ -228,7 +229,7 @@ class ChemElementGPU {
 
 			int shell_lines[shell_entries][2]= { 
 				{0,28}, 																	// K lines
-				{29,57},{85,112},{113,135},													// L lines	
+				{29,57},{85,112},{113,135},													// L lines
 				{136,157},{158,179},{180,199},{200,218},									// M lines
 				{219,236},{237,253},{254,269},{270,284},{285,298},{299,311},{312,323},		// N lines
 				{321,334},{335,344},{345,353},{354,361},{362,368},{369,371},{372,373},		// O lines
@@ -272,13 +273,14 @@ class ChemElementGPU {
 			
 			cudaFree(line_ratios_line);
 			cudaFree(line_ratios_ratio);
+			cudaFree(&shell_lines);
 				return myLine;
 			}
 			return 0;
 		};
 
 		// Helper functions
-		inline __device__ float interpolate(float arg, float stepsize, const float* vec) const{
+		__device__ float interpolate(float arg, float stepsize, const float* vec) const{
 			float x = arg/stepsize;
 			int i = ceilf(x); //std::ceil(x);
 
@@ -288,7 +290,18 @@ class ChemElementGPU {
 			float y1 = vec[i-1];
 			float y2 = vec[i];
 
-			return y1 + (y2-y1)/(x2-x1)*(arg-x1);
+			float result =  y1 + (y2-y1)/(x2-x1)*(arg-x1);
+
+			//cudaFree(&x);
+			//cudaFree(&i);
+			//cudaFree(&x1);
+			//cudaFree(&x2);
+			//cudaFree(&y1);
+			//cudaFree(&y2);
+
+			return result;
+			//return y1 + (y2-y1)/(x2-x1)*(arg-x1);
+			//return vec[(int)ceilf(arg/stepsize)-1] + (vec[(int)ceilf(arg/stepsize)]-vec[(int)ceilf(arg/stepsize)-1])/(stepsize)*(arg-(ceilf(arg/stepsize)-1)*stepsize);
 		};
 
 		/*inline __device__ float dinterpolate(float arg_1, float stepsize_1, float arg_2, float stepsize_2, const float vec[energy_entries][angle_entries]) const{

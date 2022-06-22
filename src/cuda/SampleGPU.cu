@@ -21,11 +21,6 @@ class SampleGPU{
 		VoxelGPU* voxels_;
 		VoxelGPU* oobVoxel_;
 
-		//VoxelGPU* zeroVoxel_;
-		//thrust::device_vector<ChemElementGPU> chemical_elements_;
-		//vector<vector<vector<Voxel>>> voxels_;
-        //size_t memory_size_= sizeof(float)*9;
-
 	public:
 		__host__ __device__ SampleGPU(){ };
 
@@ -39,15 +34,15 @@ class SampleGPU{
 			yL_ = yL;
 			zL_ = zL;
 
-			xN_ = (int)(xL_/xLV)+1;
-			yN_ = (int)(yL_/yLV)+1;
-			zN_ = (int)(zL_/zLV)+1;
+			xN_ = (int)(xL_/xLV);
+			yN_ = (int)(yL_/yLV);
+			zN_ = (int)(zL_/zLV);
 
 			voxN_= xN_*yN_*zN_;
     
-			xLV_ = xL_/((float)(xN_-1));
-			yLV_ = yL_/((float)(yN_-1));
-			zLV_ = zL_/((float)(zN_-1));
+			xLV_ = xL_/((float)(xN_));
+			yLV_ = yL_/((float)(yN_));
+			zLV_ = zL_/((float)(zN_));
 
 			voxels_ = voxels;
 
@@ -60,8 +55,8 @@ class SampleGPU{
 			//}
 
 			/*Define Zero-Voxel and Out-of-Bounds-Voxel*/
-			//zeroVoxel = &voxels_[0][0][0];
 			oobVoxel_ = oobVoxel;
+			//zeroVoxel = &voxels_[0][0][0];
 			//oobVoxel_ =  new VoxelGPU(-1.,-1.,-1.,-1.,-1.,-1.,&(materials_[0][0][0]));
 
 			/*Define Nearest Neighbours for each Voxel*/
@@ -79,14 +74,15 @@ class SampleGPU{
 								{
 									for(int n=-1; n<2;n++)
 									{
-										if((i+n < 0) || (i+n>=xN_) || (j+m < 0) || (j+m>=yN_) ||(k+l< 0) || (k+l>=xN_))
+										if((i+n < 0) || (i+n>=xN_) || (j+m < 0) || (j+m>=yN_) ||(k+l< 0) || (k+l>=zN_))
 											nn[count++]=oobVoxel_;	
-										//else
+										else
+											nn[count++]=&voxels[(i+n)*yN_*zN_+(j+m)*zN_+(k+l)];
 										//	nn[count++]=&voxels_[i+n][j+m][k+l];	
 								}
 							}
 						}
-						//(voxels_[i][j][k]).setNN(nn);
+						(voxels_[(i)*yN_*zN_+(j)*zN_+(k)]).setNN(nn);
 					}
 				}
 			}
@@ -109,9 +105,10 @@ class SampleGPU{
 		__device__  VoxelGPU* 	getVoxel(float x, float y, float z){
 			VoxelGPU *temp = oobVoxel_;
 		
-			int xSteps = (int) floor(x/xLV_);
-			int ySteps = (int) floor(y/yLV_);
-			int zSteps = (int) floor(z/zLV_);
+			int xSteps = (int) floorf(x/xLV_);
+			int ySteps = (int) floorf(y/yLV_);
+			int zSteps = (int) floorf(z/zLV_);
+
 			if(((xSteps < xN_)&&(zSteps < zN_)&&(zSteps < zN_)) && ((xSteps >= 0)&&(zSteps >= 0)&&(zSteps >= 0)))
 				temp = &voxels_[xSteps*yN_*zN_+ySteps*zN_+zSteps];
 
@@ -119,10 +116,6 @@ class SampleGPU{
 		};
 
 		__device__  VoxelGPU* 	getVoxel(int x, int y, int z){
-			//VoxelGPU *temp = oobVoxel_;
-			//temp = &(voxels_[x][y][z]);
-			//			return temp;
-
 			return &voxels_[x*yN_*zN_+y*zN_+z];
 		};
 

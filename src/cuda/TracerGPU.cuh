@@ -28,7 +28,7 @@ class TracerGPU{
 		static void callAdd();
 		static void callTest();
 
-		__device__ static RayGPU* traceForward(RayGPU* ray, VoxelGPU* currentVoxel, int* nextVoxel, SampleGPU *sample, curandState_t *localState);
+		__device__ static void traceForward(RayGPU* ray, VoxelGPU* currentVoxel, curandState_t *localState);
 
 		//static void callAdd(int N, int M, float *x, float *y, RayGPU* rays_1, RayGPU* rays_2, ChemElementGPU* elements, MaterialGPU* materials,ChemElementGPU* myElements,float* myElements_weights); 
 

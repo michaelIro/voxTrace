@@ -5,7 +5,7 @@
 int main() {
 	std::cout << "START: Test-4" << std::endl;
 
-	std::string path = "/media/miro/Data/pos-0-new";
+	std::string path = "/media/miro/Data/pos-3";
 	arma::Mat<double> complete_;
 	int raysN= 0;
   	for (const auto & file : std::filesystem::directory_iterator(path)){
@@ -32,9 +32,9 @@ int main() {
 		//std::cout << rays__.n_rows << std::endl;
 		//std::cout << rays__.n_cols << std::endl;
 	}
-	complete_.save(arma::hdf5_name("/media/miro/Data/pos-0-new.h5","my_data"));
+	complete_.save(arma::hdf5_name("/media/miro/Data/pos-3.h5","my_data"));
 
-	std::cout << "END: Test-4" << std::endl << std::endl;
+	std::cout << "END: Test-4" << std::endl;
     return 0;
 }
 

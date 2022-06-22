@@ -5,11 +5,7 @@
 // Memory-Estimation: 1 instance of Ray approx. 133 byte => 10⁶ Rays approx. 133 MB 
 
 #include <iostream>
-//#include <math.h> 
-//#include <cuda.h>
-//#include <cuda_runtime.h>
 #include <device_launch_parameters.h>
-
 
 class RayGPU {
 	// These Parameters are taken 1:1 from Shadow3
@@ -27,6 +23,9 @@ class RayGPU {
 	int iaNum_;						// Number of interactions of this ray
 	bool iaFlag_;					// Interaction Flag
 	float prob_;					// Probability
+	bool oobFlag_=false;
+	int nextVoxel_=13;
+	float tIn=0.0;
 
 	// int sum of sizes of all member variables
 	size_t memory_size_= sizeof(float)* 17 + sizeof(int)*2 + sizeof(bool)*2 + sizeof(size_t);
@@ -74,6 +73,9 @@ class RayGPU {
     __host__ __device__ void setEnergyKeV(float keV) {k_=keV*50677300.0;};
 	__host__ __device__ void setIAFlag(bool iaFlag) {iaFlag_=iaFlag;};
 	__host__ __device__ void setIANum(int iaNum) {iaNum_=iaNum;};
+	__host__ __device__ void setOOBFlag(bool oobFlag) {oobFlag_=oobFlag;};
+	__host__ __device__ void setNextVoxel(int nextVoxel) {nextVoxel_=nextVoxel;};
+	__host__ __device__ void setTIn(float tIn) {this->tIn=tIn;};
 
 	__host__ __device__ void rotate(float phi, float theta){
 			float diX = cosf(theta)*cosf(phi)*dirX_ - sinf(phi)*dirY_ + sinf(theta)*cosf(phi)*dirZ_;
@@ -110,14 +112,17 @@ class RayGPU {
 	__host__ __device__ bool getIAFlag() const {return iaFlag_;};
 	__host__ __device__ int getIANum() const {return iaNum_;};
 	__host__ __device__ float getProb() const {return prob_;};
+	__host__ __device__ bool getOOBFlag() const {return oobFlag_;};
+	__host__ __device__ int getNextVoxel() const {return nextVoxel_;};
+	__host__ __device__ float getTIn() const {return tIn;};
 
 	__device__ void primaryTransform(float x0, float y0, float z0, float d, float alpha){
 
 		float alpha_ = alpha / 180 * M_PI;
 
-		float x0__ = x0 + getStartX();
-		float y0__ = y0 - d * cosf(alpha_) + cosf(alpha_)*getStartY()-sinf(alpha_)*getStartZ();
-		float z0__ = z0 - d * sinf(alpha_) + sinf(alpha_)*getStartY()+cosf(alpha_)*getStartZ();
+		float x0__ = x0 + getStartX()*10000.;
+		float y0__ = y0 - d * cosf(alpha_) + cosf(alpha_)*getStartY()*10000.-sinf(alpha_)*getStartZ()*10000.;
+		float z0__ = z0 - d * sinf(alpha_) + sinf(alpha_)*getStartY()*10000.+cosf(alpha_)*getStartZ()*10000.;
 
 		float xd__ = getDirX(); 
 		float yd__ = cosf(alpha_)*getDirY()-sinf(alpha_)*getDirZ();
@@ -127,7 +132,7 @@ class RayGPU {
 		setEndCoordinates(xd__,yd__,zd__);
 	}
 
-	__device__ void secondaryTransform(float x0, float y0, float z0, float d, float beta){
+	__device__ void secondaryTransform(float x0, float y0, float z0, float d, float beta, float rin){
 		
 		float beta_ = beta / 180 * M_PI;
 
@@ -142,8 +147,8 @@ class RayGPU {
 			float zd__ = sinf(beta_)*getDirY()+cosf(beta_)*getDirZ();
 
 
-			float dfac__= (0.49-y0__) / yd__;
-			float rin__= 0.1; //actually 0.095
+			float dfac__= (d-y0__) / yd__;
+			float rin__= rin; 
 
 			x0__= x0__ + dfac__ * xd__;
 			y0__= 0.0;
@@ -153,7 +158,7 @@ class RayGPU {
 			float r_spot__ = sqrt( (x0__*x0__) + (z0__*z0__) );
 
 			if(r_spot__ < rin__){
-				setStartCoordinates(x0__,y0__,z0__);
+				setStartCoordinates(x0__/10000.,y0__/10000.,z0__/10000.);
 				setEndCoordinates(xd__,yd__,zd__);
 				setIAFlag(true);
 			}

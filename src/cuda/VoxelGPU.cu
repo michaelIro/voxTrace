@@ -44,7 +44,7 @@ class VoxelGPU{
 		__device__ MaterialGPU* getMaterial() {return mat_;};
 		__device__ VoxelGPU* getNN(int i) const{return nn_[i];};
 
-		__device__ float intersect(RayGPU* ray, int* nextVoxelGPU, float *tIn){	
+		__device__ float intersect(RayGPU* ray){	
 	
 			float t0x, t1x;
 			float t0y, t1y;
@@ -52,10 +52,10 @@ class VoxelGPU{
 			float t0_max, t1_min;
 			bool xDir=true,yDir=true,zDir=true;
 
-			/*if Ray is x-Parallel no intersection with x-Planes possible*/
-			if((*ray).getDirX() != 0.){
-				t0x = ( getX0()-(*ray).getStartX() ) / (*ray).getDirX(); 
-				t1x = ( getX1()-(*ray).getStartX() ) / (*ray).getDirX();
+			// if Ray is x-Parallel no intersection with x-Planes possible
+			if(ray->getDirX() != 0.){
+				t0x = ( getX0()-ray->getStartX() ) / ray->getDirX(); 
+				t1x = ( getX1()-ray->getStartX() ) / ray->getDirX();
 				if(t0x>t1x){
 					float temp = t0x;
 					t0x=t1x;
@@ -67,9 +67,11 @@ class VoxelGPU{
 				t0x=FLT_MIN;
 				t1x=FLT_MAX;
 			}
-			if((*ray).getDirY() != 0.){
-				t0y = ( getY0()-(*ray).getStartY() ) / (*ray).getDirY(); 
-				t1y = ( getY1()-(*ray).getStartY() ) / (*ray).getDirY();  
+
+			// if Ray is y-Parallel no intersection with y-Planes possible
+			if(ray->getDirY() != 0.){
+				t0y = ( getY0()-ray->getStartY() ) / ray->getDirY(); 
+				t1y = ( getY1()-ray->getStartY() ) / ray->getDirY();  
 				if(t0y>t1y){
 					float temp = t0y;
 					t0y=t1y;
@@ -81,9 +83,11 @@ class VoxelGPU{
 				t0y=FLT_MIN;
 				t1y=FLT_MAX;
 			}
-			if((*ray).getDirZ() != 0.){
-				t0z = ( getZ0()-(*ray).getStartZ() ) / (*ray).getDirZ(); 
-				t1z = ( getZ1()-(*ray).getStartZ() ) / (*ray).getDirZ();  
+
+			// if Ray is z-Parallel no intersection with z-Planes possible
+			if(ray->getDirZ() != 0.){
+				t0z = ( getZ0()-ray->getStartZ() ) / ray->getDirZ(); 
+				t1z = ( getZ1()-ray->getStartZ() ) / ray->getDirZ();  
 				if(t0z>t1z){
 					float temp = t0z;
 					t0z=t1z;
@@ -96,63 +100,55 @@ class VoxelGPU{
 				t1z=FLT_MAX;
 			}
 
-			//cout<<"t0x "<<t0x<<"t1x "<<t1x<<endl;
-			//cout<<"t0y "<<t0y<<"t1x "<<t1y<<endl;
-			//cout<<"t0z "<<t0z<<"t1x "<<t1z<<endl;
-			//cout<<"IANUM: "<<(*ray).getIANum()<<endl;
-
-			if((*ray).getIAFlag() ){
+			if(ray->getIAFlag() ){
 				t0_max = 0.;
-				(*ray).setIAFlag(false);
+				ray->setIAFlag(false);
 			}
 			else t0_max = max(max(t0x,t0y),t0z);
 			t1_min = min(min(t1x,t1y),t1z);
 
-			//cout<<"t1min"<<t1_min<<endl;
-
 			if((t1_min == t1z) && (t1_min != t1y) && (t1_min != t1x)) { 
-				if(zDir)	(*nextVoxelGPU)= 22; 	
-				else		(*nextVoxelGPU)= 4; 	
+				if(zDir)	ray->setNextVoxel(22); 	
+				else		ray->setNextVoxel(4); 	
 			}
 			else if	((t1_min != t1z) && (t1_min == t1y) && (t1_min != t1x))	{
-				if(yDir) 		(*nextVoxelGPU)= 16; 	
-				else 			(*nextVoxelGPU)= 10; 	
+				if(yDir) 		ray->setNextVoxel(16); 	
+				else 			ray->setNextVoxel(10); 	
 			}
 			else if	((t1_min != t1z) && (t1_min != t1y) && (t1_min == t1x))	{
-				if(xDir) 		(*nextVoxelGPU)= 14; 	
-				else 			(*nextVoxelGPU)= 12; 	
+				if(xDir) 		ray->setNextVoxel(14); 	
+				else 			ray->setNextVoxel(12); 	
 			}
-
 	
 			/*The following options are very unlikely*/
 			else if	((t1_min == t1z) && (t1_min == t1y) && (t1_min != t1x))	{
 				if(zDir){
-					if(yDir) 	(*nextVoxelGPU)= 25; 	
-					else 		(*nextVoxelGPU)= 19; 	
+					if(yDir) 	ray->setNextVoxel(25); 	
+					else 		ray->setNextVoxel(19); 	
 				}
 				else{
-					if(yDir) 	(*nextVoxelGPU)= 1; 	
-					else 		(*nextVoxelGPU)= 7; 	
+					if(yDir) 	ray->setNextVoxel(1); 	
+					else 		ray->setNextVoxel(7); 	
 				}
 			}
 			else if	((t1_min == t1z) && (t1_min != t1y) && (t1_min == t1x))	{ 
 				if(zDir){
-					if(xDir) 	(*nextVoxelGPU)= 23; 	
-					else 		(*nextVoxelGPU)= 21; 	
+					if(xDir) 	ray->setNextVoxel(23); 	
+					else 		ray->setNextVoxel(21); 	
 				}
 				else{
-					if(xDir) 	(*nextVoxelGPU)= 3; 	
-					else 		(*nextVoxelGPU)= 5; 	
+					if(xDir) 	ray->setNextVoxel(3); 	
+					else 		ray->setNextVoxel(5); 	
 				}
 			}	
 			else if	((t1_min != t1z) && (t1_min == t1y) && (t1_min == t1x))	{ 
 				if(yDir){
-					if(xDir) 	(*nextVoxelGPU)= 17; 	
-					else 		(*nextVoxelGPU)= 15; 	
+					if(xDir) 	ray->setNextVoxel(17); 	
+					else 		ray->setNextVoxel(15); 	
 				}
 				else{
-					if(xDir) 	(*nextVoxelGPU)= 11; 	
-					else 		(*nextVoxelGPU)= 9; 	
+					if(xDir) 	ray->setNextVoxel(11); 	
+					else 		ray->setNextVoxel(9); 	
 				}
 			}	
 	
@@ -160,27 +156,28 @@ class VoxelGPU{
 			else if	((t1_min == t1z) && (t1_min == t1y) && (t1_min == t1x))	{ 
 				if(zDir){
 					if(yDir) {
-						if(xDir) 	(*nextVoxelGPU)= 26; 	
-						else 		(*nextVoxelGPU)= 24; 	
+						if(xDir) 	ray->setNextVoxel(26); 	
+						else 		ray->setNextVoxel(24); 	
 					}
 					else{
-						if(xDir) 	(*nextVoxelGPU)= 20; 	
-						else 		(*nextVoxelGPU)= 18; 	
+						if(xDir) 	ray->setNextVoxel(20); 	
+						else 		ray->setNextVoxel(18); 	
 					}
 				}
 				else{
 					if(yDir) {
-						if(xDir) 	(*nextVoxelGPU)= 8; 	
-						else 		(*nextVoxelGPU)= 6; 	
+						if(xDir) 	ray->setNextVoxel(8); 	
+						else 		ray->setNextVoxel(6); 	
 					}
 					else{
-						if(xDir) 	(*nextVoxelGPU)= 2; 	
-						else 		(*nextVoxelGPU)= 0; 	
+						if(xDir) 	ray->setNextVoxel(2); 	
+						else 		ray->setNextVoxel(0); 	
 					}
 				}
 			}
 	
-			*tIn = t0_max;
+			//*tIn = t0_max;
+			ray->setTIn(t0_max);
 			return (t1_min-t0_max); // TODO: direction  
 		};
 
