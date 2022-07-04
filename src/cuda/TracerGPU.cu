@@ -199,13 +199,15 @@ void TracerGPU::callTrace(){
   *oobVoxel = VoxelGPU(-1.,-1.,-1.,-1.,-1.,-1.,&(materials[0]));
   *sample = SampleGPU(x_, y_,  z_, xL_,  yL_, zL_,  xLV_,  yLV_,  zLV_, xN_, yN_,  zN_, voxels, oobVoxel);
 
-  std::string path = "/tank/data/";
+  //std::string path = "/tank/data/";
+  std::string path = "/gpfs/data/fs71764/miro/work/out";
 
   for (const auto & file : std::filesystem::directory_iterator(path)){
 
 	  std::string pathname = file.path();
 	  std::cout << pathname << std::endl;
-    std::string path_out = "/media/miro/Data/" + file.path().filename().string() + "-pos-5.h5";
+    //std::string path_out = "/media/miro/Data/" + file.path().filename().string() + "-pos-5.h5";
+    std::string path_out = "/gpfs/data/fs71764/miro/work/nist-1107/pos-0/" + file.path().filename().string() + ".h5";
     if(std::filesystem::exists(path_out)){
       std::cout << "File already exists" << std::endl;
     }

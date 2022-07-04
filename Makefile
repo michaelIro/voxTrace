@@ -3,7 +3,11 @@
 ## USER SPECIFIC DIRECTORIES ##
 
 # Location of the CUDA Toolkit
-CUDA_PATH ?= /usr/local/cuda
+# Local
+#CUDA_PATH ?= /usr/local/cuda
+
+# VSC
+CUDA_PATH ?= /gpfs/opt/sw/spack-0.17.1/opt/spack/linux-almalinux8-zen3/gcc-11.2.0/cuda-11.5.0-ao7cp7wu3mvop6eocjixhdcda25p24r5
 
 ##############################
 # start deprecated interface #
@@ -243,9 +247,13 @@ ALL_LDFLAGS += $(ALL_CCFLAGS)
 ALL_LDFLAGS += $(addprefix -Xlinker ,$(LDFLAGS))
 ALL_LDFLAGS += $(addprefix -Xlinker ,$(EXTRA_LDFLAGS))
 
-# Common includes and paths for CUDA
-INCLUDES  := -I$(CUDA_PATH)/include -I/usr/include/xraylib -I/usr/local/include/polycap -I/usr/include/easyRNG #-I../../../Common 
-LIBRARIES := -L$(CUDA_PATH)/lib64 -L/home/miro/Software/1st-party/voxTrace/build/src/api -L/home/miro/Software/1st-party/voxTrace/build/src/base -L/usr/lib/x86_64-linux-gnu
+# Common includes and paths for CUDA Local
+#INCLUDES  := -I$(CUDA_PATH)/include -I/usr/include/xraylib -I/usr/local/include/polycap -I/usr/include/easyRNG #-I../../../Common 
+#LIBRARIES := -L$(CUDA_PATH)/lib64 -L/home/miro/Software/1st-party/voxTrace/build/src/api -L/home/miro/Software/1st-party/voxTrace/build/src/base -L/usr/lib/x86_64-linux-gnu
+
+# Common includes and paths for CUDA VSC
+INCLUDES  := -I$(CUDA_PATH)/include -I/home/fs71764/miro/Software/3rd-Party/Install/include/xraylib  -I/home/fs71764/miro/Software/3rd-Party/Install/include/polycap -I/home/fs71764/miro/Software/3rd-Party/Install/include/easyRNG #-I/usr/include/xraylib -I/usr/local/include/polycap -I/usr/include/easyRNG #-I../../../Common 
+LIBRARIES := -L$(CUDA_PATH)/lib64 -L/home/fs71764/miro/Software/1st-Party/voxTrace/build/src/api -L/home/fs71764/miro/Software/1st-Party/voxTrace/build/src/base -L/home/fs71764/miro/Software/3rd-Party/Install/lib -L/gpfs/opt/sw/spack-0.17.1/opt/spack/linux-almalinux8-zen3/gcc-11.2.0/armadillo-10.5.0-zzssso6lwzgjpsuubriirjj67cf2rin6/lib64 #-L/home/miro/Software/1st-party/voxTrace/build/src/api -L/home/miro/Software/1st-party/voxTrace/build/src/base -L/usr/lib/x86_64-linux-gnu
 
 ################################################################################
 
@@ -268,11 +276,14 @@ $(foreach sm,$(SMS),$(eval GENCODE_FLAGS += -gencode arch=compute_$(sm),code=sm_
 # Generate PTX code from the highest SM architecture in $(SMS) to guarantee forward-compatibility
 HIGHEST_SM := $(lastword $(sort $(SMS)))
 ifneq ($(HIGHEST_SM),)
-GENCODE_FLAGS += -gencode arch=compute_$(HIGHEST_SM),code=compute_$(HIGHEST_SM)
+GENCODE_FLAGS += -gencode arch=compute_$(HIGHEST_SM),code=compute_$(HIGHEST_SM) -Wno-deprecated-gpu-targets
 endif
 endif
 ##########################################################
-ALL_CCFLAGS += --std=c++17 -lcudart -l:libXRayLibAPI.a -l:libxrl.a -larmadillo -l:libPolyCapAPI.a -lpolycap -lstdc++ -Xcompiler -fopenmp -l:libvt.base.a #--threads 0 
+#Local
+#ALL_CCFLAGS += --std=c++17 -lcudart -l:libXRayLibAPI.a -l:libxrl.a -larmadillo -l:libPolyCapAPI.a -lpolycap -lstdc++ -Xcompiler -fopenmp -l:libvt.base.a #--threads 0 
+#VSC
+ALL_CCFLAGS += --std=c++17 -lcudart -l:libXRayLibAPI.a -l:libxrl.so -larmadillo -l:libPolyCapAPI.a -lpolycap -lstdc++ -Xcompiler -fopenmp -l:libvt.base.a #--threads 0 
 ##########################################################
 ifeq ($(SAMPLE_ENABLED),0)
 EXEC ?= @echo "[@]"

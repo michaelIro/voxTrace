@@ -21,7 +21,7 @@ int main() {
 
 	TracerGPU::callTrace(); 
     
-    PolyCapAPI mySecondaryPolycap((char*) "../test-data/in/polycap/pc-236-descr.txt");
+    //PolyCapAPI mySecondaryPolycap((char*) "../test-data/in/polycap/pc-236-descr.txt");
 
     //XRBeam myDetectorBeam(mySecondaryPolycap.traceFast(fluorescence_.getMatrix()));
 	//std::cout << "Detector size:" << myDetectorBeam.getRays().size() << std::endl;
