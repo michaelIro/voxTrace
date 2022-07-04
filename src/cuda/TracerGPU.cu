@@ -18,7 +18,7 @@ __global__ void trace(RayGPU *rays, SampleGPU* sample, curandState_t *states)
   //int pos = (blockIdx.x-1)*256 + threadIdx.x;
 	RayGPU*	currentRay = &rays[blockIdx.x];
   currentRay->primaryTransform(300000.0, 300000.0,0.0, 5100.0, 45.0); // 300 used to be 70
-  //currentRay->setStartCoordinates(currentRay->getStartX(), currentRay->getStartY(), currentRay->getStartZ()+60.0);
+  currentRay->setStartCoordinates(currentRay->getStartX(), currentRay->getStartY(), currentRay->getStartZ()+60.0);
 
 	VoxelGPU* currentVoxel = sample->findStartVoxel(currentRay);
 
@@ -44,7 +44,7 @@ __global__ void trace(RayGPU *rays, SampleGPU* sample, curandState_t *states)
     }
   }while(!(currentRay->getIAFlag() || currentRay->getOOBFlag()));
 
-  //currentRay->setStartCoordinates(currentRay->getStartX(), currentRay->getStartY(), currentRay->getStartZ()-60.0);
+  currentRay->setStartCoordinates(currentRay->getStartX(), currentRay->getStartY(), currentRay->getStartZ()-60.0);
   currentRay->secondaryTransform(300000.0, 300000.0, 0.0, 4900.0, 45.0, 950.0); //rin actually 0.095
 }
 
@@ -205,7 +205,7 @@ void TracerGPU::callTrace(){
 
 	  std::string pathname = file.path();
 	  std::cout << pathname << std::endl;
-    std::string path_out = "/media/miro/Data/" + file.path().filename().string() + "-pos-4.h5";
+    std::string path_out = "/media/miro/Data/" + file.path().filename().string() + "-pos-5.h5";
     if(std::filesystem::exists(path_out)){
       std::cout << "File already exists" << std::endl;
     }
