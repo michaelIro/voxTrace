@@ -43,7 +43,6 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_compile_options(vt.cuda PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-G>)
     target_compile_options(vt.cuda PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-g>)
     target_compile_options(vt.cuda PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O0>)
-    message("ES WIRD GEDEBUGGT")  
 endif()
 #target_compile_options(vt.cuda PRIVATE -G -g)
 
