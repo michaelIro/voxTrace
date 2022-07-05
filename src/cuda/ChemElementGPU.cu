@@ -17,8 +17,8 @@ class ChemElementGPU {
 		static constexpr float max_energy = 20.0;									// Maximum energy of the energy grid [keV] -> 40 keV
 		static constexpr int energy_entries = (int)(max_energy/energy_resolution);	// Number of energy grid entries
 
-		static constexpr float angle_resolution = 0.1;								// Resolution of the angle grid [rad] -> 0.005 rad
-		static constexpr float max_angle = 2*M_PI;									// Maximum angle of the angle grid [rad] -> 2*pi
+		static constexpr float angle_resolution = 0.01;								// Resolution of the angle grid [rad] -> 0.005 rad
+		static constexpr float max_angle = M_PI;									// Maximum angle of the angle grid [rad] -> 2*pi
 		static constexpr int angle_entries = (int)(max_angle/angle_resolution);		// Number of angle grid entries
 
 		static constexpr int line_entries = 382;									// Number of lines in the line grid
@@ -30,7 +30,6 @@ class ChemElementGPU {
 		float cs_ray_prob[energy_entries];
 		float cs_compt_prob[energy_entries];
 
-		//float cs_fluor_l[energy_entries][shell_entries];
 		float cs_phot_part[shell_entries][energy_entries];
 
 		float dcs_rayl[energy_entries][angle_entries];
@@ -42,13 +41,15 @@ class ChemElementGPU {
 		float fluor_yield[shell_entries];
 		float auger_yield[shell_entries];
 
-		/*
-		int shell_lines[shell_entries][2]= { {0,28}, {29,57},{85,112},{113,135},		// L lines	// K lines
+		
+		int shell_lines[shell_entries][2]= { 
+			{0,28}, 																	// K lines
+			{29,57},{85,112},{113,135},													// L lines	
 			{136,157},{158,179},{180,199},{200,218},									// M lines
 			{219,236},{237,253},{254,269},{270,284},{285,298},{299,311},{312,323},		// N lines
 			{321,334},{335,344},{345,353},{354,361},{362,368},{369,371},{372,373},		// O lines
 			{374,377},{378,380},{381,382}												// P lines
-		};*/
+		};
 
 		__host__ void discretize(){
 			for(int i=1; i<=energy_entries; i++){
@@ -59,11 +60,20 @@ class ChemElementGPU {
 				cs_ray_prob[i] = XRayLibAPI::CS_Ray(z_,e) / XRayLibAPI::CS_Tot(z_,e);
 				cs_compt_prob[i] = XRayLibAPI::CS_Compt(z_,e) / XRayLibAPI::CS_Tot(z_,e);
 
+				float dcs_rayl_sum=0., dcs_comp_sum=0.;
 				for(int j = 0; j < angle_entries; j++){
 					float a = j*angle_resolution;
 					dcs_rayl[i][j] = XRayLibAPI::DCS_Rayl(z_,e,a);
 					dcs_comp[i][j] = XRayLibAPI::DCS_Compt(z_,e,a);
+					dcs_rayl_sum += dcs_rayl[i][j];
+					dcs_comp_sum += dcs_comp[i][j]; 
 				}
+				for(int j = 0; j < angle_entries; j++){
+					dcs_rayl[i][j] = dcs_rayl[i][j] / dcs_rayl_sum;
+					dcs_comp[i][j] = dcs_comp[i][j] / dcs_comp_sum;
+
+				}
+
 			}
 
 			for(int i = 0; i < 31; i++){
@@ -111,18 +121,13 @@ class ChemElementGPU {
 		__device__ float CS_Phot_Prob(float energy) const { return interpolate(energy, energy_resolution, cs_phot_prob);};
 		__device__ float CS_Rayl_Prob(float energy) const { return interpolate(energy, energy_resolution, cs_ray_prob);};
 		__device__ float CS_Compt_Prob(float energy) const { return interpolate(energy, energy_resolution, cs_compt_prob);};
-		//__device__ float CS_Fluor_Line(int shell, float energy) const {return interpolate(energy,energy_resolution, cs_fluor_l[shell]);}; 
 		__device__ float CS_Phot_Part_Prob(int shell, float energy) const {return interpolate(energy,energy_resolution, cs_phot_part[shell]);};
 
-		//__device__ float DCS_Rayl(float energy, float angle) const {return dinterpolate(energy, energy_resolution,angle, angle_resolution, dcs_rayl);};
-		//__device__ float DCS_Compt(float energy, float angle) const {return dinterpolate(energy, energy_resolution,angle, angle_resolution, dcs_comp);};
+		__device__ float DCS_Rayl(float energy, float angle) const { return interpolate(angle, angle_resolution, dcs_rayl[lrintf(energy/energy_resolution)]);};
+		__device__ float DCS_Compt(float energy, float angle) const { return interpolate(angle, angle_resolution, dcs_comp[lrintf(energy/energy_resolution)]);};
 
 		// "Decisions" with random number
 		__device__ int getInteractionType(float energy, float randomN) const{
-	
-			//float tot = CS_Tot(energy);
-			//float phot = CS_Phot_Prob(energy);
-			//float photRayleigh = (CS_Phot_Prob(energy) + CS_Rayl_Prob(energy));
 
 			if(randomN <= CS_Phot_Prob(energy)) return 0;
 			else if(randomN <= (CS_Phot_Prob(energy) + CS_Rayl_Prob(energy))) return 1;
@@ -148,93 +153,38 @@ class ChemElementGPU {
 
 		__device__ float getThetaCompt(float energy, float randomN) const {
 			
-			int stepsize = 200;
-			int arraysize = (int) (M_PI/(1./((float)stepsize)))+1;
-
-			float probSum=0.;
-			float* prob; //= new float[arraysize];
-			float* theta; //= new float[arraysize];
-			cudaMalloc(&prob, sizeof(float)*arraysize);
-			cudaMalloc(&theta, sizeof(float)*arraysize);
-
-			float photLambda = 1. / (energy/12.39841930);
-
-
-			float x =0.;
-			for(int i=0; i<arraysize; i++){
-				x = ((float)i)/((float)(stepsize));
-				theta[i]= 2*asinf(x*photLambda);
-				prob[i] = DCS_Compt(energy,theta[i]);
-
-				if((isnan(prob[i]))) break;
-				if(i!=0) probSum += prob[i-1]*(cos(theta[i]) - cos(theta[i-1]));	
+			int i; 
+			float sum = 0.;
+			for(i=0; i<angle_entries; i++){
+				sum += DCS_Compt(energy,i*angle_resolution);
+				if(sum >randomN) break;
 			}
 
-  			float integral = probSum*2*M_PI;
-
-			probSum =0.;
-			int j;
-			for(j=0; j<arraysize; j++){
-				probSum += prob[j]/integral;
-				if(probSum >randomN)break;
-			}
-			float res = theta[j];
-			cudaFree(prob);
-			cudaFree(theta);
-
-			return res;//theta[j];
+			return i*angle_resolution;
 		};
 
 		__device__ float getThetaRayl(float energy, float randomN) const {
 			
-			int stepsize = 200;
-			int arraysize = (int) (M_PI/(1./((float)stepsize)))+1;
-
-			float probSum=0.;
-			float* prob; //= new float[arraysize];
-			float* theta; //= new float[arraysize];
-			cudaMalloc(&prob, sizeof(float)*arraysize);
-			cudaMalloc(&theta, sizeof(float)*arraysize);
-
-			float photLambda = 1. / (energy/12.39841930);
-
-
-			float x =0.;
-			for(int i=0; i<arraysize; i++){
-				x = ((float)i)/((float)(stepsize));
-				theta[i]= 2*asinf(x*photLambda);
-				prob[i] = DCS_Rayl(energy,theta[i]);
-
-				if((isnan(prob[i]))) break;
-				if(i!=0) probSum += prob[i-1]*(cos(theta[i]) - cos(theta[i-1]));	
+			int i; 
+			float sum = 0.;
+			for(i=0; i<angle_entries; i++){
+				sum += DCS_Rayl(energy,i*angle_resolution);
+				if(sum > randomN) break;
 			}
 
-  			float integral = probSum*2*M_PI; //before abs() why?
-
-			probSum =0.;
-			int j;
-			for(j=0; j<arraysize; j++){
-				probSum += prob[j]/integral;
-				if(probSum >randomN)break;
-			}
-			float res = theta[j];
-			
-			cudaFree(prob);
-			cudaFree(theta);
-
-			return res;//theta[j];		
-			};
+			return i*angle_resolution;
+		};
 
 		__device__ int getTransition(int shell, float randomN) const { 
 
-			int shell_lines[shell_entries][2]= { 
+			/*int shell_lines[shell_entries][2]= { 
 				{0,28}, 																	// K lines
 				{29,57},{85,112},{113,135},													// L lines
 				{136,157},{158,179},{180,199},{200,218},									// M lines
 				{219,236},{237,253},{254,269},{270,284},{285,298},{299,311},{312,323},		// N lines
 				{321,334},{335,344},{345,353},{354,361},{362,368},{369,371},{372,373},		// O lines
 				{374,377},{378,380},{381,382}												// P lines
-			};
+			};*/
 			int dimensions = 0;
 			//int i1 = shell_lines[shell][0];
 			//int i2 = shell_lines[shell][1];
@@ -273,7 +223,7 @@ class ChemElementGPU {
 			
 			cudaFree(line_ratios_line);
 			cudaFree(line_ratios_ratio);
-			cudaFree(&shell_lines);
+			//cudaFree(&shell_lines);
 				return myLine;
 			}
 			return 0;
@@ -292,137 +242,12 @@ class ChemElementGPU {
 
 			float result =  y1 + (y2-y1)/(x2-x1)*(arg-x1);
 
-			//cudaFree(&x);
-			//cudaFree(&i);
-			//cudaFree(&x1);
-			//cudaFree(&x2);
-			//cudaFree(&y1);
-			//cudaFree(&y2);
-
 			return result;
-			//return y1 + (y2-y1)/(x2-x1)*(arg-x1);
-			//return vec[(int)ceilf(arg/stepsize)-1] + (vec[(int)ceilf(arg/stepsize)]-vec[(int)ceilf(arg/stepsize)-1])/(stepsize)*(arg-(ceilf(arg/stepsize)-1)*stepsize);
+
 		};
 
-		/*inline __device__ float dinterpolate(float arg_1, float stepsize_1, float arg_2, float stepsize_2, const float vec[energy_entries][angle_entries]) const{
-
-			int i1 = ceilf(arg_1/stepsize_1);
-			int i2 = ceilf(arg_2/stepsize_2);
-
-			if(i2 == 0){
-				float x1 = (i1-1)*stepsize_1;
-				float x2 = i1*stepsize_1;
-
-				float y1 = vec[i1-1][0];
-				float y2 = vec[i1][0];
-
-				//return y1 + (y2-y1)/(x2-x1)*(arg_1-x1);
-				return 0.0;
-			}
 
 
-			float q11 = vec[i1-1][i2-1]; 
-			float q12 = vec[i1-1][i2];
-			float q21 = vec[i1][i2-1];
-			float q22 = vec[i1][i2];
-			float x1 = (i1-1)*stepsize_1;
-			float x2 = i1*stepsize_1;
-			float y1 = (i2-1)*stepsize_2;
-			float y2 = i2*stepsize_2;
-
-			float x = arg_1;
-			float y = arg_2;
-
-    		float x2x1, y2y1, x2x, y2y, yy1, xx1;
-    		x2x1 = x2 - x1;
-    		y2y1 = y2 - y1;
-    		x2x = x2 - x;
-    		y2y = y2 - y;
-    		yy1 = y - y1;
-    		xx1 = x - x1;
-
-    		return 1.0 / (x2x1 * y2y1) * (q11 * x2x * y2y + q21 * xx1 * y2y + q12 * x2x * yy1 + q22 * xx1 * yy1);
-		}*/
-
-		inline __device__ float DCS_Rayl(float energy, float angle) const{
-
-			int i1 = ceilf(energy/energy_resolution);
-			int i2 = ceilf(angle/angle_resolution);
-
-			if(i2 == 0){
-				float x1 = (i1-1)*energy_resolution;
-				float x2 = i1*energy_resolution;
-
-				float y1 = dcs_rayl[i1-1][0];
-				float y2 = dcs_rayl[i1][0];
-
-				return y1 + (y2-y1)/(x2-x1)*(energy-x1);
-				//return 0.0;
-			}
-
-
-			float q11 = dcs_rayl[i1-1][i2-1]; 
-			float q12 = dcs_rayl[i1-1][i2];
-			float q21 = dcs_rayl[i1][i2-1];
-			float q22 = dcs_rayl[i1][i2];
-			float x1 = (i1-1)*energy_resolution;
-			float x2 = i1*energy_resolution;
-			float y1 = (i2-1)*angle_resolution;
-			float y2 = i2*angle_resolution;
-
-			float x = energy;
-			float y = angle;
-
-    		float x2x1, y2y1, x2x, y2y, yy1, xx1;
-    		x2x1 = x2 - x1;
-    		y2y1 = y2 - y1;
-    		x2x = x2 - x;
-    		y2y = y2 - y;
-    		yy1 = y - y1;
-    		xx1 = x - x1;
-
-    		return 1.0 / (x2x1 * y2y1) * (q11 * x2x * y2y + q21 * xx1 * y2y + q12 * x2x * yy1 + q22 * xx1 * yy1);
-		}
-
-		inline __device__ float DCS_Compt(float energy, float angle) const{
-
-			int i1 = ceilf(energy/energy_resolution);
-			int i2 = ceilf(angle/angle_resolution);
-
-			if(i2 == 0){
-				float x1 = (i1-1)*energy_resolution;
-				float x2 = i1*energy_resolution;
-
-				float y1 = dcs_comp[i1-1][0];
-				float y2 = dcs_comp[i1][0];
-
-				return y1 + (y2-y1)/(x2-x1)*(energy-x1);
-				//return 0.0;
-			}
-
-
-			float q11 = dcs_comp[i1-1][i2-1]; 
-			float q12 = dcs_comp[i1-1][i2];
-			float q21 = dcs_comp[i1][i2-1];
-			float q22 = dcs_comp[i1][i2];
-			float x1 = (i1-1)*energy_resolution;
-			float x2 = i1*energy_resolution;
-			float y1 = (i2-1)*angle_resolution;
-			float y2 = i2*angle_resolution;
-
-			float x = energy;
-			float y = angle;
-
-    		float x2x1, y2y1, x2x, y2y, yy1, xx1;
-    		x2x1 = x2 - x1;
-    		y2y1 = y2 - y1;
-    		x2x = x2 - x;
-    		y2y = y2 - y;
-    		yy1 = y - y1;
-    		xx1 = x - x1;
-
-    		return 1.0 / (x2x1 * y2y1) * (q11 * x2x * y2y + q21 * xx1 * y2y + q12 * x2x * yy1 + q22 * xx1 * yy1);
-		}
 
 
 		__host__ size_t getMemorySize() const {

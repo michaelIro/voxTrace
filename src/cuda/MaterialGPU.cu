@@ -45,7 +45,7 @@ class MaterialGPU {
 		
 		__device__ float CS_Tot_Lin(float energy) const { return (CS_Tot(energy) * rho_); };
 
-		__device__ ChemElementGPU* const getInteractingElement(float energy, float randomN) const {
+		__device__ ChemElementGPU* getInteractingElement(float energy, float randomN) const {
 
 			float muMassTot = CS_Tot(energy);
 			float sum = 0.;

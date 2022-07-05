@@ -77,15 +77,6 @@ class RayGPU {
 	__host__ __device__ void setNextVoxel(int nextVoxel) {nextVoxel_=nextVoxel;};
 	__host__ __device__ void setTIn(float tIn) {this->tIn=tIn;};
 
-	__host__ __device__ void rotate(float phi, float theta){
-			float diX = cosf(theta)*cosf(phi)*dirX_ - sinf(phi)*dirY_ + sinf(theta)*cosf(phi)*dirZ_;
-			float diY = cosf(theta)*sinf(phi)*dirX_ + cosf(phi)*dirY_ + sinf(theta)*sinf(phi)*dirZ_;
-			float diZ = -sinf(theta)*dirX_+cosf(theta)*dirZ_;
-			dirX_=diX;
-			dirY_=diY;
-			dirZ_=diZ;
-	}
-
 	__host__ __device__ float getStartX() const {return x0_;};
 	__host__ __device__ float getStartY() const {return y0_;};
 	__host__ __device__ float getStartZ() const {return z0_;};
@@ -115,6 +106,15 @@ class RayGPU {
 	__host__ __device__ bool getOOBFlag() const {return oobFlag_;};
 	__host__ __device__ int getNextVoxel() const {return nextVoxel_;};
 	__host__ __device__ float getTIn() const {return tIn;};
+
+	__host__ __device__ void rotate(float phi, float theta){
+			float diX = cosf(theta)*cosf(phi)*dirX_ - sinf(phi)*dirY_ + sinf(theta)*cosf(phi)*dirZ_;
+			float diY = cosf(theta)*sinf(phi)*dirX_ + cosf(phi)*dirY_ + sinf(theta)*sinf(phi)*dirZ_;
+			float diZ = -sinf(theta)*dirX_+cosf(theta)*dirZ_;
+			dirX_=diX;
+			dirY_=diY;
+			dirZ_=diZ;
+	}
 
 	__device__ void primaryTransform(float x0, float y0, float z0, float d, float alpha){
 
