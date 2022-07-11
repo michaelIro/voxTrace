@@ -73,6 +73,8 @@ if(NOT HDF5_FOUND)
     message(FATAL_ERROR "HDF-5 was not found! Check if it is installed on your System.")
 endif(NOT HDF5_FOUND)
 ######################################################################################## end of finding libraries
+target_include_directories(Test-3 PUBLIC ${POLYCAP_INCLUDE_DIRS})
+
 target_compile_options(Test-1 PUBLIC -DARMA_USE_HDF5)#-O3
 target_compile_options(Test-2 PUBLIC -DARMA_USE_HDF5) #-O3
 target_compile_options(Test-3 PUBLIC -DARMA_USE_HDF5 -O0) #-lcuda -O3

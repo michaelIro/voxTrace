@@ -4,10 +4,10 @@
 
 # Location of the CUDA Toolkit
 # Local
-#CUDA_PATH ?= /usr/local/cuda
+CUDA_PATH ?= /usr/local/cuda
 
 # VSC
-CUDA_PATH ?= /gpfs/opt/sw/spack-0.17.1/opt/spack/linux-almalinux8-zen3/gcc-11.2.0/cuda-11.5.0-ao7cp7wu3mvop6eocjixhdcda25p24r5
+#CUDA_PATH ?= /gpfs/opt/sw/spack-0.17.1/opt/spack/linux-almalinux8-zen3/gcc-11.2.0/cuda-11.5.0-ao7cp7wu3mvop6eocjixhdcda25p24r5
 
 ##############################
 # start deprecated interface #
@@ -248,12 +248,12 @@ ALL_LDFLAGS += $(addprefix -Xlinker ,$(LDFLAGS))
 ALL_LDFLAGS += $(addprefix -Xlinker ,$(EXTRA_LDFLAGS))
 
 # Common includes and paths for CUDA Local
-#INCLUDES  := -I$(CUDA_PATH)/include -I/usr/include/xraylib -I/usr/local/include/polycap -I/usr/include/easyRNG #-I../../../Common 
-#LIBRARIES := -L$(CUDA_PATH)/lib64 -L/home/miro/Software/1st-party/voxTrace/build/src/api -L/home/miro/Software/1st-party/voxTrace/build/src/base -L/usr/lib/x86_64-linux-gnu
+INCLUDES  := -I$(CUDA_PATH)/include -I/usr/include/xraylib -I/usr/local/include/polycap -I/usr/include/easyRNG #-I../../../Common 
+LIBRARIES := -L$(CUDA_PATH)/lib64 -L/home/miro/Software/1st-party/voxTrace/build/src/api -L/home/miro/Software/1st-party/voxTrace/build/src/base -L/usr/lib/x86_64-linux-gnu
 
 # Common includes and paths for CUDA VSC
-INCLUDES  := -I$(CUDA_PATH)/include -I/home/fs71764/miro/Software/3rd-Party/Install/include/xraylib  -I/home/fs71764/miro/Software/3rd-Party/Install/include/polycap -I/home/fs71764/miro/Software/3rd-Party/Install/include/easyRNG #-I/usr/include/xraylib -I/usr/local/include/polycap -I/usr/include/easyRNG #-I../../../Common 
-LIBRARIES := -L$(CUDA_PATH)/lib64 -L/home/fs71764/miro/Software/1st-Party/voxTrace/build/src/api -L/home/fs71764/miro/Software/1st-Party/voxTrace/build/src/base -L/home/fs71764/miro/Software/3rd-Party/Install/lib -L/gpfs/opt/sw/spack-0.17.1/opt/spack/linux-almalinux8-zen3/gcc-11.2.0/armadillo-10.5.0-zzssso6lwzgjpsuubriirjj67cf2rin6/lib64 #-L/home/miro/Software/1st-party/voxTrace/build/src/api -L/home/miro/Software/1st-party/voxTrace/build/src/base -L/usr/lib/x86_64-linux-gnu
+#INCLUDES  := -I$(CUDA_PATH)/include -I/home/fs71764/miro/Software/3rd-Party/Install/include/xraylib  -I/home/fs71764/miro/Software/3rd-Party/Install/include/polycap -I/home/fs71764/miro/Software/3rd-Party/Install/include/easyRNG #-I/usr/include/xraylib -I/usr/local/include/polycap -I/usr/include/easyRNG #-I../../../Common 
+#LIBRARIES := -L$(CUDA_PATH)/lib64 -L/home/fs71764/miro/Software/1st-Party/voxTrace/build/src/api -L/home/fs71764/miro/Software/1st-Party/voxTrace/build/src/base -L/home/fs71764/miro/Software/3rd-Party/Install/lib -L/gpfs/opt/sw/spack-0.17.1/opt/spack/linux-almalinux8-zen3/gcc-11.2.0/armadillo-10.5.0-zzssso6lwzgjpsuubriirjj67cf2rin6/lib64 #-L/home/miro/Software/1st-party/voxTrace/build/src/api -L/home/miro/Software/1st-party/voxTrace/build/src/base -L/usr/lib/x86_64-linux-gnu
 
 ################################################################################
 
@@ -281,9 +281,9 @@ endif
 endif
 ##########################################################
 #Local
-#ALL_CCFLAGS += --std=c++17 -lcudart -l:libXRayLibAPI.a -l:libxrl.a -larmadillo -l:libPolyCapAPI.a -lpolycap -lstdc++ -Xcompiler -fopenmp -l:libvt.base.a #--threads 0 
+ALL_CCFLAGS += --std=c++17 -lcudart -l:libXRayLibAPI.a -l:libxrl.a -larmadillo -l:libPolyCapAPI.a -lpolycap -lstdc++ -Xcompiler -fopenmp -l:libvt.base.a #--threads 0 
 #VSC
-ALL_CCFLAGS += --std=c++17 -lcudart -l:libXRayLibAPI.a -l:libxrl.so -larmadillo -l:libPolyCapAPI.a -lpolycap -lstdc++ -Xcompiler -fopenmp -l:libvt.base.a #--threads 0 
+#ALL_CCFLAGS += --std=c++17 -lcudart -l:libXRayLibAPI.a -l:libxrl.so -larmadillo -l:libPolyCapAPI.a -lpolycap -lstdc++ -Xcompiler -fopenmp -l:libvt.base.a #--threads 0 
 ##########################################################
 ifeq ($(SAMPLE_ENABLED),0)
 EXEC ?= @echo "[@]"

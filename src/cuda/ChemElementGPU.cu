@@ -17,8 +17,8 @@ class ChemElementGPU {
 		static constexpr float max_energy = 20.0;									// Maximum energy of the energy grid [keV] -> 40 keV
 		static constexpr int energy_entries = (int)(max_energy/energy_resolution);	// Number of energy grid entries
 
-		static constexpr float angle_resolution = 0.01;								// Resolution of the angle grid [rad] -> 0.005 rad
-		static constexpr float max_angle = M_PI;									// Maximum angle of the angle grid [rad] -> 2*pi
+		static constexpr float angle_resolution = 0.005;							// Resolution of the angle grid [rad] -> 0.005 rad
+		static constexpr float max_angle = M_PI;									// Maximum angle of the angle grid [rad] -> Pi
 		static constexpr int angle_entries = (int)(max_angle/angle_resolution);		// Number of angle grid entries
 
 		static constexpr int line_entries = 382;									// Number of lines in the line grid
@@ -42,14 +42,14 @@ class ChemElementGPU {
 		float auger_yield[shell_entries];
 
 		
-		int shell_lines[shell_entries][2]= { 
+		/*int shell_lines[shell_entries][2]= { 
 			{0,28}, 																	// K lines
 			{29,57},{85,112},{113,135},													// L lines	
 			{136,157},{158,179},{180,199},{200,218},									// M lines
 			{219,236},{237,253},{254,269},{270,284},{285,298},{299,311},{312,323},		// N lines
 			{321,334},{335,344},{345,353},{354,361},{362,368},{369,371},{372,373},		// O lines
 			{374,377},{378,380},{381,382}												// P lines
-		};
+		};*/
 
 		__host__ void discretize(){
 			for(int i=1; i<=energy_entries; i++){
@@ -163,6 +163,11 @@ class ChemElementGPU {
 			return i*angle_resolution;
 		};
 
+		__device__ float getComptEnergy(float energy, float theta){ 
+			
+  			return energy / (1 + (energy / 510.998928)*(1 - cosf(theta))); // 510 = electron rest mass (keV)
+		}
+
 		__device__ float getThetaRayl(float energy, float randomN) const {
 			
 			int i; 
@@ -177,14 +182,14 @@ class ChemElementGPU {
 
 		__device__ int getTransition(int shell, float randomN) const { 
 
-			/*int shell_lines[shell_entries][2]= { 
+			int shell_lines[shell_entries][2]= { 
 				{0,28}, 																	// K lines
 				{29,57},{85,112},{113,135},													// L lines
 				{136,157},{158,179},{180,199},{200,218},									// M lines
 				{219,236},{237,253},{254,269},{270,284},{285,298},{299,311},{312,323},		// N lines
 				{321,334},{335,344},{345,353},{354,361},{362,368},{369,371},{372,373},		// O lines
 				{374,377},{378,380},{381,382}												// P lines
-			};*/
+			};
 			int dimensions = 0;
 			//int i1 = shell_lines[shell][0];
 			//int i2 = shell_lines[shell][1];
@@ -223,7 +228,7 @@ class ChemElementGPU {
 			
 			cudaFree(line_ratios_line);
 			cudaFree(line_ratios_ratio);
-			//cudaFree(&shell_lines);
+			cudaFree(&shell_lines);
 				return myLine;
 			}
 			return 0;
@@ -243,12 +248,7 @@ class ChemElementGPU {
 			float result =  y1 + (y2-y1)/(x2-x1)*(arg-x1);
 
 			return result;
-
 		};
-
-
-
-
 
 		__host__ size_t getMemorySize() const {
 
