@@ -283,7 +283,7 @@ endif
 #Local
 ALL_CCFLAGS += --std=c++17 -lcudart -l:libXRayLibAPI.a -l:libxrl.a -larmadillo -l:libPolyCapAPI.a -lpolycap -lstdc++ -Xcompiler -fopenmp -l:libvt.base.a #--threads 0 
 #VSC
-#ALL_CCFLAGS += --std=c++17 -lcudart -l:libXRayLibAPI.a -l:libxrl.so -larmadillo -l:libPolyCapAPI.a -lpolycap -lstdc++ -Xcompiler -fopenmp -l:libvt.base.a #--threads 0 
+#ALL_CCFLAGS += --std=c++17 -lcudart -l:libXRayLibAPI.a -l:libxrl.so -larmadillo -lhdf5 -lstdc++ -Xcompiler -fopenmp -DARMA_USE_HDF5 #--threads 0 -l:libPolyCapAPI.a -lpolycap -l:libvt.base.a
 ##########################################################
 ifeq ($(SAMPLE_ENABLED),0)
 EXEC ?= @echo "[@]"
