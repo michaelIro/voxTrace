@@ -4,6 +4,8 @@
 /** Chemical-Element-Object for GPU */
 
 //#include <math.h>
+#include <cmath>
+#include <stdio.h>
 #include <device_launch_parameters.h>
 #include "../api/XRayLibAPI.hpp"
 
@@ -22,8 +24,7 @@ class ChemElementGPU {
 		static constexpr int angle_entries = (int)(max_angle/angle_resolution);		// Number of angle grid entries
 
 		static constexpr int line_entries = 382;									// Number of lines in the line grid
-		static constexpr int shell_entries = 25;									// Number of shells in the shell grid
-		static constexpr int max_shell = shell_entries;								// Maximum shell number
+		static constexpr int shell_entries = 25;									// Number of shells in the shell grid / Maximum shell number
 
 		float cs_tot[energy_entries];
 		float cs_phot_prob[energy_entries];
@@ -39,26 +40,17 @@ class ChemElementGPU {
 		float rad_rate[line_entries];
 
 		float fluor_yield[shell_entries];
-		float auger_yield[shell_entries];
-
-		
-		/*int shell_lines[shell_entries][2]= { 
-			{0,28}, 																	// K lines
-			{29,57},{85,112},{113,135},													// L lines	
-			{136,157},{158,179},{180,199},{200,218},									// M lines
-			{219,236},{237,253},{254,269},{270,284},{285,298},{299,311},{312,323},		// N lines
-			{321,334},{335,344},{345,353},{354,361},{362,368},{369,371},{372,373},		// O lines
-			{374,377},{378,380},{381,382}												// P lines
-		};*/
 
 		__host__ void discretize(){
-			for(int i=1; i<=energy_entries; i++){
+			for(int i=1; i< energy_entries; i++){
 				float e = i*energy_resolution;
 
 				cs_tot[i] = XRayLibAPI::CS_Tot(z_,e);
 				cs_phot_prob[i] = XRayLibAPI::CS_Phot(z_,e) / XRayLibAPI::CS_Tot(z_,e);
 				cs_ray_prob[i] = XRayLibAPI::CS_Ray(z_,e) / XRayLibAPI::CS_Tot(z_,e);
 				cs_compt_prob[i] = XRayLibAPI::CS_Compt(z_,e) / XRayLibAPI::CS_Tot(z_,e);
+
+				//printf("%i %f  %f  %f  %f  %f  %f \n",z_,(float)i/5.,cs_tot[i],cs_phot_prob[i] + cs_ray_prob[i]+cs_compt_prob[i],cs_phot_prob[i],cs_ray_prob[i],cs_compt_prob[i]);
 
 				float dcs_rayl_sum=0., dcs_comp_sum=0.;
 				for(int j = 0; j < angle_entries; j++){
@@ -71,18 +63,14 @@ class ChemElementGPU {
 				for(int j = 0; j < angle_entries; j++){
 					dcs_rayl[i][j] = dcs_rayl[i][j] / dcs_rayl_sum;
 					dcs_comp[i][j] = dcs_comp[i][j] / dcs_comp_sum;
-
 				}
-
 			}
 
-			for(int i = 0; i < 31; i++){
+			for(int i = 0; i < shell_entries; i++){
 				fluor_yield[i] = XRayLibAPI::FluorY(z_,i);
-				auger_yield[i] = XRayLibAPI::AugY(z_,i);
 
-				for(int j = 0; j < energy_entries; j++){
+				for(int j = 1; j < energy_entries; j++){
 					float e = j*energy_resolution;
-					//cs_fluor_l[i][j] = XRayLibAPI::CS_FluorL(z_,j,e);
 					cs_phot_part[i][j] = XRayLibAPI::CS_Phot_Part(z_,i,e) / XRayLibAPI::CS_Phot(z_,e);
 				}
 			}
@@ -91,6 +79,7 @@ class ChemElementGPU {
 				line_energies[i] = XRayLibAPI::LineE(z_,i*-1-1);
 				rad_rate[i] = XRayLibAPI::RadRate(z_,i*-1-1);
 			}
+			//printf("\n");
 		};
 
   	public:
@@ -103,7 +92,7 @@ class ChemElementGPU {
 			rho_ = 	XRayLibAPI::Rho(z_);
 
 			discretize();
-			getMemorySize();
+			//getMemorySize();
 		};
 		
 		// Member-Getter
@@ -113,7 +102,6 @@ class ChemElementGPU {
 
 		// Simple DB-Access
 		__device__ float Fluor_Y(int shell) const {return fluor_yield[shell];};
-		__device__ float Aug_Y(int shell) const {return auger_yield[shell];};
 		__device__ float Rad_Rate(int line) const {return rad_rate[line];};
 		__device__ float Line_Energy(int line) const {return line_energies[line];};
 
@@ -142,7 +130,7 @@ class ChemElementGPU {
 			float cs_tot = CS_Phot_Prob(energy);
 
 			if(cs_tot!=0.0)
-			for(shell_ = 0; shell_ < max_shell; shell_++){
+			for(shell_ = 0; shell_ < shell_entries; shell_++){
 				temp_= CS_Phot_Part_Prob(shell_, energy);
 				sum_ += temp_;
 				if(sum_ > randomN) break;
@@ -157,10 +145,14 @@ class ChemElementGPU {
 			float sum = 0.;
 			for(i=0; i<angle_entries; i++){
 				sum += DCS_Compt(energy,i*angle_resolution);
-				if(sum >randomN) break;
+				if(sum > randomN) break;
 			}
-
-			return i*angle_resolution;
+			float theta;
+			if(i < angle_entries-1)
+				theta = i*angle_resolution + angle_resolution / (DCS_Compt(energy,(i+1)*angle_resolution) - DCS_Compt(energy,i*angle_resolution))  * (sum-i*DCS_Compt(energy,i*angle_resolution));
+			else 
+				theta = angle_entries*angle_resolution;
+			return theta;
 		};
 
 		__device__ float getComptEnergy(float energy, float theta){ 
@@ -176,8 +168,12 @@ class ChemElementGPU {
 				sum += DCS_Rayl(energy,i*angle_resolution);
 				if(sum > randomN) break;
 			}
-
-			return i*angle_resolution;
+			float theta;
+			if(i < angle_entries-1)
+				theta = i*angle_resolution + angle_resolution / (DCS_Rayl(energy,(i+1)*angle_resolution) - DCS_Rayl(energy,i*angle_resolution)) * (sum-i*DCS_Rayl(energy,i*angle_resolution));
+			else 
+				theta = angle_entries*angle_resolution;
+			return theta;
 		};
 
 		__device__ int getTransition(int shell, float randomN) const { 
@@ -190,54 +186,27 @@ class ChemElementGPU {
 				{321,334},{335,344},{345,353},{354,361},{362,368},{369,371},{372,373},		// O lines
 				{374,377},{378,380},{381,382}												// P lines
 			};
-			int dimensions = 0;
-			//int i1 = shell_lines[shell][0];
-			//int i2 = shell_lines[shell][1];
 
-			for(int i = shell_lines[shell][0]; i <= shell_lines[shell][1]; i++){
-				if(Rad_Rate(i)>0.0)
-					dimensions++;
-			}
-			if(dimensions !=0){
-
-
-				
-			int* line_ratios_line;
-			float* line_ratios_ratio;	
-			cudaMalloc(&line_ratios_line, sizeof(int)*dimensions);
-			cudaMalloc(&line_ratios_ratio, sizeof(float)*dimensions);
-
-			int c = 0;
-			for(int i = shell_lines[shell][0]; i <= shell_lines[shell][1]; i++){
-				float ratio = Rad_Rate(i);
-				if (Rad_Rate(i)>0.0) {
-					line_ratios_line[c]=i;
-					line_ratios_ratio[c]=ratio;	
-					c++;
-				}
-			}
-
-			float mySum = 0.;
+			float sum = 0.;
 			int myLine;
-					
-			for(int i = 0; i < dimensions; i++){
-				mySum += line_ratios_ratio[i];
-				myLine = line_ratios_line[i];
-				if(mySum>randomN) break; 	
+			for(int i = shell_lines[shell][0]; i <= shell_lines[shell][1]; i++){
+				sum += Rad_Rate(i);
+				myLine = i;
+				if (sum>randomN) break;
 			}
-			
-			cudaFree(line_ratios_line);
-			cudaFree(line_ratios_ratio);
-			cudaFree(&shell_lines);
-				return myLine;
-			}
-			return 0;
+
+			return myLine;
 		};
 
 		// Helper functions
 		__device__ float interpolate(float arg, float stepsize, const float* vec) const{
+
 			float x = arg/stepsize;
 			int i = ceilf(x); //std::ceil(x);
+			if( i < 1){
+				float result = vec[0];
+				return result;
+			}
 
 			float x1 = (i-1)*stepsize;
 			float x2 = i*stepsize;

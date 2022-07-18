@@ -6,6 +6,10 @@
 
 #include <iostream>
 #include <device_launch_parameters.h>
+#include <curand.h>
+#include <cuda.h>
+#include <cuda_runtime.h>
+#include <curand_kernel.h>
 
 class RayGPU {
 	// These Parameters are taken 1:1 from Shadow3
@@ -97,7 +101,6 @@ class RayGPU {
     __host__ __device__ bool getFlag() const {return flag_;};
     __host__ __device__ float getWaveNumber() const {return k_;};
     __host__ __device__ float getOpticalPath() const {return opd_;};
-	__host__ __device__ float getEnergyEV() const {return (k_ / 50677300.0);};
     __host__ __device__ float getEnergyKeV() const {return (k_ / 50677300.0);};
 
 	__host__ __device__ bool getIAFlag() const {return iaFlag_;};
@@ -170,6 +173,30 @@ class RayGPU {
 			setIAFlag(false);
 		}
 
+	}
+
+	__device__ void generateRayGPU(curandState_t *localState, float r_out, float f, float r_f, float energy_keV){
+  		float x0__ = curand_normal(localState)/3.0f*r_out;
+  		float y0__ = 0.0f;
+  		float z0__ = curand_normal(localState)/3.0f*r_out;
+
+  		float xD__ = curand_normal(localState)/3.0f*r_f;
+  		float yD__ = f;
+  		float zD__ = curand_normal(localState)/3.0f*r_f;
+
+  		xD__ = xD__ - x0__;
+  		yD__ = yD__ - y0__;
+  		zD__ = zD__ - z0__;
+
+  		float norm__ = sqrtf(xD__*xD__+ yD__*yD__ + zD__*zD__);
+
+  		xD__ = xD__ / norm__;
+  		yD__ = yD__ / norm__;
+  		zD__ = zD__ / norm__;
+
+  		setStartCoordinates(x0__,y0__,z0__);
+  		setEndCoordinates(xD__,yD__,zD__);
+  		setEnergyKeV(energy_keV);
 	}
 
 	__host__ void print() const { 

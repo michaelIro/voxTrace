@@ -24,14 +24,11 @@ class TracerGPU{
 
 	public:
 
-		static void callTrace(); 	//arma::Mat<double>& beam_
-		static void callAdd();
-		static void callTest();
+		static void callTracePreBeam(); 
+		static void callTraceNewBeam(); 
 
 		__device__ static void traceForward(RayGPU* ray, VoxelGPU* currentVoxel, curandState_t *localState);
-
-		//static void callAdd(int N, int M, float *x, float *y, RayGPU* rays_1, RayGPU* rays_2, ChemElementGPU* elements, MaterialGPU* materials,ChemElementGPU* myElements,float* myElements_weights); 
-
+		__device__ static void generateRayGPU(curandState_t *localState, float r_out, float f, float r_f, float energy_keV, RayGPU* ray);
 };
 
 #endif

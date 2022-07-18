@@ -1,0 +1,242 @@
+========= CUDA-MEMCHECK
+========= This tool is deprecated and will be removed in a future release of the CUDA toolkit
+========= Please use the compute-sanitizer tool as a drop-in replacement
+START: Test-3
+========= Invalid __global__ read of size 4
+=========     at 0x000002a0 in _ZNK14ChemElementGPU7Fluor_YEi
+=========     by thread (0,0,0) in block (30,0,0)
+=========     Address 0x7f41e81859a0 is out of bounds
+=========     Saved host backtrace up to driver entry point at kernel launch time
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libcuda.so.1 [0x21740c]
+=========     Host Frame:/usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0 [0x1433c]
+=========     Host Frame:/usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0 (cudaLaunchKernel + 0x1d8) [0x69c38]
+=========     Host Frame:./build/bin/Test-3 [0x80b6e]
+=========     Host Frame:./build/bin/Test-3 [0x80521]
+=========     Host Frame:./build/bin/Test-3 [0x8056a]
+=========     Host Frame:./build/bin/Test-3 [0x7f83d]
+=========     Host Frame:./build/bin/Test-3 [0x7a4a0]
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libc.so.6 [0x29fd0]
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libc.so.6 (__libc_start_main + 0x7d) [0x2a07d]
+=========     Host Frame:./build/bin/Test-3 [0x798f5]
+=========
+========= Program hit cudaErrorLaunchFailure (error 719) due to "unspecified launch failure" on CUDA API call to cudaDeviceSynchronize.
+=========     Saved host backtrace up to driver entry point at error
+Trace: 0.886993 s
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libcuda.so.1 [0x34fb13]
+=========     Host Frame:/usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0 (cudaDeviceSynchronize + 0x127) [0x448b7]
+=========     Host Frame:./build/bin/Test-3 [0x7f842]
+=========     Host Frame:./build/bin/Test-3 [0x7a4a0]
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libc.so.6 [0x29fd0]
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libc.so.6 (__libc_start_main + 0x7d) [0x2a07d]
+=========     Host Frame:./build/bin/Test-3 [0x798f5]
+=========
+========= Program hit cudaErrorLaunchFailure (error 719) due to "unspecified launch failure" on CUDA API call to cudaFree.
+=========     Saved host backtrace up to driver entry point at error
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libcuda.so.1 [0x34fb13]
+=========     Host Frame:/usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0 (cudaFree + 0x16e) [0x4f21e]
+=========     Host Frame:./build/bin/Test-3 [0x7fe7e]
+=========     Host Frame:./build/bin/Test-3 [0x7a4a0]
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libc.so.6 [0x29fd0]
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libc.so.6 (__libc_start_main + 0x7d) [0x2a07d]
+=========     Host Frame:./build/bin/Test-3 [0x798f5]
+=========
+========= Program hit cudaErrorLaunchFailure (error 719) due to "unspecified launch failure" on CUDA API call to cudaFree.
+=========     Saved host backtrace up to driver entry point at error
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libcuda.so.1 [0x34fb13]
+=========     Host Frame:/usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0 (cudaFree + 0x16e) [0x4f21e]
+=========     Host Frame:./build/bin/Test-3 [0x7fe8d]
+=========     Host Frame:./build/bin/Test-3 [0x7a4a0]
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libc.so.6 [0x29fd0]
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libc.so.6 (__libc_start_main + 0x7d) [0x2a07d]
+=========     Host Frame:./build/bin/Test-3 [0x798f5]
+=========
+========= Program hit cudaErrorLaunchFailure (error 719) due to "unspecified launch failure" on CUDA API call to cudaFree.
+=========     Saved host backtrace up to driver entry point at error
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libcuda.so.1 [0x34fb13]
+=========     Host Frame:/usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0 (cudaFree + 0x16e) [0x4f21e]
+=========     Host Frame:./build/bin/Test-3 [0x7ff3a]
+=========     Host Frame:./build/bin/Test-3 [0x7a4a0]
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libc.so.6 [0x29fd0]
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libc.so.6 (__libc_start_main + 0x7d) [0x2a07d]
+=========     Host Frame:./build/bin/Test-3 [0x798f5]
+=========
+========= Program hit cudaErrorLaunchFailure (error 719) due to "unspecified launch failure" on CUDA API call to cudaFree.
+=========     Saved host backtrace up to driver entry point at error
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libcuda.so.1 [0x34fb13]
+=========     Host Frame:/usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0 (cudaFree + 0x16e) [0x4f21e]
+=========     Host Frame:./build/bin/Test-3 [0x7ff49]
+=========     Host Frame:./build/bin/Test-3 [0x7a4a0]
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libc.so.6 [0x29fd0]
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libc.so.6 (__libc_start_main + 0x7d) [0x2a07d]
+=========     Host Frame:./build/bin/Test-3 [0x798f5]
+=========
+========= Program hit cudaErrorLaunchFailure (error 719) due to "unspecified launch failure" on CUDA API call to cudaFree.
+=========     Saved host backtrace up to driver entry point at error
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libcuda.so.1 [0x34fb13]
+=========     Host Frame:/usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0 (cudaFree + 0x16e) [0x4f21e]
+=========     Host Frame:./build/bin/Test-3 [0x7ff58]
+=========     Host Frame:./build/bin/Test-3 [0x7a4a0]
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libc.so.6 [0x29fd0]
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libc.so.6 (__libc_start_main + 0x7d) [0x2a07d]
+=========     Host Frame:./build/bin/Test-3 [0x798f5]
+=========
+========= Program hit cudaErrorLaunchFailure (error 719) due to "unspecified launch failure" on CUDA API call to cudaFree.
+=========     Saved host backtrace up to driver entry point at error
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libcuda.so.1 [0x34fb13]
+=========     Host Frame:/usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0 (cudaFree + 0x16e) [0x4f21e]
+=========     Host Frame:./build/bin/Test-3 [0x7ff67]
+=========     Host Frame:./build/bin/Test-3 [0x7a4a0]
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libc.so.6 [0x29fd0]
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libc.so.6 (__libc_start_main + 0x7d) [0x2a07d]
+=========     Host Frame:./build/bin/Test-3 [0x798f5]
+=========
+========= Program hit cudaErrorLaunchFailure (error 719) due to "unspecified launch failure" on CUDA API call to cudaFree.
+=========     Saved host backtrace up to driver entry point at error
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libcuda.so.1 [0x34fb13]
+=========     Host Frame:/usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0 (cudaFree + 0x16e) [0x4f21e]
+=========     Host Frame:./build/bin/Test-3 [0x7ff76]
+=========     Host Frame:./build/bin/Test-3 [0x7a4a0]
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libc.so.6 [0x29fd0]
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libc.so.6 (__libc_start_main + 0x7d) [0x2a07d]
+=========     Host Frame:./build/bin/Test-3 [0x798f5]
+=========
+*** stack smashing detected ***: terminated
+========= Program hit cudaErrorLaunchFailure (error 719) due to "unspecified launch failure" on CUDA API call to cudaFree.
+=========     Saved host backtrace up to driver entry point at error
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libcuda.so.1 [0x34fb13]
+=========     Host Frame:/usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0 (cudaFree + 0x16e) [0x4f21e]
+=========     Host Frame:./build/bin/Test-3 [0x7ff85]
+=========     Host Frame:./build/bin/Test-3 [0x7a4a0]
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libc.so.6 [0x29fd0]
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libc.so.6 (__libc_start_main + 0x7d) [0x2a07d]
+=========     Host Frame:./build/bin/Test-3 [0x798f5]
+=========
+========= Error: process didn't terminate successfully
+========= No CUDA-MEMCHECK results found
+
+
+
+
+
+
+
+
+
+
+
+
+
+======== CUDA-MEMCHECK
+========= This tool is deprecated and will be removed in a future release of the CUDA toolkit
+========= Please use the compute-sanitizer tool as a drop-in replacement
+START: Test-3
+========= Invalid __global__ read of size 4
+=========     at 0x000139d0 in traceNewBeam(RayGPU*, SampleGPU*, curandStateXORWOW*)
+=========     by thread (0,0,0) in block (30,0,0)
+=========     Address 0x7f5e2a1859a0 is out of bounds
+=========     Saved host backtrace up to driver entry point at kernel launch time
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libcuda.so.1 [0x21740c]
+=========     Host Frame:/usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0 [0x1433c]
+=========     Host Frame:/usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0 (cudaLaunchKernel + 0x1d8) [0x69c38]
+=========     Host Frame:./build/bin/Test-3 [0x80b6e]
+=========     Host Frame:./build/bin/Test-3 [0x80521]
+=========     Host Frame:./build/bin/Test-3 [0x8056a]
+=========     Host Frame:./build/bin/Test-3 [0x7f83d]
+=========     Host Frame:./build/bin/Test-3 [0x7a4a0]
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libc.so.6 [0x29fd0]
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libc.so.6 (__libc_start_main + 0x7d) [0x2a07d]
+=========     Host Frame:./build/bin/Test-3 [0x798f5]
+=========
+========= Program hit cudaErrorLaunchFailure (error 719) due to "unspecified launch failure" on CUDA API call to cudaDeviceSynchronize.
+Trace: 0.565289 s
+=========     Saved host backtrace up to driver entry point at error
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libcuda.so.1 [0x34fb13]
+=========     Host Frame:/usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0 (cudaDeviceSynchronize + 0x127) [0x448b7]
+=========     Host Frame:./build/bin/Test-3 [0x7f842]
+=========     Host Frame:./build/bin/Test-3 [0x7a4a0]
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libc.so.6 [0x29fd0]
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libc.so.6 (__libc_start_main + 0x7d) [0x2a07d]
+=========     Host Frame:./build/bin/Test-3 [0x798f5]
+=========
+========= Program hit cudaErrorLaunchFailure (error 719) due to "unspecified launch failure" on CUDA API call to cudaFree.
+=========     Saved host backtrace up to driver entry point at error
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libcuda.so.1 [0x34fb13]
+=========     Host Frame:/usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0 (cudaFree + 0x16e) [0x4f21e]
+=========     Host Frame:./build/bin/Test-3 [0x7fe7e]
+=========     Host Frame:./build/bin/Test-3 [0x7a4a0]
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libc.so.6 [0x29fd0]
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libc.so.6 (__libc_start_main + 0x7d) [0x2a07d]
+=========     Host Frame:./build/bin/Test-3 [0x798f5]
+=========
+========= Program hit cudaErrorLaunchFailure (error 719) due to "unspecified launch failure" on CUDA API call to cudaFree.
+=========     Saved host backtrace up to driver entry point at error
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libcuda.so.1 [0x34fb13]
+=========     Host Frame:/usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0 (cudaFree + 0x16e) [0x4f21e]
+=========     Host Frame:./build/bin/Test-3 [0x7fe8d]
+=========     Host Frame:./build/bin/Test-3 [0x7a4a0]
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libc.so.6 [0x29fd0]
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libc.so.6 (__libc_start_main + 0x7d) [0x2a07d]
+=========     Host Frame:./build/bin/Test-3 [0x798f5]
+=========
+========= Program hit cudaErrorLaunchFailure (error 719) due to "unspecified launch failure" on CUDA API call to cudaFree.
+=========     Saved host backtrace up to driver entry point at error
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libcuda.so.1 [0x34fb13]
+=========     Host Frame:/usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0 (cudaFree + 0x16e) [0x4f21e]
+=========     Host Frame:./build/bin/Test-3 [0x7ff3a]
+=========     Host Frame:./build/bin/Test-3 [0x7a4a0]
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libc.so.6 [0x29fd0]
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libc.so.6 (__libc_start_main + 0x7d) [0x2a07d]
+=========     Host Frame:./build/bin/Test-3 [0x798f5]
+=========
+========= Program hit cudaErrorLaunchFailure (error 719) due to "unspecified launch failure" on CUDA API call to cudaFree.
+=========     Saved host backtrace up to driver entry point at error
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libcuda.so.1 [0x34fb13]
+=========     Host Frame:/usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0 (cudaFree + 0x16e) [0x4f21e]
+=========     Host Frame:./build/bin/Test-3 [0x7ff49]
+=========     Host Frame:./build/bin/Test-3 [0x7a4a0]
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libc.so.6 [0x29fd0]
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libc.so.6 (__libc_start_main + 0x7d) [0x2a07d]
+=========     Host Frame:./build/bin/Test-3 [0x798f5]
+=========
+========= Program hit cudaErrorLaunchFailure (error 719) due to "unspecified launch failure" on CUDA API call to cudaFree.
+=========     Saved host backtrace up to driver entry point at error
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libcuda.so.1 [0x34fb13]
+=========     Host Frame:/usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0 (cudaFree + 0x16e) [0x4f21e]
+=========     Host Frame:./build/bin/Test-3 [0x7ff58]
+=========     Host Frame:./build/bin/Test-3 [0x7a4a0]
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libc.so.6 [0x29fd0]
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libc.so.6 (__libc_start_main + 0x7d) [0x2a07d]
+=========     Host Frame:./build/bin/Test-3 [0x798f5]
+=========
+========= Program hit cudaErrorLaunchFailure (error 719) due to "unspecified launch failure" on CUDA API call to cudaFree.
+=========     Saved host backtrace up to driver entry point at error
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libcuda.so.1 [0x34fb13]
+=========     Host Frame:/usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0 (cudaFree + 0x16e) [0x4f21e]
+=========     Host Frame:./build/bin/Test-3 [0x7ff67]
+=========     Host Frame:./build/bin/Test-3 [0x7a4a0]
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libc.so.6 [0x29fd0]
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libc.so.6 (__libc_start_main + 0x7d) [0x2a07d]
+=========     Host Frame:./build/bin/Test-3 [0x798f5]
+=========
+========= Program hit cudaErrorLaunchFailure (error 719) due to "unspecified launch failure" on CUDA API call to cudaFree.
+=========     Saved host backtrace up to driver entry point at error
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libcuda.so.1 [0x34fb13]
+=========     Host Frame:/usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0 (cudaFree + 0x16e) [0x4f21e]
+=========     Host Frame:./build/bin/Test-3 [0x7ff76]
+=========     Host Frame:./build/bin/Test-3 [0x7a4a0]
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libc.so.6 [0x29fd0]
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libc.so.6 (__libc_start_main + 0x7d) [0x2a07d]
+=========     Host Frame:./build/bin/Test-3 [0x798f5]
+=========
+========= Program hit cudaErrorLaunchFailure (error 719) due to "unspecified launch failure" on CUDA API call to cudaFree.
+=========     Saved host backtrace up to driver entry point at error
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libcuda.so.1 [0x34fb13]
+END: Test-3
+=========     Host Frame:/usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0 (cudaFree + 0x16e) [0x4f21e]
+=========     Host Frame:./build/bin/Test-3 [0x7ff85]
+=========     Host Frame:./build/bin/Test-3 [0x7a4a0]
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libc.so.6 [0x29fd0]
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libc.so.6 (__libc_start_main + 0x7d) [0x2a07d]
+=========     Host Frame:./build/bin/Test-3 [0x798f5]
+=========
+========= ERROR SUMMARY: 10 errors
