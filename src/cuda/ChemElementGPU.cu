@@ -75,7 +75,7 @@ class ChemElementGPU {
 				}
 			}
 
-			for(int i = 0; i < 382; i++){
+			for(int i = 0; i < line_entries; i++){
 				line_energies[i] = XRayLibAPI::LineE(z_,i*-1-1);
 				rad_rate[i] = XRayLibAPI::RadRate(z_,i*-1-1);
 			}
