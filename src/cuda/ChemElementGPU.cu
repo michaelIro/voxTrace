@@ -42,6 +42,10 @@ class ChemElementGPU {
 		float fluor_yield[shell_entries];
 
 		__host__ void discretize(){
+
+			a_ =	XRayLibAPI::A(z_);
+			rho_ = 	XRayLibAPI::Rho(z_);
+
 			for(int i=1; i< energy_entries; i++){
 				float e = i*energy_resolution;
 
@@ -88,9 +92,6 @@ class ChemElementGPU {
 
 		__host__ ChemElementGPU(const int& z){
 			z_ =	z;
-			a_ =	XRayLibAPI::A(z_);
-			rho_ = 	XRayLibAPI::Rho(z_);
-
 			discretize();
 			//getMemorySize();
 		};

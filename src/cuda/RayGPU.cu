@@ -27,9 +27,10 @@ class RayGPU {
 	int iaNum_;						// Number of interactions of this ray
 	bool iaFlag_;					// Interaction Flag
 	float prob_;					// Probability
-	bool oobFlag_=false;
-	int nextVoxel_=13;
-	float tIn=0.0;
+	bool oobFlag_		=	false;
+	int nextVoxel_		=	13;
+	float tIn			=	0.0;
+	int respawnCounter_ = 	0;
 
 	// int sum of sizes of all member variables
 	size_t memory_size_= sizeof(float)* 17 + sizeof(int)*2 + sizeof(bool)*2 + sizeof(size_t);
@@ -38,9 +39,14 @@ class RayGPU {
 
 	__host__ __device__ RayGPU() {};
 
-  	__host__ __device__ RayGPU(float startX, float startY, float startZ, float dirX, float dirY, float dirZ, 
-	  float asX, float asY, float asZ, bool flag, float k, int q, float opd, float fS, 
-	  float fP, float apX, float apY, float apZ, float prob){
+  	__host__ __device__ RayGPU(
+			float startX, float startY, float startZ, 
+			float dirX, float dirY, float dirZ, 
+	  		float asX, float asY, float asZ, 
+			bool flag, float k, int q, 
+			float opd, float fS, float fP, 
+			float apX, float apY, float apZ, 
+			float prob){
 		x0_ = startX;
 		y0_ = startY;
 		z0_ = startZ;
@@ -80,6 +86,8 @@ class RayGPU {
 	__host__ __device__ void setOOBFlag(bool oobFlag) {oobFlag_=oobFlag;};
 	__host__ __device__ void setNextVoxel(int nextVoxel) {nextVoxel_=nextVoxel;};
 	__host__ __device__ void setTIn(float tIn) {this->tIn=tIn;};
+	__host__ __device__ void raiseRespawnCounter() {respawnCounter_++;};
+
 
 	__host__ __device__ float getStartX() const {return x0_;};
 	__host__ __device__ float getStartY() const {return y0_;};
@@ -109,6 +117,7 @@ class RayGPU {
 	__host__ __device__ bool getOOBFlag() const {return oobFlag_;};
 	__host__ __device__ int getNextVoxel() const {return nextVoxel_;};
 	__host__ __device__ float getTIn() const {return tIn;};
+	__host__ __device__ int getRespawnCounter() const {return respawnCounter_;};
 
 	__host__ __device__ void rotate(float phi, float theta){
 			float diX = cosf(theta)*cosf(phi)*dirX_ - sinf(phi)*dirY_ + sinf(theta)*cosf(phi)*dirZ_;
