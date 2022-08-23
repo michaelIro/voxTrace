@@ -70,11 +70,16 @@ __global__ void traceNewBeam(RayGPU *rays, SampleGPU* sample, curandState_t *sta
 
       c++;
 
+      if(currentRay->getOOBFlag()) 
+        c=c;
+
     }while(!(currentRay->getOOBFlag()));
 
     currentRay->setStartCoordinates(currentRay->getStartX()-offset[0], currentRay->getStartY()-offset[1], currentRay->getStartZ()-offset[2]);
     currentRay->secondaryTransform(sec_trans_param[0], sec_trans_param[1], sec_trans_param[2], sec_trans_param[3], sec_trans_param[4], sec_trans_param[5]);
-
+    
+    if(currentRay->getIAFlag() && currentRay->getIndex()==0) 
+        c=c;
   }while(!(currentRay->getIAFlag()));
 }
 
@@ -333,8 +338,8 @@ void TracerGPU::callTracePreBeam(){
 void TracerGPU::callTraceNewBeam(float* offset, int n_rays, int  n_el, int* els, float* wgt, float* prim_trans_param, float* sec_trans_param, float* prim_cap_geom, std::string path_out){
 
   float x_=0.0, y_=0.0,z_=0.0;
-  float xL_=600000.0,yL_=600000.0,zL_=3000.0;
-  float xLV_=60000.0,yLV_=60000.0,zLV_=10.0;
+  float xL_=600.0,yL_=600.0,zL_=3000.0;
+  float xLV_=6.0,yLV_=6.0,zLV_=10.0;
 
   int xN_ = (int)(xL_/xLV_);
   int yN_ = (int)(yL_/yLV_);
@@ -431,7 +436,7 @@ void TracerGPU::callTraceNewBeam(float* offset, int n_rays, int  n_el, int* els,
   printf("Trace: %f s\n", time_spent_to_trace);
 
 	arma::Mat<double> rays__;
-  rays__ = arma::ones(n_rays, 19);
+  rays__ = arma::ones(n_rays, 21);
   
   int total_respawns = 0;
   for(int i = 0; i < n_rays; i++){
@@ -442,11 +447,11 @@ void TracerGPU::callTraceNewBeam(float* offset, int n_rays, int  n_el, int* els,
 			(double) rays[i].getFlag(), rays[i].getWaveNumber(),(double) rays[i].getIndex(),
 			rays[i].getOpticalPath(),rays[i].getSPhase(),rays[i].getPPhase(),
 			rays[i].getPPolX(), rays[i].getPPolY(),rays[i].getPPolZ(),
-			rays[i].getProb()});  
+			rays[i].getProb(), (double) rays[i].getIANum(),(double) rays[i].getRespawnCounter()});  
     total_respawns += rays[i].getRespawnCounter();
 	}
 
-  printf("Generated Rays: %i s\n", total_respawns);
+  printf("Generated Rays: %i\n", total_respawns);
   rays__.save(arma::hdf5_name(path_out,"my_data"));
 
   //free all memory cuda

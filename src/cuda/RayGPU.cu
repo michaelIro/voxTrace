@@ -24,12 +24,12 @@ class RayGPU {
 	float fS_, fP_;					// Phases
 
 	// Further Parameters needed for voxTrace
-	int iaNum_;						// Number of interactions of this ray
-	bool iaFlag_;					// Interaction Flag
 	float prob_;					// Probability
-	bool oobFlag_		=	false;
+	int iaNum_			= 	0;		// Number of interactions of this ray
+	bool iaFlag_		= 	false;	// Interaction Flag
+	bool oobFlag_		=	false;	// Out of Bounds Flag
 	int nextVoxel_		=	13;
-	float tIn			=	0.0;
+	float tIn_			=	0.0;
 	int respawnCounter_ = 	0;
 
 	// int sum of sizes of all member variables
@@ -69,8 +69,6 @@ class RayGPU {
 		fS_=fS;
 		fP_=fP;
 	
-		iaNum_=0;
-		iaFlag_=false;
 		prob_= prob;
 	};
 	
@@ -85,9 +83,8 @@ class RayGPU {
 	__host__ __device__ void setIANum(int iaNum) {iaNum_=iaNum;};
 	__host__ __device__ void setOOBFlag(bool oobFlag) {oobFlag_=oobFlag;};
 	__host__ __device__ void setNextVoxel(int nextVoxel) {nextVoxel_=nextVoxel;};
-	__host__ __device__ void setTIn(float tIn) {this->tIn=tIn;};
+	__host__ __device__ void setTIn(float tIn) {tIn_=tIn;};
 	__host__ __device__ void raiseRespawnCounter() {respawnCounter_++;};
-
 
 	__host__ __device__ float getStartX() const {return x0_;};
 	__host__ __device__ float getStartY() const {return y0_;};
@@ -116,7 +113,7 @@ class RayGPU {
 	__host__ __device__ float getProb() const {return prob_;};
 	__host__ __device__ bool getOOBFlag() const {return oobFlag_;};
 	__host__ __device__ int getNextVoxel() const {return nextVoxel_;};
-	__host__ __device__ float getTIn() const {return tIn;};
+	__host__ __device__ float getTIn() const {return tIn_;};
 	__host__ __device__ int getRespawnCounter() const {return respawnCounter_;};
 
 	__host__ __device__ void rotate(float phi, float theta){
@@ -206,6 +203,10 @@ class RayGPU {
   		setStartCoordinates(x0__,y0__,z0__);
   		setEndCoordinates(xD__,yD__,zD__);
   		setEnergyKeV(energy_keV);
+		setOOBFlag(false);
+		setIAFlag(false);
+		setIANum(0);
+		setTIn(0.0);
 	}
 
 	__host__ void print() const { 
