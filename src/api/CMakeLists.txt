@@ -80,11 +80,13 @@ endif (ENSMALLEN_FOUND)
 
 # ALTERNATIVES FOR ENSMALLEN
 # GSL - GNU Scientific Library (mostly GNU General Public Licence)
-#find_package(GSL REQUIRED)
-#if (GSL_FOUND)
-#  include_directories(${GSL_INCLUDE_DIRS})
-#  target_link_libraries (OptimizerAPI ${GSL_LIBRARIES})
-#endif (GSL_FOUND)
+find_package(GSL REQUIRED)
+if (GSL_FOUND)
+  include_directories(${GSL_INCLUDE_DIRS})
+  message(STATUS "GSL_INCLUDE_DIRS: "${GSL_INCLUDE_DIRS} "   GSL_LIBRARIES   " ${GSL_LIBRARIES})
+  #target_link_libraries (OptimizerAPI ${GSL_LIBRARIES})
+  target_link_libraries (PolyCapAPI ${GSL_LIBRARIES})
+endif (GSL_FOUND)
 
 # OptimLib: a lightweight C++ library of numerical optimization methods for nonlinear functions. (Apache 2.0)
 #find_path(OPTIMLIB_INCLUDE_DIR optim/optim.hpp)

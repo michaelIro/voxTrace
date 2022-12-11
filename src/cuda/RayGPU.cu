@@ -116,22 +116,50 @@ class RayGPU {
 	__host__ __device__ float getTIn() const {return tIn_;};
 	__host__ __device__ int getRespawnCounter() const {return respawnCounter_;};
 
-	__host__ __device__ void rotate(float phi, float theta){
-			float diX = cosf(theta)*cosf(phi)*dirX_ - sinf(phi)*dirY_ + sinf(theta)*cosf(phi)*dirZ_;
-			float diY = cosf(theta)*sinf(phi)*dirX_ + cosf(phi)*dirY_ + sinf(theta)*sinf(phi)*dirZ_;
-			float diZ = -sinf(theta)*dirX_+cosf(theta)*dirZ_;
-			dirX_=diX;
-			dirY_=diY;
-			dirZ_=diZ;
+	__device__ void rotate(float phi, float theta){
+		float diX = cosf(theta)*cosf(phi)*dirX_ - sinf(phi)*dirY_ + sinf(theta)*cosf(phi)*dirZ_;
+		float diY = cosf(theta)*sinf(phi)*dirX_ + cosf(phi)*dirY_ + sinf(theta)*sinf(phi)*dirZ_;
+		float diZ = -sinf(theta)*dirX_+cosf(theta)*dirZ_;
+		dirX_=diX;
+		dirY_=diY;
+		dirZ_=diZ;
+	}
+
+	__device__ void generateRayGPU(curandState_t *localState, float r_out, float f, float r_f, float energy_keV){
+  		float x0__ = curand_normal(localState)/3.0f*r_out;
+  		float y0__ = 0.0f;
+  		float z0__ = curand_normal(localState)/3.0f*r_out;
+
+  		float xD__ = curand_normal(localState)/3.0f*r_f;
+  		float yD__ = f;
+  		float zD__ = curand_normal(localState)/3.0f*r_f;
+
+  		xD__ = xD__ - x0__;
+  		yD__ = yD__ - y0__;
+  		zD__ = zD__ - z0__;
+
+  		float norm__ = sqrtf(xD__*xD__+ yD__*yD__ + zD__*zD__);
+
+  		xD__ = xD__ / norm__;
+  		yD__ = yD__ / norm__;
+  		zD__ = zD__ / norm__;
+
+  		setStartCoordinates(x0__,y0__,z0__);
+  		setEndCoordinates(xD__,yD__,zD__);
+  		setEnergyKeV(energy_keV);
+		setOOBFlag(false);
+		setIAFlag(false);
+		setIANum(0);
+		setTIn(0.0);
 	}
 
 	__device__ void primaryTransform(float x0, float y0, float z0, float d, float alpha){
 
 		float alpha_ = alpha / 180 * M_PI;
 
-		float x0__ = x0 + getStartX()*10000.;
-		float y0__ = y0 - d * cosf(alpha_) + cosf(alpha_)*getStartY()*10000.-sinf(alpha_)*getStartZ()*10000.;
-		float z0__ = z0 - d * sinf(alpha_) + sinf(alpha_)*getStartY()*10000.+cosf(alpha_)*getStartZ()*10000.;
+		float x0__ = x0 + getStartX();
+		float y0__ = y0 - d * cosf(alpha_) + cosf(alpha_)*getStartY()-sinf(alpha_)*getStartZ();
+		float z0__ = z0 - d * sinf(alpha_) + sinf(alpha_)*getStartY()+cosf(alpha_)*getStartZ();
 
 		float xd__ = getDirX(); 
 		float yd__ = cosf(alpha_)*getDirY()-sinf(alpha_)*getDirZ();
@@ -179,34 +207,6 @@ class RayGPU {
 			setIAFlag(false);
 		}
 
-	}
-
-	__device__ void generateRayGPU(curandState_t *localState, float r_out, float f, float r_f, float energy_keV){
-  		float x0__ = curand_normal(localState)/3.0f*r_out;
-  		float y0__ = 0.0f;
-  		float z0__ = curand_normal(localState)/3.0f*r_out;
-
-  		float xD__ = curand_normal(localState)/3.0f*r_f;
-  		float yD__ = f;
-  		float zD__ = curand_normal(localState)/3.0f*r_f;
-
-  		xD__ = xD__ - x0__;
-  		yD__ = yD__ - y0__;
-  		zD__ = zD__ - z0__;
-
-  		float norm__ = sqrtf(xD__*xD__+ yD__*yD__ + zD__*zD__);
-
-  		xD__ = xD__ / norm__;
-  		yD__ = yD__ / norm__;
-  		zD__ = zD__ / norm__;
-
-  		setStartCoordinates(x0__,y0__,z0__);
-  		setEndCoordinates(xD__,yD__,zD__);
-  		setEnergyKeV(energy_keV);
-		setOOBFlag(false);
-		setIAFlag(false);
-		setIANum(0);
-		setTIn(0.0);
 	}
 
 	__host__ void print() const { 

@@ -100,9 +100,15 @@ class VoxelGPU{
 				t1z=FLT_MAX;
 			}
 
-			if(ray->getIAFlag() ){
-				t0_max = 0.;
-				ray->setIAFlag(false);
+			//if(ray->getIAFlag() ){
+			//	t0_max = 0.;
+			//	ray->setIAFlag(false);
+			//}
+			// check if ray start is inside the voxel -> if so t0max = 0, find t1_min
+			if (ray->getStartX() >= x0_ && ray->getStartX() <= x1_ &&
+				ray->getStartY() >= y0_ && ray->getStartY() <= y1_ &&
+				ray->getStartZ() >= z0_ && ray->getStartZ()<= z1_){
+					t0_max = 0.0f;
 			}
 			else t0_max = max(max(t0x,t0y),t0z);
 			t1_min = min(min(t1x,t1y),t1z);

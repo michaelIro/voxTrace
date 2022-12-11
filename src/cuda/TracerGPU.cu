@@ -396,7 +396,7 @@ void TracerGPU::callTraceNewBeam(float* offset, int n_rays, int  n_el, int* els,
         for(int l = 0; l< n_el; l++)
           weights[i*yN_*zN_*n_el+j*zN_*n_el+k*n_el+l] = wgt[l]; 
 
-        materials[i*yN_*zN_+j*zN_+k] = MaterialGPU(n_el, elements, &weights[i*yN_*zN_*n_el+j*zN_*n_el+k*n_el+0]);
+        materials[i*yN_*zN_+j*zN_+k] = MaterialGPU(n_el, &elements[0], &weights[i*yN_*zN_*n_el+j*zN_*n_el+k*n_el+0]);
         voxels[i*yN_*zN_+j*zN_+k] = VoxelGPU(x_+i*xLV_, y_+j*yLV_, z_+k*zLV_, xLV_, yLV_, zLV_,&materials[i*yN_*zN_+j*zN_+k]);
       }
     }
@@ -427,7 +427,7 @@ void TracerGPU::callTraceNewBeam(float* offset, int n_rays, int  n_el, int* els,
                         );
   }
 
-  traceNewBeam<<<n_rays,1>>>(rays,sample, states, ofst, prim_trans, sec_trans, prim_geom);
+  traceNewBeam<<<n_rays,1>>>(rays, sample, states, ofst, prim_trans, sec_trans, prim_geom);
 
   cudaDeviceSynchronize();
 

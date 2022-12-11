@@ -248,8 +248,8 @@ ALL_LDFLAGS += $(addprefix -Xlinker ,$(LDFLAGS))
 ALL_LDFLAGS += $(addprefix -Xlinker ,$(EXTRA_LDFLAGS))
 
 # Common includes and paths for CUDA Local
-INCLUDES  := -I$(CUDA_PATH)/include -I/usr/include/xraylib -I/usr/local/include/polycap -I/usr/include/easyRNG #-I../../../Common 
-LIBRARIES := -L$(CUDA_PATH)/lib64 -L/home/miro/Software/1st-party/voxTrace/build/src/api -L/home/miro/Software/1st-party/voxTrace/build/src/base -L/usr/lib/x86_64-linux-gnu
+INCLUDES  := -I$(CUDA_PATH)/include -I/usr/include/xraylib -I/usr/local/include/polycap -I/usr/include/easyRNG -I/usr/include/hdf5/serial #-I../../../Common 
+LIBRARIES := -L$(CUDA_PATH)/lib64 -L/home/miro/Software/1st-party/voxTrace/build/src/api -L/home/miro/Software/1st-party/voxTrace/build/src/base -L/usr/lib/x86_64-linux-gnu -L/usr/lib/x86_64-linux-gnu/hdf5/serial
 
 # Common includes and paths for CUDA VSC
 #INCLUDES  := -I$(CUDA_PATH)/include -I/home/fs71764/miro/Software/3rd-Party/Install/include/xraylib  -I/home/fs71764/miro/Software/3rd-Party/Install/include/polycap -I/home/fs71764/miro/Software/3rd-Party/Install/include/easyRNG #-I/usr/include/xraylib -I/usr/local/include/polycap -I/usr/include/easyRNG #-I../../../Common 
@@ -281,7 +281,7 @@ endif
 endif
 ##########################################################
 #Local
-ALL_CCFLAGS += --std=c++17 -lcudart -l:libXRayLibAPI.a -l:libxrl.a -larmadillo -l:libPolyCapAPI.a -lpolycap -lstdc++ -Xcompiler -fopenmp -l:libvt.base.a #--threads 0 
+ALL_CCFLAGS += --std=c++17 -lcudart -l:libXRayLibAPI.a -l:libxrl.a -larmadillo -lhdf5 -l:libPolyCapAPI.a -lpolycap -lstdc++ -Xcompiler -fopenmp -l:libvt.base.a -DARMA_USE_HDF5 #--threads 0 
 #VSC
 #ALL_CCFLAGS += --std=c++17 -lcudart -l:libXRayLibAPI.a -l:libxrl.so -larmadillo -lhdf5 -lstdc++ -Xcompiler -fopenmp -DARMA_USE_HDF5 #--threads 0 -l:libPolyCapAPI.a -lpolycap -l:libvt.base.a
 ##########################################################
