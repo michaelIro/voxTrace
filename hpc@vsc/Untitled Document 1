@@ -1,0 +1,40 @@
+
+# .bashrc
+
+# Source global definitions
+if [ -f /etc/bashrc ]; then
+        . /etc/bashrc
+fi
+
+# Uncomment the following line if you don't like systemctl's auto-paging feature:
+# export SYSTEMD_PAGER=
+
+# User specific aliases and functions
+
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+__conda_setup="$('/opt/sw/spack-0.12.1/opt/spack/linux-centos7-x86_64/gcc-9.1.0/miniconda3-4.10.3-nkcdatdnhxwzb66xlmwjpzetstucq4fs/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__conda_setup"
+else
+    if [ -f "/opt/sw/spack-0.12.1/opt/spack/linux-centos7-x86_64/gcc-9.1.0/miniconda3-4.10.3-nkcdatdnhxwzb66xlmwjpzetstucq4fs/etc/profile.d/conda.sh" ]; then
+        . "/opt/sw/spack-0.12.1/opt/spack/linux-centos7-x86_64/gcc-9.1.0/miniconda3-4.10.3-nkcdatdnhxwzb66xlmwjpzetstucq4fs/etc/profile.d/conda.sh"
+    else
+        export PATH="/opt/sw/spack-0.12.1/opt/spack/linux-centos7-x86_64/gcc-9.1.0/miniconda3-4.10.3-nkcdatdnhxwzb66xlmwjpzetstucq4fs/bin:$PATH"
+    fi
+fi
+unset __conda_setup
+# <<< conda initialize <<<
+
+# User modules VSC-4
+#module load gcc/9.1.0-gcc-4.8.5-mj7s6dg armadillo/9.900.3-gcc-9.1.0-mht5noj cmake/3.17.3-gcc-9.1.0-tsjr5x6 openmpi/4.1.1-gcc-9.1.0-fwmcvon hdf5/1.12.0-gcc-9.1.0-x63yn53 miniconda3/4.10.3-gcc-9$
+# User modules VSC-5
+spack load gcc@11.2.0 cmake@3.21.4%gcc@11.2.0 cuda@11.5.0%gcc@11.2.0 hdf5@1.12.1 armadillo boost@1.77.0
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/fs71764/miro/Software/3rd-Party/Install/lib
+export PKG_CONFIG_PATH=$HOME/Software/3rd-Party/Install/lib/pkgconfig
+export CPATH=$CPATH:/home/fs71764/miro/Software/3rd-Party/Install/include/ensmallen_bits:/home/fs71764/miro/Software/3rd-Party/Install/include:/home/fs71764/miro/Software/3rd-Party/Install/incl$
+conda activate /home/fs71764/miro/Software/3rd-Party/miniconda3/voxTrace
+
+
+alias tmux_mi='tmux -L mi list-sessions 2>/dev/null && tmux -L mi attach-session || tmux -L mi new-session'
+
