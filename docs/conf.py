@@ -10,7 +10,7 @@ breathe_default_project = "voxTrace"
 # sakldkl
 project = "voxTrace"
 author = "Michael Iro"
-copyright = '2021, Michael Iro'
+copyright = '2022, Michael Iro'
 version = '1.0'
 
 source_suffix = {
