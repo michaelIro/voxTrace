@@ -8,8 +8,9 @@ project(voxTrace VERSION 1.0)
 # sets the C++ standard to C++20
 set(CMAKE_CXX_STANDARD 20)
 #########################################################################################
-link_directories(/home/fs71764/miro/Software/3rd-Party/Install/lib /opt/sw/spack-0.12.1/opt/spack/linux-centos7-x86_64/gcc-4.8.5/gcc-9.1.0-mj7s6dgfnhgi2n42fyxgmitnuslcyol3/bin/gfortran)
-#list(APPEND CMAKE_PREFIX_PATH "$HOME/Software/3rd-Party/Install/xraylib")
+#link_directories(/home/fs71764/miro/Software/3rd-Party/Install/lib /opt/sw/spack-0.12.1/opt/spack/linux-centos7-x86_64/gcc-4.8.5/gcc-9.1.0-mj7s6dgfnhgi2n42fyxgmitnuslcyol3/bin/gfortran)
+link_directories(/usr/bin/gfortran-11)
+list(APPEND CMAKE_PREFIX_PATH "$HOME/Software/3rd-Party/Install/xraylib")
 #########################################################################################
 enable_language(CUDA)
 

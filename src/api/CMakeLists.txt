@@ -38,7 +38,18 @@ find_library(SHADOW_LIBRARY libshadow3.a PATHS /home/fs71764/miro/Software/3rd-P
 #message(${CMAKE_SOURCE_DIR})
 target_include_directories(Shadow3API PUBLIC ${SHADOW_INCLUDE_DIR}/src ${SHADOW_INCLUDE_DIR}/src/c ${SHADOW_INCLUDE_DIR}/src/def)
 target_link_libraries(Shadow3API ${SHADOW_CPP_LIBRARY} ${SHADOW_C_LIBRARY} ${SHADOW_LIBRARY})
-target_link_libraries(Shadow3API gfortran)
+#link_directories(/usr/lib/x86_64-linux-gnu)
+#target_link_libraries(Shadow3API /home/miro/.debug/usr/lib/x86_64-linux-gnu/libgfortran.so.5.0.0)
+#target_link_libraries(Shadow3API gfortran5)
+
+find_library(GFORTRAN_LIB gfortran HINTS /usr/lib/x86_64-linux-gnu/ /usr/bin/ /usr/local/lib /home/miro/miniconda3/lib /usr/lib/gcc/x86_64-linux-gnu/11/)
+if (GFORTRAN_LIB)
+  message("-- Found libgfortran at: ${GFORTRAN_LIB}")
+  target_link_libraries(Shadow3API ${GFORTRAN_LIB})
+else()
+  message(FATAL_ERROR "libgfortran not found")
+endif()
+
 #########################################################################################
 # PolyCap: a C library to calculate X-ray transmission through polycapillaries => https://github.com/PieterTack/polycap
 pkg_check_modules(POLYCAP REQUIRED libpolycap)

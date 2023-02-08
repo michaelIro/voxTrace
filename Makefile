@@ -9,6 +9,53 @@ CUDA_PATH ?= /usr/local/cuda
 # VSC
 #CUDA_PATH ?= /gpfs/opt/sw/spack-0.17.1/opt/spack/linux-almalinux8-zen3/gcc-11.2.0/cuda-11.5.0-ao7cp7wu3mvop6eocjixhdcda25p24r5
 
+
+####
+DOXYGEN = doxygen
+SPHINX = sphinx-build
+###
+
+####
+CXX = g++
+CXXFLAGS = -Wall -std=c++20
+
+API_PATH = src/api
+API_BUILD_PATH = build/api
+
+XRayLibAPI_SOURCES = $(API_PATH)/XRayLibAPI.cpp
+Shadow3API_SOURCES = $(API_PATH)/Shadow3API.cpp
+PolyCapAPI_SOURCES = $(API_PATH)/PolyCapAPI.cpp
+PlotAPI_SOURCES = $(API_PATH)/PlotAPI.cpp
+OptimizerAPI_SOURCES = $(API_PATH)/OptimizerAPI.cpp
+
+#VoxTraceGPU_SOURCES = $(SRC_DIR)/VoxelGPU.cu $(SRC_DIR)/VoxelGPU.h $(SRC_DIR)/VoxelGPU.cuh
+
+XRayLibAPI_OBJECTS = $(XRayLibAPI_SOURCES:.cpp=.o)
+Shadow3API_OBJECTS = $(Shadow3API_SOURCES:.cpp=.o)
+PolyCapAPI_OBJECTS = $(PolyCapAPI_SOURCES:.cpp=.o)
+
+PlotAPI_OBJECTS = $(PlotAPI_SOURCES:.cpp=.o)
+OptimizerAPI_OBJECTS = $(OptimizerAPI_SOURCES:.cpp=.o)
+
+XRAYLIB_INCLUDE_DIRS = `pkg-config --cflags libxrl`
+XRAYLIB_LIBRARIES = `pkg-config --libs libxrl`
+
+
+
+#/home/miro/Software/3rd-party/shadow3/src/c/shadow_bind_cpp.hpp
+
+#/home/miro/Software/3rd-party/shadow3/src/c/
+#${SHADOW_INCLUDE_DIR}/src ${SHADOW_INCLUDE_DIR}/src/c ${SHADOW_INCLUDE_DIR}/src/def)
+SHADOW_INCLUDE_DIR = -I/home/miro/Software/3rd-party/shadow3/src/c -I/home/miro/Software/3rd-party/shadow3/src -I/home/miro/Software/3rd-party/shadow3/src/def
+SHADOW_CPP_LIBRARY = -I/home/fs71764/miro/Software/3rd-Party/Install/lib/libshadow3c++.a
+SHADOW_C_LIBRARY = -I/home/fs71764/miro/Software/3rd-Party/Install/lib/libshadow3c.a
+SHADOW_LIBRARY = -I/home/fs71764/miro/Software/3rd-Party/Install/lib/libshadow3.a
+
+POLYCAP_INCLUDE_DIRS = `pkg-config --cflags libpolycap`
+POLYCAP_LIBRARIES = `pkg-config --libs libpolycap`
+###
+
+
 ##############################
 # start deprecated interface #
 ##############################
@@ -132,6 +179,7 @@ else ifneq ($(TARGET_ARCH),$(HOST_ARCH))
         HOST_COMPILER ?= powerpc64le-linux-gnu-g++
     endif
 endif
+
 HOST_COMPILER ?= g++
 NVCC          := $(CUDA_PATH)/bin/nvcc -ccbin $(HOST_COMPILER)
 
@@ -339,6 +387,29 @@ run: build
 	$(EXEC) ./transpose
 
 testrun: build
+
+doc:
+	$(DOXYGEN) docs/Doxyfile
+	$(SPHINX) -b html docs/sphinx $(SPHINX_SOURCE) $(SPHINX_BUILD)
+
+clean-doc:
+	rm -rf docs/html
+	rm -rf docs/sphinx
+
+#XRayLibAPI.o: $(SRC_DIR)/api/XRayLibAPI.cpp
+#   $(CXX) $(CXXFLAGS) $(INCLUDES) -I/usr/include/xraylib -c $(SRC_DIR)/api/XRayLibAPI.cpp -o $(BUILD_DIR)/$@ -dc $< 
+
+XRayLibAPI: $(XRayLibAPI_OBJECTS)
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -I/usr/include/xraylib -o XRayLibAPI $(XRayLibAPI_OBJECTS) $(XRAYLIB_INCLUDE_DIRS) $(XRAYLIB_LIBRARIES) 
+
+Shadow3API: $(Shadow3API_OBJECTS)
+	$(HOST_COMPILER) $(CXXFLAGS) -o Shadow3API $(Shadow3API_OBJECTS) $(SHADOW_INCLUDE_DIR) $(SHADOW_CPP_LIBRARY) $(SHADOW_C_LIBRARY) $(SHADOW_LIBRARY) -lgfortran
+
+PolyCapAPI: $(PolyCapAPI_OBJECTS)
+	$(HOST_COMPILER) $(CXXFLAGS) -o PolyCapAPI $(PolyCapAPI_OBJECTS) $(POLYCAP_INCLUDE_DIRS) $(POLYCAP_LIBRARIES)
+
+PlotAPI: $(PlotAPI_OBJECTS)
+	$(CXX) $(CXXFLAGS) -o PlotAPI $(PlotAPI_OBJECTS)
 
 clean: 
 	$(RM) $(BUILD_DIR)/* *.o $(EXE)
