@@ -31,6 +31,7 @@ class RayGPU {
 	int nextVoxel_		=	13;
 	float tIn_			=	0.0;
 	int respawnCounter_ = 	0;
+	bool augerFlag_		=	false;
 
 	// int sum of sizes of all member variables
 	size_t memory_size_= sizeof(float)* 17 + sizeof(int)*2 + sizeof(bool)*2 + sizeof(size_t);
@@ -115,6 +116,9 @@ class RayGPU {
 	__host__ __device__ int getNextVoxel() const {return nextVoxel_;};
 	__host__ __device__ float getTIn() const {return tIn_;};
 	__host__ __device__ int getRespawnCounter() const {return respawnCounter_;};
+
+	__host__ __device__ bool getAugerFlag() const {return augerFlag_;};
+	__host__ __device__ void setAugerFlag(bool augerFlag) {augerFlag_=augerFlag;};
 
 	__device__ void rotate(float phi, float theta){
 		float diX = cosf(theta)*cosf(phi)*dirX_ - sinf(phi)*dirY_ + sinf(theta)*cosf(phi)*dirZ_;

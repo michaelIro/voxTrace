@@ -52,6 +52,8 @@ __global__ void traceNewBeam(RayGPU *rays, SampleGPU* sample, curandState_t *sta
     currentRay->generateRayGPU(&states[blockIdx.x], prim_cap_geom[0], prim_cap_geom[1], prim_cap_geom[2], prim_cap_geom[3]);
     currentRay->primaryTransform(prim_trans_param[0], prim_trans_param[1], prim_trans_param[2], prim_trans_param[3], prim_trans_param[4]);
     currentRay->setStartCoordinates(currentRay->getStartX()+offset[0], currentRay->getStartY()+offset[1], currentRay->getStartZ()+offset[2]);
+    currentRay->setIAFlag(false);
+    currentRay->setAugerFlag(false);
 
 	  VoxelGPU* currentVoxel = sample->findStartVoxel(currentRay);
 
@@ -73,13 +75,19 @@ __global__ void traceNewBeam(RayGPU *rays, SampleGPU* sample, curandState_t *sta
       if(currentRay->getOOBFlag()) 
         c=c;
 
-    }while(!(currentRay->getOOBFlag()));
+    }while(!(currentRay->getOOBFlag()) && !(currentRay->getAugerFlag()));
 
-    currentRay->setStartCoordinates(currentRay->getStartX()-offset[0], currentRay->getStartY()-offset[1], currentRay->getStartZ()-offset[2]);
-    currentRay->secondaryTransform(sec_trans_param[0], sec_trans_param[1], sec_trans_param[2], sec_trans_param[3], sec_trans_param[4], sec_trans_param[5]);
+    if(!(currentRay->getAugerFlag())){
+      currentRay->setStartCoordinates(currentRay->getStartX()-offset[0], currentRay->getStartY()-offset[1], currentRay->getStartZ()-offset[2]);
+      currentRay->secondaryTransform(sec_trans_param[0], sec_trans_param[1], sec_trans_param[2], sec_trans_param[3], sec_trans_param[4], sec_trans_param[5]);
+    }
+    else
+      currentRay->setIAFlag(false);
+
     
     if(currentRay->getIAFlag() && currentRay->getIndex()==0) 
         c=c;
+        
   }while(!(currentRay->getIAFlag()));
 }
 
@@ -113,6 +121,8 @@ __device__  void TracerGPU::traceForward(RayGPU* ray, VoxelGPU* currentVoxel, cu
 			if(randomN < interactingElement->Fluor_Y(myShell)){                                      // X-ray-Fluorescence (in case of Auger no further action, except for setting the IA flag                                                                
         randomN = curand_uniform(localState);
 				float l = intersectionLength*randomN + ray->getTIn();
+        //float l = fmin(-logf(1 - randomN) / muLin, intersectionLength) + ray->getTIn();
+
         randomN = curand_uniform(localState);
 				int myLine = interactingElement->getTransition(myShell, randomN);
         randomN = curand_uniform(localState);
@@ -129,10 +139,14 @@ __device__  void TracerGPU::traceForward(RayGPU* ray, VoxelGPU* currentVoxel, cu
 				ray->setStartCoordinates(xNew,yNew,zNew);
 				ray->setEnergyKeV(interactingElement->Line_Energy(myLine));
 			}
+      else{                                                                                   // Auger-Emission
+        ray->setAugerFlag(true);
+      }
 		}
 		else if(interactionType == 1){	                                                           // Rayleigh-Scattering TODO: Polarized-Unpolarized
       randomN = curand_uniform(localState);
       float l = intersectionLength*randomN + ray->getTIn();
+      //float l = fmin(-logf(1 - randomN) / muLin, intersectionLength) + ray->getTIn();
 
       float xNew = ray->getStartX()+ray->getDirX()*l;
 			float yNew = ray->getStartY()+ray->getDirY()*l;
@@ -150,7 +164,8 @@ __device__  void TracerGPU::traceForward(RayGPU* ray, VoxelGPU* currentVoxel, cu
 		else if(interactionType == 2){                                    // Compton-Scattering
       randomN = curand_uniform(localState);
       float l = intersectionLength*randomN + ray->getTIn();       
-
+      //float l = fmin(-logf(1 - randomN) / muLin, intersectionLength) + ray->getTIn();
+      
       float xNew = ray->getStartX()+ray->getDirX()*l;
 			float yNew = ray->getStartY()+ray->getDirY()*l;
 			float zNew = ray->getStartZ()+ray->getDirZ()*l;
@@ -335,11 +350,12 @@ void TracerGPU::callTracePreBeam(){
   cudaFree(weights);
 }
 
-void TracerGPU::callTraceNewBeam(float* offset, int n_rays, int  n_el, int* els, float* wgt, float* prim_trans_param, float* sec_trans_param, float* prim_cap_geom, std::string path_out){
+void TracerGPU::callTraceNewBeam(float* offset, int n_rays, int  n_el, int* els, float* wgt, float* prim_trans_param, float* sec_trans_param, float* prim_cap_geom, std::string path_out, float* sample_start, float* sample_length, float* sample_voxel_length){
 
-  float x_=0.0, y_=0.0,z_=0.0;
-  float xL_=600.0,yL_=600.0,zL_=3000.0;
-  float xLV_=6.0,yLV_=6.0,zLV_=10.0;
+  // get value of sample_start, sample_length, sample_voxel_length
+  float x_=sample_start[0], y_=sample_start[1],z_=sample_start[2];
+  float xL_=sample_length[0],yL_=sample_length[1],zL_=sample_length[2];
+  float xLV_=sample_voxel_length[0],yLV_=sample_voxel_length[1],zLV_=sample_voxel_length[2];
 
   int xN_ = (int)(xL_/xLV_);
   int yN_ = (int)(yL_/yLV_);
