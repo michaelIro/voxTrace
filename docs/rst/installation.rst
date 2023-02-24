@@ -55,7 +55,7 @@ Ubuntu 20.04
     -> gsl
     
 Manjaro (https://manjaro.org/) -> ArchLinux based OS
-~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     -> git
     -> base-devel (all: gcc, make, pkgconf)
     -> gcc-fortran (bash command is still gfortran)

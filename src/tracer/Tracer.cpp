@@ -14,7 +14,7 @@ void Tracer::start(){
 	vector<Ray> tracedRays(primary_.getRays().size());
 	int i = 0;
 	int ia = 0;
-	int size = primary_.getRays().size();
+	//int size = primary_.getRays().size();
 
 
 	#pragma omp parallel for
@@ -41,7 +41,7 @@ Ray* Tracer::traceForward(Ray* ray, Voxel* currentVoxel, int* nextVoxel, Sample 
 		return ray;
 		
 	double tIn;
-	double rayEnergy = (*ray).getEnergyKeV();	
+	double rayEnergy = (*ray).getEnergyKeV() /50677300.0;	 // FIXME: SOMETHING WRONG WITH ENERGY / 50677... should not be here
 	double muLin = (*currentVoxel).getMaterial().getMuLin(rayEnergy);
 	double intersectionLength = (*currentVoxel).intersect(ray,nextVoxel,&tIn);
 	double randomN = ((double) rand()) / ((double) RAND_MAX);

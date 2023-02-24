@@ -29,6 +29,10 @@ double XRayLibAPI::CS_Ray(int z, double energy){
     return XRayLib::CS_Rayl(z, energy, NULL);
 }
 
+double XRayLibAPI::CS_Compt(int z, double energy){
+    return XRayLib::CS_Compt(z, energy, NULL);
+}
+
 double XRayLibAPI::CS_Phot_Part(int z, int shell, double energy){
     return XRayLib::CS_Photo_Partial(z, shell, energy, NULL); 
 }

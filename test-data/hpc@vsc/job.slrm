@@ -1,0 +1,14 @@
+#!/bin/bash
+#
+#SBATCH -J PrimBeam
+#SBATCH -N 1
+#SBATCH --partition=mem_0096
+#SBATCH --qos=mem_0096   
+#SBATCH --ntasks-per-node=48
+#SBATCH --ntasks-per-core=2
+#SBATCH --array=1-2
+#SBATCH --mail-user=michael.iro@tuwien.ac.at
+#SBATCH --mail-type=ALL
+
+./Test-1 $SLURM_ARRAY_TASK_ID
+

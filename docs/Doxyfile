@@ -1,0 +1,39 @@
+# Doxygen Configuration File
+
+# Project information
+PROJECT_NAME           = "voxTrace"
+PROJECT_NUMBER         = "1.0"
+PROJECT_BRIEF          = "A voxel-based ray-tracing code for Confocal Micro-X-ray fluorescence analysis"
+
+# Input
+INPUT                  = "src"
+RECURSIVE              = YES
+
+# Output options
+OUTPUT_DIRECTORY       = "build/doc"
+CREATE_SUBDIRS         = NO
+OUTPUT_LANGUAGE        = English
+
+# Source code parsing options
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = NO
+EXTRACT_PACKAGE        = NO
+EXTRACT_STATIC         = NO
+EXTRACT_LOCAL_CLASSES  = YES
+EXTRACT_LOCAL_METHODS  = YES
+
+# Documentation generation options
+GENERATE_HTML          = NO
+GENERATE_LATEX         = NO
+GENERATE_RTF           = NO
+GENERATE_MAN           = NO
+GENERATE_XML           = YES
+
+# Build options
+EXAMPLE_PATH           = "src/api"
+EXAMPLE_PATTERNS       = "*"
+EXAMPLE_RECURSIVE      = YES
+
+USE_MATHJAX            = YES
+XML_PROGRAMLISTING     = YES
+XML_NS_MEMB_FILE_SCOPE = YES

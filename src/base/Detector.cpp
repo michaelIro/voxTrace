@@ -1,6 +1,6 @@
 /**Detector*/
 
-#include "Detector.h"
+#include "Detector.hpp"
 
 using namespace std;
 

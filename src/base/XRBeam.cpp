@@ -18,7 +18,7 @@ XRBeam::XRBeam(vector<Ray> rays){
  * @return XRBeam-Object containing vec<Ray> and Member-Functions
  */
 XRBeam::XRBeam(arma::Mat<double> rays){
-	for(int i = 0; i < rays.n_rows; i++){
+	for(int i = 0; i < ((int)rays.n_rows); i++){
 		rays_.push_back(
 			Ray(rays(i,0),rays(i,1),rays(i,2),rays(i,3),
 			rays(i,4),rays(i,5),rays(i,6),
@@ -87,7 +87,7 @@ void XRBeam::primaryTransform(double x0, double y0, double z0, double d, double 
 
 	alpha = alpha / 180 * M_PI;
 
-	int i=0;
+	//int i=0;
 	for (Ray ray : rays_) {
 
 		double x0_ = x0 + ray.getStartX();
@@ -121,7 +121,7 @@ void XRBeam::primaryTransform(double x0, double y0, double z0, double d, double 
 void XRBeam::secondaryTransform(double x0, double y0, double z0, double d, double beta){
 	vector<Ray> rays__;
 	beta = beta / 180 * M_PI;
-	int i =0;
+	//int i =0;
 	for(Ray ray: rays_){
 		if((ray.getStartZ()>=0.0) && (ray.getDirZ()<0.0)){
 
@@ -172,14 +172,14 @@ arma::Mat<double> XRBeam::getMatrix() const{
 	int i =0;
 	for(auto ray: rays_){
 		//arma::rowvec row_ = 
-		rays__.row(i++)={
+		rays__.row(i++)=arma::rowvec({
 			ray.getStartX(),ray.getStartY(),ray.getStartZ(),
 			ray.getDirX(),ray.getDirY(),ray.getDirZ(),
 			ray.getSPolX(),ray.getSPolY(),ray.getSPolZ(),
 			(double) ray.getFlag(), ray.getWaveNumber(),(double) ray.getIndex(),
 			ray.getOpticalPath(),ray.getSPhase(),ray.getPPhase(),
 			ray.getPPolX(),ray.getPPolY(),ray.getPPolZ(),
-			ray.getProb()};
+			ray.getProb()});
 	}
 		
 	return rays__;

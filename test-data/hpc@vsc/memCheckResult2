@@ -1,0 +1,1005 @@
+=========     Host Frame: [0x21740c]
+=========                in /usr/lib/x86_64-linux-gnu/libcuda.so.1
+=========     Host Frame: [0x1433c]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:cudaLaunchKernel [0x69c38]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:/usr/local/cuda/include/cuda_runtime.h:211:cudaError cudaLaunchKernel<char>(char const*, dim3, dim3, void**, unsigned long, CUstream_st*) [0x81a63]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:/tmp/tmpxft_00029ba1_00000000-6_TracerGPU.compute_86.cudafe1.stub.c:1:__device_stub__Z5traceP6RayGPUP9SampleGPUP17curandStateXORWOW(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x81211]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:33:trace(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x8125a]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:290:TracerGPU::callTrace() [0x7e0f3]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/Test-3.cpp:24:main [0x7a915]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:../sysdeps/nptl/libc_start_call_main.h:58:__libc_start_call_main [0x29fd0]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:../csu/libc-start.c:379:__libc_start_main [0x2a07d]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:_start [0x79d05]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+========= 
+========= Stack overflow
+=========     at 0x50 in /home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:44:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *)
+=========     by thread (0,0,0) in block (18,0,0)
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:30:trace(RayGPU *, SampleGPU *, curandStateXORWOW *) [0xed0]
+=========     Saved host backtrace up to driver entry point at kernel launch time
+=========     Host Frame: [0x21740c]
+=========                in /usr/lib/x86_64-linux-gnu/libcuda.so.1
+=========     Host Frame: [0x1433c]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:cudaLaunchKernel [0x69c38]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:/usr/local/cuda/include/cuda_runtime.h:211:cudaError cudaLaunchKernel<char>(char const*, dim3, dim3, void**, unsigned long, CUstream_st*) [0x81a63]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:/tmp/tmpxft_00029ba1_00000000-6_TracerGPU.compute_86.cudafe1.stub.c:1:__device_stub__Z5traceP6RayGPUP9SampleGPUP17curandStateXORWOW(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x81211]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:33:trace(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x8125a]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:290:TracerGPU::callTrace() [0x7e0f3]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/Test-3.cpp:24:main [0x7a915]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:../sysdeps/nptl/libc_start_call_main.h:58:__libc_start_call_main [0x29fd0]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:../csu/libc-start.c:379:__libc_start_main [0x2a07d]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:_start [0x79d05]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+========= 
+========= Stack overflow
+=========     at 0x50 in /home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:44:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *)
+=========     by thread (0,0,0) in block (208,0,0)
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:30:trace(RayGPU *, SampleGPU *, curandStateXORWOW *) [0xed0]
+=========     Saved host backtrace up to driver entry point at kernel launch time
+=========     Host Frame: [0x21740c]
+=========                in /usr/lib/x86_64-linux-gnu/libcuda.so.1
+=========     Host Frame: [0x1433c]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:cudaLaunchKernel [0x69c38]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:/usr/local/cuda/include/cuda_runtime.h:211:cudaError cudaLaunchKernel<char>(char const*, dim3, dim3, void**, unsigned long, CUstream_st*) [0x81a63]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:/tmp/tmpxft_00029ba1_00000000-6_TracerGPU.compute_86.cudafe1.stub.c:1:__device_stub__Z5traceP6RayGPUP9SampleGPUP17curandStateXORWOW(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x81211]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:33:trace(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x8125a]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:290:TracerGPU::callTrace() [0x7e0f3]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/Test-3.cpp:24:main [0x7a915]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:../sysdeps/nptl/libc_start_call_main.h:58:__libc_start_call_main [0x29fd0]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:../csu/libc-start.c:379:__libc_start_main [0x2a07d]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:_start [0x79d05]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+========= 
+========= Stack overflow
+=========     at 0x50 in /home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:283:ChemElementGPU::interpolate(float, float, const float *) const
+=========     by thread (0,0,0) in block (284,0,0)
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:110:ChemElementGPU::CS_Tot(float) const [0x2b0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:41:MaterialGPU::CS_Tot(float) const [0x8c0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:50:MaterialGPU::getInteractingElement(float, float) const [0x2b0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:61:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x41e0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:30:trace(RayGPU *, SampleGPU *, curandStateXORWOW *) [0xed0]
+=========     Saved host backtrace up to driver entry point at kernel launch time
+=========     Host Frame: [0x21740c]
+=========                in /usr/lib/x86_64-linux-gnu/libcuda.so.1
+=========     Host Frame: [0x1433c]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:cudaLaunchKernel [0x69c38]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:/usr/local/cuda/include/cuda_runtime.h:211:cudaError cudaLaunchKernel<char>(char const*, dim3, dim3, void**, unsigned long, CUstream_st*) [0x81a63]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:/tmp/tmpxft_00029ba1_00000000-6_TracerGPU.compute_86.cudafe1.stub.c:1:__device_stub__Z5traceP6RayGPUP9SampleGPUP17curandStateXORWOW(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x81211]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:33:trace(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x8125a]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:290:TracerGPU::callTrace() [0x7e0f3]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/Test-3.cpp:24:main [0x7a915]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:../sysdeps/nptl/libc_start_call_main.h:58:__libc_start_call_main [0x29fd0]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:../csu/libc-start.c:379:__libc_start_main [0x2a07d]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:_start [0x79d05]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+========= 
+========= Stack overflow
+=========     at 0x50 in /home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:44:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *)
+=========     by thread (0,0,0) in block (170,0,0)
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:30:trace(RayGPU *, SampleGPU *, curandStateXORWOW *) [0xed0]
+=========     Saved host backtrace up to driver entry point at kernel launch time
+=========     Host Frame: [0x21740c]
+=========                in /usr/lib/x86_64-linux-gnu/libcuda.so.1
+=========     Host Frame: [0x1433c]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:cudaLaunchKernel [0x69c38]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:/usr/local/cuda/include/cuda_runtime.h:211:cudaError cudaLaunchKernel<char>(char const*, dim3, dim3, void**, unsigned long, CUstream_st*) [0x81a63]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:/tmp/tmpxft_00029ba1_00000000-6_TracerGPU.compute_86.cudafe1.stub.c:1:__device_stub__Z5traceP6RayGPUP9SampleGPUP17curandStateXORWOW(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x81211]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:33:trace(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x8125a]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:290:TracerGPU::callTrace() [0x7e0f3]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/Test-3.cpp:24:main [0x7a915]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:../sysdeps/nptl/libc_start_call_main.h:58:__libc_start_call_main [0x29fd0]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:../csu/libc-start.c:379:__libc_start_main [0x2a07d]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:_start [0x79d05]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+========= 
+========= Stack overflow
+=========     at 0x50 in /home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:44:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *)
+=========     by thread (0,0,0) in block (360,0,0)
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:30:trace(RayGPU *, SampleGPU *, curandStateXORWOW *) [0xed0]
+=========     Saved host backtrace up to driver entry point at kernel launch time
+=========     Host Frame: [0x21740c]
+=========                in /usr/lib/x86_64-linux-gnu/libcuda.so.1
+=========     Host Frame: [0x1433c]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:cudaLaunchKernel [0x69c38]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:/usr/local/cuda/include/cuda_runtime.h:211:cudaError cudaLaunchKernel<char>(char const*, dim3, dim3, void**, unsigned long, CUstream_st*) [0x81a63]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:/tmp/tmpxft_00029ba1_00000000-6_TracerGPU.compute_86.cudafe1.stub.c:1:__device_stub__Z5traceP6RayGPUP9SampleGPUP17curandStateXORWOW(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x81211]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:33:trace(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x8125a]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:290:TracerGPU::callTrace() [0x7e0f3]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/Test-3.cpp:24:main [0x7a915]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:../sysdeps/nptl/libc_start_call_main.h:58:__libc_start_call_main [0x29fd0]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:../csu/libc-start.c:379:__libc_start_main [0x2a07d]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:_start [0x79d05]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+========= 
+========= Stack overflow
+=========     at 0x50 in /home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:283:ChemElementGPU::interpolate(float, float, const float *) const
+=========     by thread (0,0,0) in block (398,0,0)
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:110:ChemElementGPU::CS_Tot(float) const [0x2b0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:41:MaterialGPU::CS_Tot(float) const [0x8c0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:50:MaterialGPU::getInteractingElement(float, float) const [0x2b0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:61:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x41e0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:30:trace(RayGPU *, SampleGPU *, curandStateXORWOW *) [0xed0]
+=========     Saved host backtrace up to driver entry point at kernel launch time
+=========     Host Frame: [0x21740c]
+=========                in /usr/lib/x86_64-linux-gnu/libcuda.so.1
+=========     Host Frame: [0x1433c]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:cudaLaunchKernel [0x69c38]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:/usr/local/cuda/include/cuda_runtime.h:211:cudaError cudaLaunchKernel<char>(char const*, dim3, dim3, void**, unsigned long, CUstream_st*) [0x81a63]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:/tmp/tmpxft_00029ba1_00000000-6_TracerGPU.compute_86.cudafe1.stub.c:1:__device_stub__Z5traceP6RayGPUP9SampleGPUP17curandStateXORWOW(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x81211]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:33:trace(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x8125a]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:290:TracerGPU::callTrace() [0x7e0f3]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/Test-3.cpp:24:main [0x7a915]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:../sysdeps/nptl/libc_start_call_main.h:58:__libc_start_call_main [0x29fd0]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:../csu/libc-start.c:379:__libc_start_main [0x2a07d]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:_start [0x79d05]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+========= 
+========= Stack overflow
+=========     at 0x50 in /home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:44:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *)
+=========     by thread (0,0,0) in block (322,0,0)
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:30:trace(RayGPU *, SampleGPU *, curandStateXORWOW *) [0xed0]
+=========     Saved host backtrace up to driver entry point at kernel launch time
+=========     Host Frame: [0x21740c]
+=========                in /usr/lib/x86_64-linux-gnu/libcuda.so.1
+=========     Host Frame: [0x1433c]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:cudaLaunchKernel [0x69c38]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:/usr/local/cuda/include/cuda_runtime.h:211:cudaError cudaLaunchKernel<char>(char const*, dim3, dim3, void**, unsigned long, CUstream_st*) [0x81a63]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:/tmp/tmpxft_00029ba1_00000000-6_TracerGPU.compute_86.cudafe1.stub.c:1:__device_stub__Z5traceP6RayGPUP9SampleGPUP17curandStateXORWOW(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x81211]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:33:trace(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x8125a]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:290:TracerGPU::callTrace() [0x7e0f3]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/Test-3.cpp:24:main [0x7a915]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:../sysdeps/nptl/libc_start_call_main.h:58:__libc_start_call_main [0x29fd0]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:../csu/libc-start.c:379:__libc_start_main [0x2a07d]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:_start [0x79d05]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+========= 
+========= Stack overflow
+=========     at 0x50 in /home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:44:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *)
+=========     by thread (0,0,0) in block (512,0,0)
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:30:trace(RayGPU *, SampleGPU *, curandStateXORWOW *) [0xed0]
+=========     Saved host backtrace up to driver entry point at kernel launch time
+=========     Host Frame: [0x21740c]
+=========                in /usr/lib/x86_64-linux-gnu/libcuda.so.1
+=========     Host Frame: [0x1433c]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:cudaLaunchKernel [0x69c38]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:/usr/local/cuda/include/cuda_runtime.h:211:cudaError cudaLaunchKernel<char>(char const*, dim3, dim3, void**, unsigned long, CUstream_st*) [0x81a63]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:/tmp/tmpxft_00029ba1_00000000-6_TracerGPU.compute_86.cudafe1.stub.c:1:__device_stub__Z5traceP6RayGPUP9SampleGPUP17curandStateXORWOW(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x81211]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:33:trace(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x8125a]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:290:TracerGPU::callTrace() [0x7e0f3]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/Test-3.cpp:24:main [0x7a915]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:../sysdeps/nptl/libc_start_call_main.h:58:__libc_start_call_main [0x29fd0]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:../csu/libc-start.c:379:__libc_start_main [0x2a07d]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:_start [0x79d05]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+========= 
+========= Stack overflow
+=========     at 0x50 in /home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:44:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *)
+=========     by thread (0,0,0) in block (588,0,0)
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:30:trace(RayGPU *, SampleGPU *, curandStateXORWOW *) [0xed0]
+=========     Saved host backtrace up to driver entry point at kernel launch time
+=========     Host Frame: [0x21740c]
+=========                in /usr/lib/x86_64-linux-gnu/libcuda.so.1
+=========     Host Frame: [0x1433c]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:cudaLaunchKernel [0x69c38]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:/usr/local/cuda/include/cuda_runtime.h:211:cudaError cudaLaunchKernel<char>(char const*, dim3, dim3, void**, unsigned long, CUstream_st*) [0x81a63]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:/tmp/tmpxft_00029ba1_00000000-6_TracerGPU.compute_86.cudafe1.stub.c:1:__device_stub__Z5traceP6RayGPUP9SampleGPUP17curandStateXORWOW(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x81211]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:33:trace(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x8125a]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:290:TracerGPU::callTrace() [0x7e0f3]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/Test-3.cpp:24:main [0x7a915]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:../sysdeps/nptl/libc_start_call_main.h:58:__libc_start_call_main [0x29fd0]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:../csu/libc-start.c:379:__libc_start_main [0x2a07d]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:_start [0x79d05]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+========= 
+========= Stack overflow
+=========     at 0x50 in /home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:283:ChemElementGPU::interpolate(float, float, const float *) const
+=========     by thread (0,0,0) in block (651,0,0)
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:110:ChemElementGPU::CS_Tot(float) const [0x2b0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:41:MaterialGPU::CS_Tot(float) const [0x8c0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:50:MaterialGPU::getInteractingElement(float, float) const [0x2b0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:61:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x41e0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:30:trace(RayGPU *, SampleGPU *, curandStateXORWOW *) [0xed0]
+=========     Saved host backtrace up to driver entry point at kernel launch time
+=========     Host Frame: [0x21740c]
+=========                in /usr/lib/x86_64-linux-gnu/libcuda.so.1
+=========     Host Frame: [0x1433c]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:cudaLaunchKernel [0x69c38]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:/usr/local/cuda/include/cuda_runtime.h:211:cudaError cudaLaunchKernel<char>(char const*, dim3, dim3, void**, unsigned long, CUstream_st*) [0x81a63]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:/tmp/tmpxft_00029ba1_00000000-6_TracerGPU.compute_86.cudafe1.stub.c:1:__device_stub__Z5traceP6RayGPUP9SampleGPUP17curandStateXORWOW(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x81211]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:33:trace(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x8125a]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:290:TracerGPU::callTrace() [0x7e0f3]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/Test-3.cpp:24:main [0x7a915]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:../sysdeps/nptl/libc_start_call_main.h:58:__libc_start_call_main [0x29fd0]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:../csu/libc-start.c:379:__libc_start_main [0x2a07d]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:_start [0x79d05]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+========= 
+========= Stack overflow
+=========     at 0x50 in /home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:44:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *)
+=========     by thread (0,0,0) in block (618,0,0)
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:30:trace(RayGPU *, SampleGPU *, curandStateXORWOW *) [0xed0]
+=========     Saved host backtrace up to driver entry point at kernel launch time
+=========     Host Frame: [0x21740c]
+=========                in /usr/lib/x86_64-linux-gnu/libcuda.so.1
+=========     Host Frame: [0x1433c]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:cudaLaunchKernel [0x69c38]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:/usr/local/cuda/include/cuda_runtime.h:211:cudaError cudaLaunchKernel<char>(char const*, dim3, dim3, void**, unsigned long, CUstream_st*) [0x81a63]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:/tmp/tmpxft_00029ba1_00000000-6_TracerGPU.compute_86.cudafe1.stub.c:1:__device_stub__Z5traceP6RayGPUP9SampleGPUP17curandStateXORWOW(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x81211]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:33:trace(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x8125a]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:290:TracerGPU::callTrace() [0x7e0f3]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/Test-3.cpp:24:main [0x7a915]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:../sysdeps/nptl/libc_start_call_main.h:58:__libc_start_call_main [0x29fd0]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:../csu/libc-start.c:379:__libc_start_main [0x2a07d]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:_start [0x79d05]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+========= 
+========= Stack overflow
+=========     at 0x50 in /home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:283:ChemElementGPU::interpolate(float, float, const float *) const
+=========     by thread (0,0,0) in block (774,0,0)
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:110:ChemElementGPU::CS_Tot(float) const [0x2b0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:41:MaterialGPU::CS_Tot(float) const [0x8c0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:50:MaterialGPU::getInteractingElement(float, float) const [0x2b0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:61:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x41e0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:30:trace(RayGPU *, SampleGPU *, curandStateXORWOW *) [0xed0]
+=========     Saved host backtrace up to driver entry point at kernel launch time
+=========     Host Frame: [0x21740c]
+=========                in /usr/lib/x86_64-linux-gnu/libcuda.so.1
+=========     Host Frame: [0x1433c]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:cudaLaunchKernel [0x69c38]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:/usr/local/cuda/include/cuda_runtime.h:211:cudaError cudaLaunchKernel<char>(char const*, dim3, dim3, void**, unsigned long, CUstream_st*) [0x81a63]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:/tmp/tmpxft_00029ba1_00000000-6_TracerGPU.compute_86.cudafe1.stub.c:1:__device_stub__Z5traceP6RayGPUP9SampleGPUP17curandStateXORWOW(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x81211]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:33:trace(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x8125a]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:290:TracerGPU::callTrace() [0x7e0f3]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/Test-3.cpp:24:main [0x7a915]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:../sysdeps/nptl/libc_start_call_main.h:58:__libc_start_call_main [0x29fd0]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:../csu/libc-start.c:379:__libc_start_main [0x2a07d]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:_start [0x79d05]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+========= 
+========= Stack overflow
+=========     at 0x50 in /home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:44:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *)
+=========     by thread (0,0,0) in block (113,0,0)
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:30:trace(RayGPU *, SampleGPU *, curandStateXORWOW *) [0xed0]
+=========     Saved host backtrace up to driver entry point at kernel launch time
+=========     Host Frame: [0x21740c]
+=========                in /usr/lib/x86_64-linux-gnu/libcuda.so.1
+=========     Host Frame: [0x1433c]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:cudaLaunchKernel [0x69c38]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:/usr/local/cuda/include/cuda_runtime.h:211:cudaError cudaLaunchKernel<char>(char const*, dim3, dim3, void**, unsigned long, CUstream_st*) [0x81a63]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:/tmp/tmpxft_00029ba1_00000000-6_TracerGPU.compute_86.cudafe1.stub.c:1:__device_stub__Z5traceP6RayGPUP9SampleGPUP17curandStateXORWOW(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x81211]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:33:trace(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x8125a]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:290:TracerGPU::callTrace() [0x7e0f3]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/Test-3.cpp:24:main [0x7a915]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:../sysdeps/nptl/libc_start_call_main.h:58:__libc_start_call_main [0x29fd0]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:../csu/libc-start.c:379:__libc_start_main [0x2a07d]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:_start [0x79d05]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+========= 
+========= Stack overflow
+=========     at 0x50 in /home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:44:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *)
+=========     by thread (0,0,0) in block (151,0,0)
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:30:trace(RayGPU *, SampleGPU *, curandStateXORWOW *) [0xed0]
+=========     Saved host backtrace up to driver entry point at kernel launch time
+=========     Host Frame: [0x21740c]
+=========                in /usr/lib/x86_64-linux-gnu/libcuda.so.1
+=========     Host Frame: [0x1433c]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:cudaLaunchKernel [0x69c38]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:/usr/local/cuda/include/cuda_runtime.h:211:cudaError cudaLaunchKernel<char>(char const*, dim3, dim3, void**, unsigned long, CUstream_st*) [0x81a63]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:/tmp/tmpxft_00029ba1_00000000-6_TracerGPU.compute_86.cudafe1.stub.c:1:__device_stub__Z5traceP6RayGPUP9SampleGPUP17curandStateXORWOW(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x81211]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:33:trace(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x8125a]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:290:TracerGPU::callTrace() [0x7e0f3]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/Test-3.cpp:24:main [0x7a915]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:../sysdeps/nptl/libc_start_call_main.h:58:__libc_start_call_main [0x29fd0]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:../csu/libc-start.c:379:__libc_start_main [0x2a07d]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:_start [0x79d05]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+========= 
+========= Stack overflow
+=========     at 0x50 in /home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:44:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *)
+=========     by thread (0,0,0) in block (37,0,0)
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:30:trace(RayGPU *, SampleGPU *, curandStateXORWOW *) [0xed0]
+=========     Saved host backtrace up to driver entry point at kernel launch time
+=========     Host Frame: [0x21740c]
+=========                in /usr/lib/x86_64-linux-gnu/libcuda.so.1
+=========     Host Frame: [0x1433c]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:cudaLaunchKernel [0x69c38]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:/usr/local/cuda/include/cuda_runtime.h:211:cudaError cudaLaunchKernel<char>(char const*, dim3, dim3, void**, unsigned long, CUstream_st*) [0x81a63]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:/tmp/tmpxft_00029ba1_00000000-6_TracerGPU.compute_86.cudafe1.stub.c:1:__device_stub__Z5traceP6RayGPUP9SampleGPUP17curandStateXORWOW(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x81211]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:33:trace(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x8125a]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:290:TracerGPU::callTrace() [0x7e0f3]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/Test-3.cpp:24:main [0x7a915]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:../sysdeps/nptl/libc_start_call_main.h:58:__libc_start_call_main [0x29fd0]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:../csu/libc-start.c:379:__libc_start_main [0x2a07d]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:_start [0x79d05]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+========= 
+========= Stack overflow
+=========     at 0x50 in /home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:44:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *)
+=========     by thread (0,0,0) in block (75,0,0)
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:30:trace(RayGPU *, SampleGPU *, curandStateXORWOW *) [0xed0]
+=========     Saved host backtrace up to driver entry point at kernel launch time
+=========     Host Frame: [0x21740c]
+=========                in /usr/lib/x86_64-linux-gnu/libcuda.so.1
+=========     Host Frame: [0x1433c]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:cudaLaunchKernel [0x69c38]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:/usr/local/cuda/include/cuda_runtime.h:211:cudaError cudaLaunchKernel<char>(char const*, dim3, dim3, void**, unsigned long, CUstream_st*) [0x81a63]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:/tmp/tmpxft_00029ba1_00000000-6_TracerGPU.compute_86.cudafe1.stub.c:1:__device_stub__Z5traceP6RayGPUP9SampleGPUP17curandStateXORWOW(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x81211]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:33:trace(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x8125a]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:290:TracerGPU::callTrace() [0x7e0f3]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/Test-3.cpp:24:main [0x7a915]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:../sysdeps/nptl/libc_start_call_main.h:58:__libc_start_call_main [0x29fd0]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:../csu/libc-start.c:379:__libc_start_main [0x2a07d]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:_start [0x79d05]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+========= 
+========= Stack overflow
+=========     at 0x50 in /home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:44:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *)
+=========     by thread (0,0,0) in block (265,0,0)
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:30:trace(RayGPU *, SampleGPU *, curandStateXORWOW *) [0xed0]
+=========     Saved host backtrace up to driver entry point at kernel launch time
+=========     Host Frame: [0x21740c]
+=========                in /usr/lib/x86_64-linux-gnu/libcuda.so.1
+=========     Host Frame: [0x1433c]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:cudaLaunchKernel [0x69c38]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:/usr/local/cuda/include/cuda_runtime.h:211:cudaError cudaLaunchKernel<char>(char const*, dim3, dim3, void**, unsigned long, CUstream_st*) [0x81a63]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:/tmp/tmpxft_00029ba1_00000000-6_TracerGPU.compute_86.cudafe1.stub.c:1:__device_stub__Z5traceP6RayGPUP9SampleGPUP17curandStateXORWOW(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x81211]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:33:trace(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x8125a]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:290:TracerGPU::callTrace() [0x7e0f3]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/Test-3.cpp:24:main [0x7a915]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:../sysdeps/nptl/libc_start_call_main.h:58:__libc_start_call_main [0x29fd0]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:../csu/libc-start.c:379:__libc_start_main [0x2a07d]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:_start [0x79d05]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+========= 
+========= Malloc/Free Error encountered : Invalid pointer to free
+=========     at 0xb0 in cudaFree
+=========     by thread (0,0,0) in block (303,0,0)
+=========     Address 0x7fc97cfff820
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:276:ChemElementGPU::getTransition(int, float) const [0x41e0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:80:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0xa7b0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:30:trace(RayGPU *, SampleGPU *, curandStateXORWOW *) [0xed0]
+=========     Saved host backtrace up to driver entry point at kernel launch time
+=========     Host Frame: [0x21740c]
+=========                in /usr/lib/x86_64-linux-gnu/libcuda.so.1
+=========     Host Frame: [0x1433c]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:cudaLaunchKernel [0x69c38]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:/usr/local/cuda/include/cuda_runtime.h:211:cudaError cudaLaunchKernel<char>(char const*, dim3, dim3, void**, unsigned long, CUstream_st*) [0x81a63]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:/tmp/tmpxft_00029ba1_00000000-6_TracerGPU.compute_86.cudafe1.stub.c:1:__device_stub__Z5traceP6RayGPUP9SampleGPUP17curandStateXORWOW(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x81211]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:33:trace(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x8125a]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:290:TracerGPU::callTrace() [0x7e0f3]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/Test-3.cpp:24:main [0x7a915]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:../sysdeps/nptl/libc_start_call_main.h:58:__libc_start_call_main [0x29fd0]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:../csu/libc-start.c:379:__libc_start_main [0x2a07d]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:_start [0x79d05]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+========= 
+========= Stack overflow
+=========     at 0x50 in /home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:44:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *)
+=========     by thread (0,0,0) in block (227,0,0)
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:30:trace(RayGPU *, SampleGPU *, curandStateXORWOW *) [0xed0]
+=========     Saved host backtrace up to driver entry point at kernel launch time
+=========     Host Frame: [0x21740c]
+=========                in /usr/lib/x86_64-linux-gnu/libcuda.so.1
+=========     Host Frame: [0x1433c]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:cudaLaunchKernel [0x69c38]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:/usr/local/cuda/include/cuda_runtime.h:211:cudaError cudaLaunchKernel<char>(char const*, dim3, dim3, void**, unsigned long, CUstream_st*) [0x81a63]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:/tmp/tmpxft_00029ba1_00000000-6_TracerGPU.compute_86.cudafe1.stub.c:1:__device_stub__Z5traceP6RayGPUP9SampleGPUP17curandStateXORWOW(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x81211]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:33:trace(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x8125a]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:290:TracerGPU::callTrace() [0x7e0f3]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/Test-3.cpp:24:main [0x7a915]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:../sysdeps/nptl/libc_start_call_main.h:58:__libc_start_call_main [0x29fd0]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:../csu/libc-start.c:379:__libc_start_main [0x2a07d]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:_start [0x79d05]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+========= 
+========= Stack overflow
+=========     at 0x50 in /home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:44:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *)
+=========     by thread (0,0,0) in block (417,0,0)
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:30:trace(RayGPU *, SampleGPU *, curandStateXORWOW *) [0xed0]
+=========     Saved host backtrace up to driver entry point at kernel launch time
+=========     Host Frame: [0x21740c]
+=========                in /usr/lib/x86_64-linux-gnu/libcuda.so.1
+=========     Host Frame: [0x1433c]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:cudaLaunchKernel [0x69c38]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:/usr/local/cuda/include/cuda_runtime.h:211:cudaError cudaLaunchKernel<char>(char const*, dim3, dim3, void**, unsigned long, CUstream_st*) [0x81a63]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:/tmp/tmpxft_00029ba1_00000000-6_TracerGPU.compute_86.cudafe1.stub.c:1:__device_stub__Z5traceP6RayGPUP9SampleGPUP17curandStateXORWOW(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x81211]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:33:trace(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x8125a]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:290:TracerGPU::callTrace() [0x7e0f3]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/Test-3.cpp:24:main [0x7a915]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:../sysdeps/nptl/libc_start_call_main.h:58:__libc_start_call_main [0x29fd0]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:../csu/libc-start.c:379:__libc_start_main [0x2a07d]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:_start [0x79d05]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+========= 
+========= Stack overflow
+=========     at 0x50 in /home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:44:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *)
+=========     by thread (0,0,0) in block (455,0,0)
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:30:trace(RayGPU *, SampleGPU *, curandStateXORWOW *) [0xed0]
+=========     Saved host backtrace up to driver entry point at kernel launch time
+=========     Host Frame: [0x21740c]
+=========                in /usr/lib/x86_64-linux-gnu/libcuda.so.1
+=========     Host Frame: [0x1433c]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:cudaLaunchKernel [0x69c38]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:/usr/local/cuda/include/cuda_runtime.h:211:cudaError cudaLaunchKernel<char>(char const*, dim3, dim3, void**, unsigned long, CUstream_st*) [0x81a63]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:/tmp/tmpxft_00029ba1_00000000-6_TracerGPU.compute_86.cudafe1.stub.c:1:__device_stub__Z5traceP6RayGPUP9SampleGPUP17curandStateXORWOW(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x81211]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:33:trace(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x8125a]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:290:TracerGPU::callTrace() [0x7e0f3]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/Test-3.cpp:24:main [0x7a915]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:../sysdeps/nptl/libc_start_call_main.h:58:__libc_start_call_main [0x29fd0]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:../csu/libc-start.c:379:__libc_start_main [0x2a07d]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:_start [0x79d05]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+========= 
+========= Malloc/Free Error encountered : Invalid pointer to free
+=========     at 0xb0 in cudaFree
+=========     by thread (0,0,0) in block (341,0,0)
+=========     Address 0x7fc97cfff820
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:276:ChemElementGPU::getTransition(int, float) const [0x41e0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:80:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0xa7b0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:30:trace(RayGPU *, SampleGPU *, curandStateXORWOW *) [0xed0]
+=========     Saved host backtrace up to driver entry point at kernel launch time
+=========     Host Frame: [0x21740c]
+=========                in /usr/lib/x86_64-linux-gnu/libcuda.so.1
+=========     Host Frame: [0x1433c]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:cudaLaunchKernel [0x69c38]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:/usr/local/cuda/include/cuda_runtime.h:211:cudaError cudaLaunchKernel<char>(char const*, dim3, dim3, void**, unsigned long, CUstream_st*) [0x81a63]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:/tmp/tmpxft_00029ba1_00000000-6_TracerGPU.compute_86.cudafe1.stub.c:1:__device_stub__Z5traceP6RayGPUP9SampleGPUP17curandStateXORWOW(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x81211]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:33:trace(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x8125a]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:290:TracerGPU::callTrace() [0x7e0f3]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/Test-3.cpp:24:main [0x7a915]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:../sysdeps/nptl/libc_start_call_main.h:58:__libc_start_call_main [0x29fd0]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:../csu/libc-start.c:379:__libc_start_main [0x2a07d]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:_start [0x79d05]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+========= 
+========= Stack overflow
+=========     at 0x50 in /home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:44:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *)
+=========     by thread (0,0,0) in block (710,0,0)
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:30:trace(RayGPU *, SampleGPU *, curandStateXORWOW *) [0xed0]
+=========     Saved host backtrace up to driver entry point at kernel launch time
+=========     Host Frame: [0x21740c]
+=========                in /usr/lib/x86_64-linux-gnu/libcuda.so.1
+=========     Host Frame: [0x1433c]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:cudaLaunchKernel [0x69c38]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:/usr/local/cuda/include/cuda_runtime.h:211:cudaError cudaLaunchKernel<char>(char const*, dim3, dim3, void**, unsigned long, CUstream_st*) [0x81a63]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:/tmp/tmpxft_00029ba1_00000000-6_TracerGPU.compute_86.cudafe1.stub.c:1:__device_stub__Z5traceP6RayGPUP9SampleGPUP17curandStateXORWOW(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x81211]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:33:trace(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x8125a]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:290:TracerGPU::callTrace() [0x7e0f3]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/Test-3.cpp:24:main [0x7a915]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:../sysdeps/nptl/libc_start_call_main.h:58:__libc_start_call_main [0x29fd0]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:../csu/libc-start.c:379:__libc_start_main [0x2a07d]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:_start [0x79d05]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+========= 
+========= Stack overflow
+=========     at 0x50 in /home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:44:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *)
+=========     by thread (0,0,0) in block (569,0,0)
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:30:trace(RayGPU *, SampleGPU *, curandStateXORWOW *) [0xed0]
+=========     Saved host backtrace up to driver entry point at kernel launch time
+=========     Host Frame: [0x21740c]
+=========                in /usr/lib/x86_64-linux-gnu/libcuda.so.1
+=========     Host Frame: [0x1433c]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:cudaLaunchKernel [0x69c38]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:/usr/local/cuda/include/cuda_runtime.h:211:cudaError cudaLaunchKernel<char>(char const*, dim3, dim3, void**, unsigned long, CUstream_st*) [0x81a63]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:/tmp/tmpxft_00029ba1_00000000-6_TracerGPU.compute_86.cudafe1.stub.c:1:__device_stub__Z5traceP6RayGPUP9SampleGPUP17curandStateXORWOW(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x81211]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:33:trace(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x8125a]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:290:TracerGPU::callTrace() [0x7e0f3]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/Test-3.cpp:24:main [0x7a915]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:../sysdeps/nptl/libc_start_call_main.h:58:__libc_start_call_main [0x29fd0]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:../csu/libc-start.c:379:__libc_start_main [0x2a07d]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:_start [0x79d05]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+========= 
+========= Stack overflow
+=========     at 0x50 in /home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:44:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *)
+=========     by thread (0,0,0) in block (607,0,0)
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:30:trace(RayGPU *, SampleGPU *, curandStateXORWOW *) [0xed0]
+=========     Saved host backtrace up to driver entry point at kernel launch time
+=========     Host Frame: [0x21740c]
+=========                in /usr/lib/x86_64-linux-gnu/libcuda.so.1
+=========     Host Frame: [0x1433c]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:cudaLaunchKernel [0x69c38]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:/usr/local/cuda/include/cuda_runtime.h:211:cudaError cudaLaunchKernel<char>(char const*, dim3, dim3, void**, unsigned long, CUstream_st*) [0x81a63]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:/tmp/tmpxft_00029ba1_00000000-6_TracerGPU.compute_86.cudafe1.stub.c:1:__device_stub__Z5traceP6RayGPUP9SampleGPUP17curandStateXORWOW(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x81211]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:33:trace(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x8125a]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:290:TracerGPU::callTrace() [0x7e0f3]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/Test-3.cpp:24:main [0x7a915]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:../sysdeps/nptl/libc_start_call_main.h:58:__libc_start_call_main [0x29fd0]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:../csu/libc-start.c:379:__libc_start_main [0x2a07d]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:_start [0x79d05]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+========= 
+========= Stack overflow
+=========     at 0x50 in /home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:283:ChemElementGPU::interpolate(float, float, const float *) const
+=========     by thread (0,0,0) in block (493,0,0)
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:110:ChemElementGPU::CS_Tot(float) const [0x2b0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:41:MaterialGPU::CS_Tot(float) const [0x8c0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:50:MaterialGPU::getInteractingElement(float, float) const [0x2b0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:61:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x41e0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:30:trace(RayGPU *, SampleGPU *, curandStateXORWOW *) [0xed0]
+=========     Saved host backtrace up to driver entry point at kernel launch time
+=========     Host Frame: [0x21740c]
+=========                in /usr/lib/x86_64-linux-gnu/libcuda.so.1
+=========     Host Frame: [0x1433c]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:cudaLaunchKernel [0x69c38]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:/usr/local/cuda/include/cuda_runtime.h:211:cudaError cudaLaunchKernel<char>(char const*, dim3, dim3, void**, unsigned long, CUstream_st*) [0x81a63]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:/tmp/tmpxft_00029ba1_00000000-6_TracerGPU.compute_86.cudafe1.stub.c:1:__device_stub__Z5traceP6RayGPUP9SampleGPUP17curandStateXORWOW(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x81211]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:33:trace(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x8125a]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:290:TracerGPU::callTrace() [0x7e0f3]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/Test-3.cpp:24:main [0x7a915]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:../sysdeps/nptl/libc_start_call_main.h:58:__libc_start_call_main [0x29fd0]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:../csu/libc-start.c:379:__libc_start_main [0x2a07d]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:_start [0x79d05]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+========= 
+========= Stack overflow
+=========     at 0x50 in /home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:283:ChemElementGPU::interpolate(float, float, const float *) const
+=========     by thread (0,0,0) in block (531,0,0)
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:110:ChemElementGPU::CS_Tot(float) const [0x2b0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:41:MaterialGPU::CS_Tot(float) const [0x8c0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:50:MaterialGPU::getInteractingElement(float, float) const [0x2b0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:61:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x41e0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:30:trace(RayGPU *, SampleGPU *, curandStateXORWOW *) [0xed0]
+=========     Saved host backtrace up to driver entry point at kernel launch time
+=========     Host Frame: [0x21740c]
+=========                in /usr/lib/x86_64-linux-gnu/libcuda.so.1
+=========     Host Frame: [0x1433c]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:cudaLaunchKernel [0x69c38]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:/usr/local/cuda/include/cuda_runtime.h:211:cudaError cudaLaunchKernel<char>(char const*, dim3, dim3, void**, unsigned long, CUstream_st*) [0x81a63]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:/tmp/tmpxft_00029ba1_00000000-6_TracerGPU.compute_86.cudafe1.stub.c:1:__device_stub__Z5traceP6RayGPUP9SampleGPUP17curandStateXORWOW(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x81211]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:33:trace(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x8125a]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:290:TracerGPU::callTrace() [0x7e0f3]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/Test-3.cpp:24:main [0x7a915]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:../sysdeps/nptl/libc_start_call_main.h:58:__libc_start_call_main [0x29fd0]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:../csu/libc-start.c:379:__libc_start_main [0x2a07d]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:_start [0x79d05]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+========= 
+========= Stack overflow
+=========     at 0x50 in /home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:283:ChemElementGPU::interpolate(float, float, const float *) const
+=========     by thread (0,0,0) in block (749,0,0)
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:110:ChemElementGPU::CS_Tot(float) const [0x2b0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:41:MaterialGPU::CS_Tot(float) const [0x8c0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:50:MaterialGPU::getInteractingElement(float, float) const [0x2b0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:61:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x41e0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:176:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x1a520]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:30:trace(RayGPU *, SampleGPU *, curandStateXORWOW *) [0xed0]
+=========     Saved host backtrace up to driver entry point at kernel launch time
+=========     Host Frame: [0x21740c]
+=========                in /usr/lib/x86_64-linux-gnu/libcuda.so.1
+=========     Host Frame: [0x1433c]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:cudaLaunchKernel [0x69c38]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:/usr/local/cuda/include/cuda_runtime.h:211:cudaError cudaLaunchKernel<char>(char const*, dim3, dim3, void**, unsigned long, CUstream_st*) [0x81a63]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:/tmp/tmpxft_00029ba1_00000000-6_TracerGPU.compute_86.cudafe1.stub.c:1:__device_stub__Z5traceP6RayGPUP9SampleGPUP17curandStateXORWOW(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x81211]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:33:trace(RayGPU*, SampleGPU*, curandStateXORWOW*) [0x8125a]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:290:TracerGPU::callTrace() [0x7e0f3]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/Test-3.cpp:24:main [0x7a915]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:../sysdeps/nptl/libc_start_call_main.h:58:__libc_start_call_main [0x29fd0]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:../csu/libc-start.c:379:__libc_start_main [0x2a07d]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:_start [0x79d05]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+========= 
+========= Program hit cudaErrorLaunchFailure (error 719) due to "unspecified launch failure" on CUDA API call to cudaDeviceSynchronize.
+=========     Saved host backtrace up to driver entry point at error
+=========     Host Frame: [0x34fb13]
+=========                in /usr/lib/x86_64-linux-gnu/libcuda.so.1
+=========     Host Frame:cudaDeviceSynchronize [0x448b7]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:src/cuda/TracerGPU.cu:292:TracerGPU::callTrace() [0x7e0f8]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/Test-3.cpp:24:main [0x7a915]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:../sysdeps/nptl/libc_start_call_main.h:58:__libc_start_call_main [0x29fd0]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:../csu/libc-start.c:379:__libc_start_main [0x2a07d]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:_start [0x79d05]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+========= 
+Read / Prepare: 0.884435 s       Trace: 902.093529 s
+Size at 2nd-Polycap-Entry: 3
+========= Program hit cudaErrorLaunchFailure (error 719) due to "unspecified launch failure" on CUDA API call to cudaFree.
+=========     Saved host backtrace up to driver entry point at error
+=========     Host Frame: [0x34fb13]
+=========                in /usr/lib/x86_64-linux-gnu/libcuda.so.1
+=========     Host Frame:cudaFree [0x4f21e]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:src/cuda/TracerGPU.cu:325:TracerGPU::callTrace() [0x7e874]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/Test-3.cpp:24:main [0x7a915]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:../sysdeps/nptl/libc_start_call_main.h:58:__libc_start_call_main [0x29fd0]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:../csu/libc-start.c:379:__libc_start_main [0x2a07d]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:_start [0x79d05]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+========= 
+========= Program hit cudaErrorLaunchFailure (error 719) due to "unspecified launch failure" on CUDA API call to cudaFree.
+=========     Saved host backtrace up to driver entry point at error
+=========     Host Frame: [0x34fb13]
+=========                in /usr/lib/x86_64-linux-gnu/libcuda.so.1
+=========     Host Frame:cudaFree [0x4f21e]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:src/cuda/TracerGPU.cu:326:TracerGPU::callTrace() [0x7e883]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/Test-3.cpp:24:main [0x7a915]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:../sysdeps/nptl/libc_start_call_main.h:58:__libc_start_call_main [0x29fd0]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:../csu/libc-start.c:379:__libc_start_main [0x2a07d]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:_start [0x79d05]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+========= 
+/tank/data/PrimaryBeam-374-0.h5
+beam_.n_rows: 6304921
+========= Program hit cudaErrorLaunchFailure (error 719) due to "unspecified launch failure" on CUDA API call to cudaMallocManaged.
+=========     Saved host backtrace up to driver entry point at error
+=========     Host Frame: [0x34fb13]
+=========                in /usr/lib/x86_64-linux-gnu/libcuda.so.1
+=========     Host Frame:cudaMallocManaged [0x4e93f]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:/usr/local/cuda/include/cuda_runtime.h:509:cudaError cudaMallocManaged<curandStateXORWOW>(curandStateXORWOW**, unsigned long, unsigned int) [0x819e8]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:275:TracerGPU::callTrace() [0x7d2f0]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/Test-3.cpp:24:main [0x7a915]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:../sysdeps/nptl/libc_start_call_main.h:58:__libc_start_call_main [0x29fd0]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:../csu/libc-start.c:379:__libc_start_main [0x2a07d]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:_start [0x79d05]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+========= 
+========= Program hit cudaErrorLaunchFailure (error 719) due to "unspecified launch failure" on CUDA API call to cudaLaunchKernel.
+=========     Saved host backtrace up to driver entry point at error
+=========     Host Frame: [0x34fb13]
+=========                in /usr/lib/x86_64-linux-gnu/libcuda.so.1
+=========     Host Frame:cudaLaunchKernel [0x69c78]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:/usr/local/cuda/include/cuda_runtime.h:211:cudaError cudaLaunchKernel<char>(char const*, dim3, dim3, void**, unsigned long, CUstream_st*) [0x81a63]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:/tmp/tmpxft_00029ba1_00000000-6_TracerGPU.compute_86.cudafe1.stub.c:17:__device_stub__Z4initjP17curandStateXORWOW(unsigned int, curandStateXORWOW*) [0x80f18]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:12:init(unsigned int, curandStateXORWOW*) [0x80f56]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:278:TracerGPU::callTrace() [0x7d379]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/Test-3.cpp:24:main [0x7a915]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:../sysdeps/nptl/libc_start_call_main.h:58:__libc_start_call_main [0x29fd0]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:../csu/libc-start.c:379:__libc_start_main [0x2a07d]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:_start [0x79d05]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+========= 
+========= Program hit cudaErrorLaunchFailure (error 719) due to "unspecified launch failure" on CUDA API call to cudaMallocManaged.
+=========     Saved host backtrace up to driver entry point at error
+=========     Host Frame: [0x34fb13]
+=========                in /usr/lib/x86_64-linux-gnu/libcuda.so.1
+=========     Host Frame:cudaMallocManaged [0x4e93f]
+=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.0
+=========     Host Frame:/usr/local/cuda/include/cuda_runtime.h:509:cudaError cudaMallocManaged<RayGPU>(RayGPU**, unsigned long, unsigned int) [0x81a13]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/cuda/TracerGPU.cu:280:TracerGPU::callTrace() [0x7d3a7]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:src/Test-3.cpp:24:main [0x7a915]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+=========     Host Frame:../sysdeps/nptl/libc_start_call_main.h:58:__libc_start_call_main [0x29fd0]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:../csu/libc-start.c:379:__libc_start_main [0x2a07d]
+=========                in /usr/lib/x86_64-linux-gnu/libc.so.6
+=========     Host Frame:_start [0x79d05]
+=========                in /home/miro/Software/1st-party/voxTrace/build/bin/Test-3
+========= 
+========= Error: process didn't terminate successfully
+========= Target application returned an error
+========= ERROR SUMMARY: 507 errors

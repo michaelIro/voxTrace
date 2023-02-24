@@ -5,12 +5,13 @@ master_doc = 'rst/index'
 html_theme = 'sphinx_rtd_theme'
 
 # Breathe Configuration
-breathe_projects = {"voxTrace": "../build/docs/xml/",}
+breathe_projects = {"voxTrace": "../build/doc/xml/",}
 breathe_default_project = "voxTrace"
-# sakldkl
+
+# Project information
 project = "voxTrace"
 author = "Michael Iro"
-copyright = '2021, Michael Iro'
+copyright = '2023, Michael Iro'
 version = '1.0'
 
 source_suffix = {
