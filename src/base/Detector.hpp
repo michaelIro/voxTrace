@@ -4,9 +4,9 @@
 // Detector
 
 #include <iostream>
-#include "ChemElement.h"
-#include "../base/Ray.h"
-#include "../base/Spectrum.h"
+#include "ChemElement.hpp"
+#include "Ray.hpp"
+#include "Spectrum.hpp"
 
 using namespace std;
 

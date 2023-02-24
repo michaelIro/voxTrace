@@ -1,4 +1,6 @@
 #include <iostream>
+#define ARMA_ALLOW_FAKE_GCC
+#include <armadillo>
 
 #include "api/PolyCapAPI.hpp"
 #include "base/XRBeam.hpp"
@@ -9,10 +11,10 @@ int main() {
     
 	// create string with path to file
 	
-	for (int i = 0; i < 41; i++){
+	for (int i = -3; i < 10; i++){
 
 		//std::string path = "/media/miro/Data-1TB/nist-1107-simulation/nist-1107-pos-(0.000000).h5";
-		std::string appendix = std::to_string(i*2.0-40.0);
+		std::string appendix = std::to_string(i*15.0);
 		std::string path_in = "/media/miro/Data-1TB/nist-1107-simulation/nist-1107-pos-(" + appendix + ").h5";
 		std::string path_out = path_in.substr(0, path_in.size()-3) + "-detector.h5";
 

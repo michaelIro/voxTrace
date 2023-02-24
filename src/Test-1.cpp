@@ -1,4 +1,5 @@
 #include <iostream>
+#define ARMA_ALLOW_FAKE_GCC
 #include <armadillo>
 
 #include "api/PolyCapAPI.hpp"

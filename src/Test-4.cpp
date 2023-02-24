@@ -1,39 +1,15 @@
 #include <iostream>
+#define ARMA_ALLOW_FAKE_GCC
 #include <armadillo>
-#include <filesystem>
+#include "api/XRayLibAPI.hpp"
+#include "api/Shadow3API.hpp"
 
 int main() {
 	std::cout << "START: Test-4" << std::endl;
-
-	std::string path = "/media/miro/Data/done/pos-5";
-	arma::Mat<double> complete_;
-	int raysN= 0;
-  	for (const auto & file : std::filesystem::directory_iterator(path)){
-    	arma::Mat<double> rays__;
-		rays__.load(arma::hdf5_name(file.path(),"my_data"));
-		raysN += rays__.n_rows;
-		//std::cout << rays__.n_rows << std::endl;
-		//std::cout << rays__.n_cols << std::endl;
-	}
-	std::cout << raysN << std::endl;
-
-	complete_.set_size(raysN,19);
-	int counter = 0;
-  	for (const auto & file : std::filesystem::directory_iterator(path)){
-    	arma::Mat<double> rays__;
-		rays__.load(arma::hdf5_name(file.path(),"my_data"));
-		for(int i = 0; i < rays__.n_rows; i++){
-			for(int j = 0; j < rays__.n_cols; j++){
-				complete_(i+counter,j) = rays__(i,j);
-			}
-		}
-		counter+= rays__.n_rows;
-		//raysN += rays__.n_rows;
-		//std::cout << rays__.n_rows << std::endl;
-		//std::cout << rays__.n_cols << std::endl;
-	}
-	complete_.save(arma::hdf5_name("/media/miro/Data/secondary/pos-5.h5","my_data"));
-
+	std::cout << XRayLibAPI::ZToSym(29) << std::endl;
+	Shadow3API shadow_((char*) "/home/miro/Software/1st-party/voxTrace/test-data/in/shadow3");
+	shadow_.trace(5);
+	shadow_.getBeamMatrix().print();
 	std::cout << "END: Test-4" << std::endl;
     return 0;
 }

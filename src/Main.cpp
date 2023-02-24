@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <filesystem>
+#define ARMA_ALLOW_FAKE_GCC
 
 #include "api/OptimizerAPI.hpp"
 #include "api/PlotAPI.hpp"

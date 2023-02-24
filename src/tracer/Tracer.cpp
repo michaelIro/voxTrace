@@ -14,7 +14,7 @@ void Tracer::start(){
 	vector<Ray> tracedRays(primary_.getRays().size());
 	int i = 0;
 	int ia = 0;
-	int size = primary_.getRays().size();
+	//int size = primary_.getRays().size();
 
 
 	#pragma omp parallel for

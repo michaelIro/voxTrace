@@ -62,7 +62,7 @@ Ray::Ray(const Ray& ray, double x, double y, double z, double phi, double theta)
 
 	asX_= asX;
 	asY_= asY;
-	asZ_= asY;
+	asZ_= asZ;
 
 	apX_= ray.getPPolX();
 	apY_= ray.getPPolY();
@@ -183,6 +183,7 @@ void Ray::setEnergy(double keV){
 
 double* Ray::getShadowRay() const{
 	double *ray;
+	ray = new double[6];
 	return ray;	
 }
 

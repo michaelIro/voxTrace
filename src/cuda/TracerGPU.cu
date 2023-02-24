@@ -77,16 +77,15 @@ __global__ void traceNewBeam(RayGPU *rays, SampleGPU* sample, curandState_t *sta
 
     }while(!(currentRay->getOOBFlag()) && !(currentRay->getAugerFlag()));
 
-    if(!(currentRay->getAugerFlag())){
+    if(!(currentRay->getAugerFlag()) && (currentRay->getEnergyKeV() < 15.0)){
       currentRay->setStartCoordinates(currentRay->getStartX()-offset[0], currentRay->getStartY()-offset[1], currentRay->getStartZ()-offset[2]);
       currentRay->secondaryTransform(sec_trans_param[0], sec_trans_param[1], sec_trans_param[2], sec_trans_param[3], sec_trans_param[4], sec_trans_param[5]);
     }
     else
       currentRay->setIAFlag(false);
 
-    
-    if(currentRay->getIAFlag() && currentRay->getIndex()==0) 
-        c=c;
+    //if(currentRay->getIAFlag() && currentRay->getIndex()==0) 
+    //    c=c;
         
   }while(!(currentRay->getIAFlag()));
 }
@@ -365,8 +364,18 @@ void TracerGPU::callTraceNewBeam(float* offset, int n_rays, int  n_el, int* els,
   yLV_ = yL_/((float)(yN_));
   zLV_ = zL_/((float)(zN_));
 
+  int n_el_new = 3;
+  int els_new[3][n_el]={{6,24},{6,27},{6,30}};
+  float wgt_new[3][n_el]={{0.999651886257307,0.00034811374269286},{0.999543658490524,0.000456341509475796},{0.999378760356556,0.000621239643443875}};
+
   ChemElementGPU* elements;
-  cudaMallocManaged(&elements, sizeof(ChemElementGPU)*n_el);
+  cudaMallocManaged(&elements, sizeof(ChemElementGPU)*n_el_new);
+
+  ChemElementGPU* elements_2;
+  cudaMallocManaged(&elements_2, sizeof(ChemElementGPU)*n_el_new);
+
+  ChemElementGPU* elements_3;
+  cudaMallocManaged(&elements_3, sizeof(ChemElementGPU)*n_el_new);
 
   float* weights;
   cudaMallocManaged(&weights, sizeof(float)*n_el*xN_*yN_*zN_);
@@ -403,16 +412,27 @@ void TracerGPU::callTraceNewBeam(float* offset, int n_rays, int  n_el, int* els,
   for(int i = 0; i< 4; i++)
     prim_geom[i] = prim_cap_geom[i];
 
-  for(int i = 0; i< n_el; i++)
-    elements[i] = ChemElementGPU(els[i]); 
-  
+  for(int i = 0; i< n_el_new; i++){
+    elements[i] = ChemElementGPU(els_new[0][i]); 
+    elements_2[i] = ChemElementGPU(els_new[1][i]); 
+    elements_3[i] = ChemElementGPU(els_new[2][i]); 
+  }
+
   for(int i = 0; i < xN_; i++){
     for(int j = 0; j < yN_; j++){
       for(int k = 0; k < zN_; k++){
-        for(int l = 0; l< n_el; l++)
-          weights[i*yN_*zN_*n_el+j*zN_*n_el+k*n_el+l] = wgt[l]; 
+        int dummy;
+        if(k<zN_/3) dummy = 0;
+        else if(k<2*zN_/3) dummy = 1;
+        else dummy = 2;
+        
+        for(int l = 0; l< n_el_new; l++)
+          weights[i*yN_*zN_*n_el_new+j*zN_*n_el_new+k*n_el_new+l] = wgt_new[dummy][l]; 
 
-        materials[i*yN_*zN_+j*zN_+k] = MaterialGPU(n_el, &elements[0], &weights[i*yN_*zN_*n_el+j*zN_*n_el+k*n_el+0]);
+        if(k<zN_/3) materials[i*yN_*zN_+j*zN_+k] = MaterialGPU(n_el_new, &elements[0], &weights[i*yN_*zN_*n_el_new+j*zN_*n_el_new+k*n_el_new+0]);
+        else if(k<2*zN_/3) materials[i*yN_*zN_+j*zN_+k] = MaterialGPU(n_el_new, &elements_2[0], &weights[i*yN_*zN_*n_el_new+j*zN_*n_el_new+k*n_el_new+0]);
+        else materials[i*yN_*zN_+j*zN_+k] = MaterialGPU(n_el_new, &elements_3[0], &weights[i*yN_*zN_*n_el_new+j*zN_*n_el_new+k*n_el_new+0]);
+
         voxels[i*yN_*zN_+j*zN_+k] = VoxelGPU(x_+i*xLV_, y_+j*yLV_, z_+k*zLV_, xLV_, yLV_, zLV_,&materials[i*yN_*zN_+j*zN_+k]);
       }
     }

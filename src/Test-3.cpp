@@ -16,7 +16,7 @@ int main(int argc, const char* argv[]) {
 //---------------------------------------------------------------------------------------------	
 
     float offset[3] = {0.0f, 0.0f, 0.0f}; 
-    int n_rays = 1000000;
+    int n_rays = 30; //30000
 
     int n_el = 6;
     int els[n_el] = {26,28,29,30,50,82};
@@ -27,11 +27,11 @@ int main(int argc, const char* argv[]) {
     float sec_trans_param[6] = {150.0f, 150.0f, 0.0f, 4900.0f, 45.0f, 950.0f}; 
 
     float sample_start[3] = {0.0f, 0.0f, 0.0f};
-    float sample_length[3] = {300.0f, 300.0f, 300.0f};
-    float sample_voxel_length[3] = {4.0f, 4.0f, 4.0f};
+    float sample_length[3] = {300.0f, 300.0f, 150.0f};
+    float sample_voxel_length[3] = {5.0f, 5.0f, 5.0f};
 
-    for(int i =-20; i < 21; i++){
-        offset[2] = ((float) i) * 2.0f;
+    for(int i =-3; i < 15; i++){
+        offset[2] = ((float) i) * 15.0f;
         std::string appendix = std::to_string(offset[2]);
         std::string path_out = "/media/miro/Data-1TB/nist-1107-simulation/nist-1107-pos-(" + appendix + ").h5";
         TracerGPU::callTraceNewBeam(offset, n_rays, n_el, els, wgt, prim_trans_param, sec_trans_param, prim_cap_geom, path_out,sample_start, sample_length, sample_voxel_length);
