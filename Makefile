@@ -49,12 +49,12 @@ ENSMALLEN_LDFLAGS = -lensmallen
 HDF5_INCLUDE_DIR = -I/usr/include/hdf5/serial
 HDF5_LIB_DIR = -L/usr/lib/x86_64-linux-gnu/hdf5/serial
 
-VOXTRACE_LIB_DIR = -L$(BUILD_DIR)/api -L$(BUILD_DIR)/base -L$(BUILD_DIR)/tracer
+VOXTRACE_LIB_DIR = -L$(BUILD_DIR)/api -L$(BUILD_DIR)/base -L$(BUILD_DIR)/tracer  -L$(BUILD_DIR)/io
 LOCAL_LIB_DIR = -L/usr/lib/x86_64-linux-gnu 
 HPC_LIB_DIR = -L/home/fs71764/miro/Software/1st-Party/voxTrace/build/src/api -L/home/fs71764/miro/Software/1st-Party/voxTrace/build/src/base -L/home/fs71764/miro/Software/3rd-Party/Install/lib -L/gpfs/opt/sw/spack-0.17.1/opt/spack/linux-almalinux8-zen3/gcc-11.2.0/armadillo-10.5.0-zzssso6lwzgjpsuubriirjj67cf2rin6/lib64 #-L/home/miro/Software/1st-party/voxTrace/build/src/api -L/home/miro/Software/1st-party/voxTrace/build/src/base -L/usr/lib/x86_64-linux-gnu
 
 
-CCLFLAGS = -larmadillo -lhdf5 -DARMA_USE_HDF5 -lxrl -l:libXRayLibAPI.a -lpolycap -l:libPolyCapAPI.a -l:libShadow3API.a -lshadow3 -lshadow3c -lshadow3c++ -l:libvt.base.a -l:libvt.tracer.a
+CCLFLAGS = -larmadillo -lhdf5 -DARMA_USE_HDF5 -lxrl -l:libXRayLibAPI.a -lpolycap -l:libPolyCapAPI.a -l:libShadow3API.a -lshadow3 -lshadow3c -lshadow3c++ -l:libvt.base.a -l:libvt.tracer.a -l:libvt.io.a
 # -l:libxrl.a 
 ##########################################################
 ################### Project file structure ###############
@@ -72,6 +72,7 @@ SRC_TRACER_DIR  = $(SRC_MAIN_DIR)/tracer
 # Build directory:
 BUILD_DIR               = $(VOXTRACE_DIR)/build/src
 BUILD_BASE_DIR          = $(BUILD_DIR)/base
+BUILD_IO_DIR            = $(BUILD_DIR)/io
 BUILD_TRACER_DIR        = $(BUILD_DIR)/tracer
 BUILD_CUDA_DIR          = $(BUILD_DIR)/cuda
 BUILD_API_OBJ_DIR       = $(BUILD_DIR)/api/obj
@@ -386,7 +387,7 @@ api_libs: libXRayLibAPI.a libShadow3API.a libPolyCapAPI.a libPlotAPI.a libOptimi
 
 apis: api_objects api_libs
 
-new: clean apis base tracer
+new: clean apis base tracer io
 
 check.deps:
 ifeq ($(SAMPLE_ENABLED),0)
@@ -481,7 +482,7 @@ clean:
 	rm -rf $(BUILD_DIR)/* *.o $(EXE)
 	mkdir -p $(BUILD_DIR)/api $(BUILD_DIR)/base $(BUILD_DIR)/cuda $(BUILD_DIR)/doc $(BUILD_DIR)/io $(BUILD_DIR)/tracer $(BUILD_DIR)/api/obj $(BUILD_DIR)/api/lib
 
-base: base_objects libvt.base.a
+base: base_objects libvt.base.a 
 
 base_objects: $(BUILD_BASE_DIR)/ChemElement.o $(BUILD_BASE_DIR)/Material.o $(BUILD_BASE_DIR)/Ray.o $(BUILD_BASE_DIR)/Sample.o $(BUILD_BASE_DIR)/Voxel.o $(BUILD_BASE_DIR)/XRBeam.o  
 
@@ -500,3 +501,17 @@ libvt.tracer.a:
 
 $(BUILD_TRACER_DIR)/%.o: $(SRC_TRACER_DIR)/%.cpp $(SRC_TRACER_DIR)/%.hpp | $(BUILD_TRACER_DIR)
 	$(HOST_COMPILER) $(INCLUDES) $(ALT_CCFLAGS) -Wall -Werror -c $< -o $@
+
+io: io_objects libvt.io.a
+
+io_objects: $(BUILD_IO_DIR)/SimulationParameter.o 
+
+libvt.io.a: 
+	ar rcs $(BUILD_IO_DIR)/$@ $(BUILD_IO_DIR)/SimulationParameter.o $< 
+
+$(BUILD_IO_DIR)/%.o: $(SRC_IO_DIR)/%.cpp $(SRC_IO_DIR)/%.hpp | $(BUILD_IO_DIR)
+	$(HOST_COMPILER) $(INCLUDES) $(ALT_CCFLAGS) -Wall -Werror -c $< -o $@
+
+fast: new cuda_tracer Test-3.o Test-3
+
+ffast: cuda_tracer Test-3.o Test-3

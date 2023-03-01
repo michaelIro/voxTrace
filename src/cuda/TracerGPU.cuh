@@ -15,6 +15,8 @@
 #include "../cuda/VoxelGPU.cu"
 #include "../cuda/SampleGPU.cu"
 
+#include "../io/SimulationParameter.hpp"
+
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <curand_kernel.h>
@@ -25,7 +27,7 @@ class TracerGPU{
 	public:
 
 		static void callTracePreBeam(); 
-		static void callTraceNewBeam(float* offset, int n_rays, int  n_el, int* els, float* wgt, float* prim_trans_param, float* sec_trans_param, float* prim_cap_geom, std::string path_out, float* sample_start, float* sample_length, float* sample_voxel_length); 
+		static void callTraceNewBeam(SimulationParameter& simp); 
 
 		__device__ static void traceForward(RayGPU* ray, VoxelGPU* currentVoxel, curandState_t *localState);
 		__device__ static void generateRayGPU(curandState_t *localState, float r_out, float f, float r_f, float energy_keV, RayGPU* ray);

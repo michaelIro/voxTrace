@@ -72,9 +72,6 @@ __global__ void traceNewBeam(RayGPU *rays, SampleGPU* sample, curandState_t *sta
 
       c++;
 
-      if(currentRay->getOOBFlag()) 
-        c=c;
-
     }while(!(currentRay->getOOBFlag()) && !(currentRay->getAugerFlag()));
 
     if(!(currentRay->getAugerFlag()) && (currentRay->getEnergyKeV() < 15.0)){
@@ -83,9 +80,6 @@ __global__ void traceNewBeam(RayGPU *rays, SampleGPU* sample, curandState_t *sta
     }
     else
       currentRay->setIAFlag(false);
-
-    //if(currentRay->getIAFlag() && currentRay->getIndex()==0) 
-    //    c=c;
         
   }while(!(currentRay->getIAFlag()));
 }
@@ -349,12 +343,15 @@ void TracerGPU::callTracePreBeam(){
   cudaFree(weights);
 }
 
-void TracerGPU::callTraceNewBeam(float* offset, int n_rays, int  n_el, int* els, float* wgt, float* prim_trans_param, float* sec_trans_param, float* prim_cap_geom, std::string path_out, float* sample_start, float* sample_length, float* sample_voxel_length){
+void TracerGPU::callTraceNewBeam(SimulationParameter& simp){
 
-  // get value of sample_start, sample_length, sample_voxel_length
-  float x_=sample_start[0], y_=sample_start[1],z_=sample_start[2];
-  float xL_=sample_length[0],yL_=sample_length[1],zL_=sample_length[2];
-  float xLV_=sample_voxel_length[0],yLV_=sample_voxel_length[1],zLV_=sample_voxel_length[2];
+  clock_t beg_ = clock();
+
+  int n_rays = simp.getNumRays();
+
+  float x_=simp.getSampleStart()[0], y_=simp.getSampleStart()[1],z_=simp.getSampleStart()[2];
+  float xL_=simp.getSampleLength()[0],yL_=simp.getSampleLength()[1],zL_=simp.getSampleLength()[2];
+  float xLV_=simp.getSampleVoxelLength()[0],yLV_=simp.getSampleVoxelLength()[1],zLV_=simp.getSampleVoxelLength()[2];
 
   int xN_ = (int)(xL_/xLV_);
   int yN_ = (int)(yL_/yLV_);
@@ -364,18 +361,13 @@ void TracerGPU::callTraceNewBeam(float* offset, int n_rays, int  n_el, int* els,
   yLV_ = yL_/((float)(yN_));
   zLV_ = zL_/((float)(zN_));
 
-  int n_el_new = 3;
-  int els_new[3][n_el]={{6,24},{6,27},{6,30}};
-  float wgt_new[3][n_el]={{0.999651886257307,0.00034811374269286},{0.999543658490524,0.000456341509475796},{0.999378760356556,0.000621239643443875}};
-
+  int n_el = simp.getUniqueElements().size();
+  int els_[n_el];
+  for (int i = 0; i < n_el; i++) 
+    els_[i] = simp.getUniqueElements()[i];
+  
   ChemElementGPU* elements;
-  cudaMallocManaged(&elements, sizeof(ChemElementGPU)*n_el_new);
-
-  ChemElementGPU* elements_2;
-  cudaMallocManaged(&elements_2, sizeof(ChemElementGPU)*n_el_new);
-
-  ChemElementGPU* elements_3;
-  cudaMallocManaged(&elements_3, sizeof(ChemElementGPU)*n_el_new);
+  cudaMallocManaged(&elements, sizeof(ChemElementGPU)*n_el);
 
   float* weights;
   cudaMallocManaged(&weights, sizeof(float)*n_el*xN_*yN_*zN_);
@@ -394,101 +386,117 @@ void TracerGPU::callTraceNewBeam(float* offset, int n_rays, int  n_el, int* els,
 
   float* ofst;
   cudaMallocManaged(&ofst, sizeof(float)*3);
+  //ofst = {0.0f, 0.0f, 0.0f}; 
   for(int i = 0; i< 3; i++)
-    ofst[i] = offset[i];
+    ofst[i] = simp.getMeasurementPoints()[0][i];
 
   float* prim_trans;
   cudaMallocManaged(&prim_trans, sizeof(float)*5);
+  //prim_trans = simp.getPrimTransParam();
   for(int i = 0; i< 5; i++)
-    prim_trans[i] = prim_trans_param[i];
+    prim_trans[i] = simp.getPrimTransParam()[i];
 
   float* sec_trans;
   cudaMallocManaged(&sec_trans, sizeof(float)*6);
+  //sec_trans = simp.getSecTransParam();
   for(int i = 0; i< 6; i++)
-    sec_trans[i] = sec_trans_param[i];
+    sec_trans[i] = simp.getSecTransParam()[i];
 
   float* prim_geom;
   cudaMallocManaged(&prim_geom, sizeof(float)*4);
+  //prim_geom = simp.getPrimCapGeom();
   for(int i = 0; i< 4; i++)
-    prim_geom[i] = prim_cap_geom[i];
+    prim_geom[i] = simp.getPrimCapGeom()[i];
 
-  for(int i = 0; i< n_el_new; i++){
-    elements[i] = ChemElementGPU(els_new[0][i]); 
-    elements_2[i] = ChemElementGPU(els_new[1][i]); 
-    elements_3[i] = ChemElementGPU(els_new[2][i]); 
-  }
-
-  for(int i = 0; i < xN_; i++){
-    for(int j = 0; j < yN_; j++){
-      for(int k = 0; k < zN_; k++){
-        int dummy;
-        if(k<zN_/3) dummy = 0;
-        else if(k<2*zN_/3) dummy = 1;
-        else dummy = 2;
-        
-        for(int l = 0; l< n_el_new; l++)
-          weights[i*yN_*zN_*n_el_new+j*zN_*n_el_new+k*n_el_new+l] = wgt_new[dummy][l]; 
-
-        if(k<zN_/3) materials[i*yN_*zN_+j*zN_+k] = MaterialGPU(n_el_new, &elements[0], &weights[i*yN_*zN_*n_el_new+j*zN_*n_el_new+k*n_el_new+0]);
-        else if(k<2*zN_/3) materials[i*yN_*zN_+j*zN_+k] = MaterialGPU(n_el_new, &elements_2[0], &weights[i*yN_*zN_*n_el_new+j*zN_*n_el_new+k*n_el_new+0]);
-        else materials[i*yN_*zN_+j*zN_+k] = MaterialGPU(n_el_new, &elements_3[0], &weights[i*yN_*zN_*n_el_new+j*zN_*n_el_new+k*n_el_new+0]);
-
-        voxels[i*yN_*zN_+j*zN_+k] = VoxelGPU(x_+i*xLV_, y_+j*yLV_, z_+k*zLV_, xLV_, yLV_, zLV_,&materials[i*yN_*zN_+j*zN_+k]);
+  for(int i = 0; i< n_el; i++)
+    elements[i] = ChemElementGPU(els_[i]); 
+ 
+  for (auto& point : simp.getMaterialPoints()) {
+    int i = (int)point.x;
+    int j = (int)point.y;
+    int k = (int)point.z;
+    for (int l = 0; l < n_el; l++) {
+      float weight = 0.0;
+      for (int m = 0; m < point.n_elements; m++) {
+        if (l == point.elements[m]) {
+          weight = point.mass_fractions[m];
+          break;
+        }
       }
+      weights[i * yN_ * zN_ * n_el + j * zN_ * n_el + k * n_el + l] = weight;
     }
+    materials[i*yN_*zN_+j*zN_+k] = MaterialGPU(n_el, &elements[0], &weights[i*yN_*zN_*n_el+j*zN_*n_el+k*n_el+0]);
+    voxels[i*yN_*zN_+j*zN_+k] = VoxelGPU(x_+i*xLV_, y_+j*yLV_, z_+k*zLV_, xLV_, yLV_, zLV_,&materials[i*yN_*zN_+j*zN_+k]);     
   }
 
   *oobVoxel = VoxelGPU(-1.,-1.,-1.,-1.,-1.,-1.,&(materials[0]));
   *sample = SampleGPU(x_, y_,  z_, xL_,  yL_, zL_,  xLV_,  yLV_,  zLV_, xN_, yN_,  zN_, voxels, oobVoxel);
 
-  clock_t begin = clock();
-
   curandState_t* states;
-  cudaMallocManaged(&states, n_rays*sizeof(curandState_t));
-
-  init<<<n_rays, 1>>>(775289, states); //time(0)
-
   RayGPU* rays;
-  cudaMallocManaged(&rays, n_rays*sizeof(RayGPU));
 
-  for(int i = 0; i < n_rays; i++){
-	  	  rays[i] = RayGPU( 
+  int n_sim_points = simp.getMeasurementPoints().size();
+
+  clock_t en_ = clock();
+
+  double time_spent_to_init= (double)(en_ - beg_) / CLOCKS_PER_SEC;
+  printf("Time spent to Init: %f s\n", time_spent_to_init);
+
+  for(int i =0; i < n_sim_points; i++){
+
+    cudaMallocManaged(&states, n_rays*sizeof(curandState_t));
+    init<<<n_rays, 1>>>(775289, states); //time(0)
+    cudaMallocManaged(&rays, n_rays*sizeof(RayGPU));
+
+    for(int j = 0; j < n_rays; j++){
+	  	rays[j] = RayGPU( 
                           0.0f,0.0f,0.0f,
                           0.0f,0.0f,0.0f,
                           0.0f,0.0f,0.0f,
-                          false, 17.4*50677300.0,i,
+                          false, 17.4*50677300.0,j,
                           3.94f,0.0f,0.0f,
                           0.0f,0.0f,0.0f,
                           1.0f
                         );
-  }
+    }
+    clock_t begin = clock();
+    for (int j = 0; j < 3; j++)
+      ofst[j] = simp.getMeasurementPoints()[i][j];
+    char buffer[64]; // reserve some space for the string
+    std::sprintf(buffer, "(x-%.1f--y%.1f--z-%.1f)", ofst[0], ofst[1], ofst[2]);
+    std::string appendix = std::string(buffer);
+    std::string file_path_out = simp.getDirectory()+"/post-sample/ps-" + appendix + ".h5";
 
-  traceNewBeam<<<n_rays,1>>>(rays, sample, states, ofst, prim_trans, sec_trans, prim_geom);
+    printf("Start Calculation Point: (x-%.1f--y%.1f--z-%.1f)", ofst[0], ofst[1], ofst[2]);
 
-  cudaDeviceSynchronize();
+    traceNewBeam<<<n_rays,1>>>(rays, sample, states, ofst, prim_trans, sec_trans, prim_geom);
 
-  clock_t end = clock();
-  double time_spent_to_trace= (double)(end - begin) / CLOCKS_PER_SEC;
-  printf("Trace: %f s\n", time_spent_to_trace);
+    cudaDeviceSynchronize();
 
-	arma::Mat<double> rays__;
-  rays__ = arma::ones(n_rays, 21);
+    clock_t end = clock();
+
+    double time_spent_to_trace= (double)(end - begin) / CLOCKS_PER_SEC;
+    printf("Time spent to Trace: %f s\n", time_spent_to_trace);
+
+	  arma::Mat<double> rays__;
+    rays__ = arma::ones(n_rays, 21);
   
-  int total_respawns = 0;
-  for(int i = 0; i < n_rays; i++){
-    rays__.row(i)=arma::rowvec({
-			rays[i].getStartX(),rays[i].getStartY(),rays[i].getStartZ(),
-			rays[i].getDirX(),rays[i].getDirY(),rays[i].getDirZ(),
-			rays[i].getSPolX(),rays[i].getSPolY(),rays[i].getSPolZ(),
-			(double) rays[i].getFlag(), rays[i].getWaveNumber(),(double) rays[i].getIndex(),
-			rays[i].getOpticalPath(),rays[i].getSPhase(),rays[i].getPPhase(),
-			rays[i].getPPolX(), rays[i].getPPolY(),rays[i].getPPolZ(),
-			rays[i].getProb(), (double) rays[i].getIANum(),(double) rays[i].getRespawnCounter()});  
-    total_respawns += rays[i].getRespawnCounter();
-	}
+    int total_respawns = 0;
+    for(int i = 0; i < n_rays; i++){
+      rays__.row(i)=arma::rowvec({
+			  rays[i].getStartX(),rays[i].getStartY(),rays[i].getStartZ(),
+			  rays[i].getDirX(),rays[i].getDirY(),rays[i].getDirZ(),
+			  rays[i].getSPolX(),rays[i].getSPolY(),rays[i].getSPolZ(),
+			  (double) rays[i].getFlag(), rays[i].getWaveNumber(),(double) rays[i].getIndex(),
+			  rays[i].getOpticalPath(),rays[i].getSPhase(),rays[i].getPPhase(),
+			  rays[i].getPPolX(), rays[i].getPPolY(),rays[i].getPPolZ(),
+			  rays[i].getProb(), (double) rays[i].getIANum(),(double) rays[i].getRespawnCounter()});  
+      total_respawns += rays[i].getRespawnCounter();
+	  }
 
-  printf("Generated Rays: %i\n", total_respawns);
-  rays__.save(arma::hdf5_name(path_out,"my_data"));
+    printf("Generated Rays: %i\n", total_respawns);
+    rays__.save(arma::hdf5_name(file_path_out,"my_data"));
+  }
 
   //free all memory cuda
   cudaFree(rays);
