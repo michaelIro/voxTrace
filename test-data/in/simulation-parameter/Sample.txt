@@ -1,0 +1,26 @@
+# Sample parameters
+# Start Position Everything in um and °
+0.0f    # X
+0.0f    # Y
+0.0f    # Z
+
+# Sample Dimensions Everything in um and °
+300.0f  # X
+300.0f  # Y
+150.0f  # Z
+
+# Voxel Dimensions Everything in um and °
+5.0f    # X
+5.0f    # Y
+5.0f    # Z
+
+# Sample type (0 = homogeneous, 1 = layered, 2 = heterogeneous)
+0       # Type
+
+# If layered
+0       # Number of layers
+
+# Number of elements
+int n_el = 6;
+int els[n_el] = {26,28,29,30,50,82};
+float wgt[n_el] = {0.0004,0.0010,0.6119,0.3741,0.0107,0.0019}; 

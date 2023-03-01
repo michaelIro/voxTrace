@@ -1,0 +1,21 @@
+# Capillaries: Everything in um and °
+# Primary Capillary Geometry
+0.1075f		# Radius
+0.5100f 	# sdfdf
+0.00165f 	# Single Capillary Diameter
+17.4f		# Energy in keV
+
+# Primary Capillary Transformation Parameters (Position)
+150.0f		# X
+150.0f		# Y
+0.0f		# Z
+5100.0f		# Distance to Detector
+45.0f		# Angle
+
+# Secondary Capillary Transformation Parameters (Position)
+150.0f		# X
+150.0f		# Y
+0.0f		# Z
+4900.0f		# Distance to Detector
+45.0f		# Angle
+950.0f		# Distance to Primary Capillary
