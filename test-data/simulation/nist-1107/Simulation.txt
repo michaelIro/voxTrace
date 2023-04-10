@@ -1,0 +1,18 @@
+# Simulation parameters
+# General Parameters
+11                  # Number of Measurement Points
+30000               # Number of Rays to simulate per Measurement Point hittiing the Secondary Polycapillary Window
+
+# Scan-Path as Offset in x, y, z in um in Coordinate System of the Sample
+0.0f, 0.0f, -50.0f      # Measurement Point 1
+0.0f, 0.0f, -40.0f      # Measurement Point 2    
+0.0f, 0.0f, -30.0f      # Measurement Point 3
+0.0f, 0.0f, -20.0f      # Measurement Point 4
+0.0f, 0.0f, -10.0f      # Measurement Point 5 
+0.0f, 0.0f, 0.0f       	# Measurement Point 6
+0.0f, 0.0f, 10.0f       # Measurement Point 7
+0.0f, 0.0f, 20.0f       # Measurement Point 8
+0.0f, 0.0f, 30.0f       # Measurement Point 9
+0.0f, 0.0f, 40.0f       # Measurement Point 10
+0.0f, 0.0f, 50.0f       # Measurement Point 11
+
