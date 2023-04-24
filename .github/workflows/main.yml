@@ -28,6 +28,11 @@ jobs:
         run: |
           cd docs
           sphinx-build -M html . _build
+          
+      - name: Copy Sphinx HTML output to gh-pages branch
+        run: |
+          mkdir published_docs
+          cp -r docs/_build/html/* published_docs/
 
       - name: Deploy documentation
         uses: peaceiris/actions-gh-pages@v3
