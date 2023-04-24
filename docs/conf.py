@@ -1,7 +1,7 @@
 # Use breathe extension to sphinx
 extensions = [ "breathe" ]
 
-master_doc = 'rst/index'
+master_doc = 'index'
 html_theme = 'sphinx_rtd_theme'
 
 # Breathe Configuration
