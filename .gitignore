@@ -1,4 +1,7 @@
-build/*
+build/src/*
+!build/src/
+build/doc/*
+!build/doc/
 .vscode/*
 .vs/*
 .ipynb_checkpoints/*
