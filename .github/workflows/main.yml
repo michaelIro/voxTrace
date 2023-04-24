@@ -17,27 +17,22 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y doxygen python3-sphinx
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-      - name: Build documentation
+      - name: Build Doxygen documentation
         run: |
           doxygen docs/Doxyfile
-          cd build/doc
-          make html
 
-      - name: Checkout gh-pages branch
-        uses: actions/checkout@v2
-        with:
-          ref: gh-pages
-          fetch-depth: 0
-
-      - name: Copy documentation files
+      - name: Build Sphinx documentation
         run: |
-          rm -rf ./*
-          cp -r ../doc/html/* .
+          cd docs
+          sphinx-build -M html . _build
 
       - name: Deploy documentation
         uses: peaceiris/actions-gh-pages@v3
         with:
-          personal_token: ${{ secrets.ACCESS_TOKEN }}
-          publish_dir: ./
+          github_token: ${{ secrets.ACCESS_TOKEN }}
+          publish_dir: ./docs/_build/html
           force_orphan: true
+
