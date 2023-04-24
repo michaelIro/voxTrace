@@ -24,8 +24,20 @@ jobs:
           cd build/doc
           make html
 
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v2
+        with:
+          ref: gh-pages
+          fetch-depth: 0
+
+      - name: Copy documentation files
+        run: |
+          rm -rf ./*
+          cp -r ../doc/_build/html/* .
+
       - name: Deploy documentation
         uses: peaceiris/actions-gh-pages@v3
         with:
           personal_token: ${{ secrets.ACCESS_TOKEN }}
-          publish_dir: ./build/doc/_build/html
+          publish_dir: ./
+          force_orphan: true
