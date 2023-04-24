@@ -21,7 +21,7 @@ jobs:
       - name: Build documentation
         run: |
           doxygen docs/Doxyfile
-          cd docs
+          cd build/docs
           make html
 
       - name: Deploy documentation
