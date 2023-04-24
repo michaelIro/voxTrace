@@ -20,8 +20,8 @@ jobs:
 
       - name: Build documentation
         run: |
-          doxygen doc/Doxyfile
-          cd build/docs
+          doxygen docs/Doxyfile
+          cd build/doc
           make html
 
       - name: Deploy documentation
