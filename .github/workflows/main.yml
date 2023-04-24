@@ -27,5 +27,5 @@ jobs:
       - name: Deploy documentation
         uses: peaceiris/actions-gh-pages@v3
         with:
-          personal_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          publish_dir: ./docs/_build/html
+          personal_token: ${{ secrets.admin }}
+          publish_dir: ./build/doc/_build/html
