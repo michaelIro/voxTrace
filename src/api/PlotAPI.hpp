@@ -10,7 +10,6 @@ class PlotAPI{
     public:
         PlotAPI() = delete;
         static void test();
-        static void scatter_plot(char* save_path, bool x_right, bool y_up, arma::Mat<double> xy_coordinates);
 
 };
 

@@ -1,49 +1,35 @@
 #include "PlotAPI.hpp"
 
 void PlotAPI::test(){
-    // Create a vector with values from 0 to pi divived into 200 uniform intervals for the x-axis
-    sciplot::Vec x = sciplot::linspace(0.0, sciplot::PI, 200);
+    // Create values for your x-axis
+    sciplot::Vec x = sciplot::linspace(0.0, 5.0, 100);
 
     // Create a Plot object
-    sciplot::Plot plot;
+    sciplot::Plot2D plot1;
+    // Set color palette for first Plot
+    plot1.palette("paired");
+    // Draw a sine graph putting x on the x-axis and sin(x) on the y-axis
+    plot1.drawCurve(x, std::sin(x)).label("sin(x)").lineWidth(4);
+    // Draw a cosine graph putting x on the x-axis and cos(x) on the y-axis
+    plot1.drawCurve(x, std::cos(x)).label("cos(x)").lineWidth(2);
 
-    // Set the x and y labels
-    plot.xlabel("x");
-    plot.ylabel("y");
+    // Create a second Plot object
+    sciplot::Plot2D plot2;
+    // Draw a tangent graph putting x on the x-axis and tan(x) on the y-axis
+    plot2.drawCurve(x, std::tan(x)).label("tan(x)").lineWidth(4);
 
-    // Set the x and y ranges
-    plot.xrange(0.0, sciplot::PI);
-    plot.yrange(0.0, 1.0);
+    // Put both plots in a "figure" horizontally next to each other
+    sciplot::Figure figure = {{plot1, plot2}};
 
-    // Set the legend to be on the bottom along the horizontal
-    plot.legend()
-        .atOutsideBottom()
-        .displayHorizontal()
-        .displayExpandWidthBy(2);
+    // Create a canvas / drawing area to hold figure and plots
+    sciplot::Canvas canvas = {{figure}};
+    // Set color palette for all Plots that do not have a palette set (plot2) / the default palette
+    canvas.defaultPalette("set1");
 
-    // Plot sin(i*x) from i = 1 to i = 6
-    plot.drawCurve(x, std::sin(1.0 * x)).label("sin(x)");
-    plot.drawCurve(x, std::sin(2.0 * x)).label("sin(2x)");
-    plot.drawCurve(x, std::sin(3.0 * x)).label("sin(3x)");
-    plot.drawCurve(x, std::sin(4.0 * x)).label("sin(4x)");
-    plot.drawCurve(x, std::sin(5.0 * x)).label("sin(5x)");
-    plot.drawCurve(x, std::sin(6.0 * x)).label("sin(6x)");
+    // Show the canvas in a pop-up window
+    //canvas.show();
 
-    // Show the plot in a pop-up window
-    //plot.show();
-
-    // Save the plot to a PDF file
-    plot.save("../test-data/out/plots/example-sine-functions.pdf");
+    // Save the plot to a SVG file
+    canvas.save("../test-data/out/plots/example-sine-functions.svg");
 }
 
-void PlotAPI::scatter_plot(char* save_path, bool x_right, bool y_up, arma::Mat<double> xy_coordinates){
-    sciplot::Vec x = { 1, 2, 3 };
-    sciplot::Vec y = { 4, 5, 6 };
-
-    sciplot::Plot plot;
-  
-    plot.drawPoints(x, y).pointType(0);
-
-    // Save the plot to a PDF file
-    plot.save(save_path);
-}
