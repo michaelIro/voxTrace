@@ -15,7 +15,8 @@ endif
 ############### USER SPECIFIC DIRECTORIES ################# 
 ############# Location of the CUDA Toolkit ################
 CUDA_PATH_LOC = /usr/lib/nvidia-cuda-toolkit
-CUDA_PATH_HPC = /gpfs/opt/sw/spack-0.17.1/opt/spack/linux-almalinux8-zen3/gcc-11.2.0/cuda-11.5.0-ao7cp7wu3mvop6eocjixhdcda25p24r5
+CUDA_PATH_HPC = /usr/local/cuda-12.1
+#/gpfs/opt/sw/spack-0.17.1/opt/spack/linux-almalinux8-zen3/gcc-11.2.0/cuda-11.5.0-ao7cp7wu3mvop6eocjixhdcda25p24r5
 ifeq ($(HPC),true)
     CUDA_PATH ?= $(CUDA_PATH_HPC)
 else
