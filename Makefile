@@ -384,19 +384,19 @@ api_objects: XRayLibAPI.o Shadow3API.o PolyCapAPI.o PlotAPI.o OptimizerAPI.o
 api_libs: libXRayLibAPI.a libShadow3API.a libPolyCapAPI.a libPlotAPI.a libOptimizerAPI.a
 
 XRayLibAPI.o: $(XRayLibAPI_SOURCES) $(XRayLibAPI_HEADERS)
-	$(HOST_COMPILER) $(XRAYLIB_CFLAGS) -c $(XRayLibAPI_SOURCES) -o $(BUILD_API_OBJ_DIR)/XRayLibAPI.o $(XRAYLIB_LFLAGS)
+	$(HOST_COMPILER) --std=c++17 $(XRAYLIB_CFLAGS) -c $(XRayLibAPI_SOURCES) -o $(BUILD_API_OBJ_DIR)/XRayLibAPI.o $(XRAYLIB_LFLAGS)
 
 libXRayLibAPI.a: $(BUILD_API_OBJ_DIR)/XRayLibAPI.o
 	ar rcs $(BUILD_API_LIB_DIR)/$@ $< 
 
 Shadow3API.o: $(Shadow3API_SOURCES) $(Shadow3API_HEADERS) 
-	$(HOST_COMPILER) $(SHADOW_INCLUDE_DIRS) $(SHADOW_LIBS) -c $(Shadow3API_SOURCES) -o $(BUILD_API_OBJ_DIR)/Shadow3API.o -lshadow3 -lshadow3c -lshadow3c++
+	$(HOST_COMPILER) --std=c++17 $(SHADOW_INCLUDE_DIRS) $(SHADOW_LIBS) -c $(Shadow3API_SOURCES) -o $(BUILD_API_OBJ_DIR)/Shadow3API.o -lshadow3 -lshadow3c -lshadow3c++
 
 libShadow3API.a: $(BUILD_API_OBJ_DIR)/Shadow3API.o
 	ar rcs $(BUILD_API_LIB_DIR)/$@ $< 
 
 PolyCapAPI.o: $(PolyCapAPI_SOURCES) $(PolyCapAPI_HEADERS)
-	$(HOST_COMPILER) $(POLYCAP_CFLAGS) -c $(PolyCapAPI_SOURCES) -o $(BUILD_API_OBJ_DIR)/PolyCapAPI.o $(POLYCAP_LFLAGS)
+	$(HOST_COMPILER) --std=c++17 $(POLYCAP_CFLAGS) -c $(PolyCapAPI_SOURCES) -o $(BUILD_API_OBJ_DIR)/PolyCapAPI.o $(POLYCAP_LFLAGS)
 
 libPolyCapAPI.a: $(BUILD_API_OBJ_DIR)/PolyCapAPI.o
 	ar rcs $(BUILD_API_LIB_DIR)/$@ $< 
@@ -408,7 +408,7 @@ libPlotAPI.a: $(BUILD_API_OBJ_DIR)/PlotAPI.o
 	ar rcs $(BUILD_API_LIB_DIR)/$@ $< 
 
 OptimizerAPI.o: $(OptimizerAPI_SOURCES) $(OptimizerAPI_HEADERS)
-	$(HOST_COMPILER) $(ENSMALLEN_INCLUDE_DIRS) -c $(OptimizerAPI_SOURCES) -o $(BUILD_API_OBJ_DIR)/OptimizerAPI.o $(ENSMALLEN_LDFLAGS)
+	$(HOST_COMPILER) --std=c++17 $(ENSMALLEN_INCLUDE_DIRS) -c $(OptimizerAPI_SOURCES) -o $(BUILD_API_OBJ_DIR)/OptimizerAPI.o $(ENSMALLEN_LDFLAGS)
 
 libOptimizerAPI.a: $(BUILD_API_OBJ_DIR)/OptimizerAPI.o
 	ar rcs $(BUILD_API_LIB_DIR)/$@ $<
