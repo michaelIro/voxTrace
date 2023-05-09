@@ -1,39 +1,18 @@
 Installation
 ============
-voxTrace 
+voxTrace is a CUDA C++ package that can theoretically be run on various plattforms after 
+modification of the MAKEFILE. voxTrace was developed and tested on Ubuntu 20.04 and 22.04.
 
-Ubuntu 20.04
---------------
-    -> shadow3 
-        clone repo from https://github.com/PaNOSC-ViNYL/shadow3/
-        switch to the the branch gfortran8-fixes (in the directory type git checkout gfortran8-fixes)
-        
-
-    -> xraylib from https://github.com/tschoonj/xraylib/wiki
-        add to /etc/bash.bashrc : 
-            export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig
-            export LD_LIBRARY_PATH=/usr/local/lib/
-
-    -> optimlib from https://github.com/kthohr/optim (https://www.kthohr.com/optimlib_docs_de.html)
-
-    -> armadillo from http://arma.sourceforge.net/ for dependencies using ArchLinux see https://aur.archlinux.org/packages/armadillo/
-            -> arpack (sudo pacman -S arpack)
-            -> blas / openblas
-            -> lapack
-            -> superlu
-            -> cmake
-            -> hdf5
-
-    -> gsl from https://www.gnu.org/software/gsl/
-        -> libgsl-dev (sudo apt-get install libgsl-dev)
+Ubuntu 
+-------
+*  Start with 
 
 A short statement by the author, concerning licencing: 
 -------------------------------------------------------
-This codes is supposed to be free to use in a way that you can basically use it
-in any way you want, without any warranty from my side. I therefore chose the :ref:`licence-label`
-MIT Licence. Nevertheless, before using/redistributing this code in 
-a commercial way you should notice that some of the packages this code naturally 
-depends on have different licences:
+This codes is supposed to be free to use, without any warranty from my side. 
+I therefore chose the :ref:`licence-label`MIT Licence. Nevertheless, before 
+using/redistributing this code in a commercial way you should notice that some 
+of the packages this code naturally depends on have different licences:
 
 * `Armadillo`_: a C++ library for linear algebra & scientific computing                                (Apache 2.0 License)
 * `OptimLib`_: a lightweight C++ library of numerical optimization methods for nonlinear functions.    (Apache 2.0 License)
