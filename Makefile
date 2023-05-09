@@ -427,7 +427,7 @@ doc:
 	$(SPHINX) -b html docs $(BUILD_SPHINX_DOC_DIR)
 
 RayGPU.o: $(SRC_CUDA_DIR)/RayGPU.cu
-	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $(BUILD_CUDA_DIR)/$@ $<
+	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $(BUILD_CUDA_DIR)/$@ -dc $<
 
 ChemElementGPU.o: $(SRC_CUDA_DIR)/ChemElementGPU.cu
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $(BUILD_CUDA_DIR)/$@ -dc $<
