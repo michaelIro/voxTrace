@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 set -e
 
-apt-get install autoconf automake autotools-dev build-essential cmake doxygen g++ gfortran gnuplot libarmadillo-dev libboost-dev libgsl-dev libhdf5-dev libtool ninja-build pkg-config python3 python3-dev python3-pip python3-setuptools python3-wheel sed wget
+apt-get install autoconf automake autotools-dev build-essential cmake doxygen g++ gfortran gnuplot libarmadillo-dev libboost-dev libgsl-dev libhdf5-dev libtool meson ninja-build pkg-config python3 python3-dev python3-pip python3-setuptools python3-wheel sed wget
 #cython cuda mlocate
+pip3 install breathe cython numpy sphinx-rtd-theme
+
+apt-get nvidia-cuda-toolkit
 
 cd ..
 mkdir installation
