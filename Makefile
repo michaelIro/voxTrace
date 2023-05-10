@@ -1,77 +1,86 @@
-# Usage:
-#   
-########################################################### 
-################# COMPILE OPTIONS ######################### 
-# Default value for -hpc option
-HPC = false
 
-# Check for -hpc option
-ifeq ($(filter -hpc,$(MAKECMDGOALS)),)
-    HPC = false
-else
-    HPC = true
-endif
+# Set default value of HPC to false
+HPC ?= false
+
 ########################################################### 
-############### USER SPECIFIC DIRECTORIES ################# 
-############# Location of the CUDA Toolkit ################
-CUDA_PATH_LOC = /usr/local/cuda-12.1#/usr/lib/nvidia-cuda-toolkit
-CUDA_PATH_HPC = 
-#/gpfs/opt/sw/spack-0.17.1/opt/spack/linux-almalinux8-zen3/gcc-11.2.0/cuda-11.5.0-ao7cp7wu3mvop6eocjixhdcda25p24r5
+############### USER SPECIFIC DIRECTORIES #################
+
+##################################################
+############# Location of the CUDA Toolkit #######
+# Local
+CUDA_PATH_LOC := /usr/local/cuda-12.1
+# HPC
+CUDA_PATH_HPC := /gpfs/opt/sw/spack-0.17.1/opt/spack/linux-almalinux8-zen3/gcc-11.2.0/cuda-11.5.0-ao7cp7wu3mvop6eocjixhdcda25p24r5
+
+# Set CUDA_PATH based on HPC variable
 ifeq ($(HPC),true)
     CUDA_PATH ?= $(CUDA_PATH_HPC)
 else
     CUDA_PATH ?= $(CUDA_PATH_LOC)
 endif
-######## Documentation-Tools ########
+##################################################
+######## Documentation-Tools #####################
 DOXYGEN = doxygen
 SPHINX = sphinx-build
+##################################################
+############## Location for Armadillo ############
+ARMA_INCLUDE_DIR_LOC=/usr/include/armadillo_bits
+ARMA_LIB_DIR_LOC=/usr/lib
+ARMA_INCLUDE_DIR_HPC=/gpfs/opt/sw/spack-0.17.1/opt/spack/linux-almalinux8-zen3/gcc-11.2.0/armadillo-10.5.0-zzssso6lwzgjpsuubriirjj67cf2rin6/include
+ARMA_LIB_DIR_HPC=/gpfs/opt/sw/spack-0.17.1/opt/spack/linux-almalinux8-zen3/gcc-11.2.0/armadillo-10.5.0-zzssso6lwzgjpsuubriirjj67cf2rin6/lib64
+##################################################
 ############# Location for XRaylib ###############
 XRAYLIB_CFLAGS = `pkg-config --cflags libxrl`
 XRAYLIB_LFLAGS = `pkg-config --libs libxrl`
-#XRAYLIB_INCLUDE_DIR_LOC = -I/usr/include/xraylib 
-#XRAYLIB_INCLUDE_DIR_HPC = -I/home/fs71764/miro/Software/3rd-Party/Install/include/xraylib 
+##################################################
 ############# Location for Polycap ###############
 POLYCAP_CFLAGS = `pkg-config --cflags libpolycap`
 POLYCAP_LFLAGS = `pkg-config --libs libpolycap`
-#POLYCAP_INCLUDE_DIR_LOC = -I/usr/local/include/polycap -I/usr/include/easyRNG 
-#POLYCAP_INCLUDE_DIR_HPC = -I/home/fs71764/miro/Software/3rd-Party/Install/include/polycap -I/home/fs71764/miro/Software/3rd-Party/Install/include/easyRNG
-############# Location for Shadow3 ############### #/home/miro/Software/3rd-party/shadow3/src/c/shadow_bind_cpp.hpp
-SHADOW_INCLUDE_DIRS = -I/usr/local/include/shadow3 
-SHADOW_LIBS = -L/usr/local/lib -lshadow3 -lshadow3c -lshadow3c++
-#SHADOW_HOME = /home/miro/Software/3rd-party/shadow3
-#SHADOW_LIB_HOME = /usr/local/lib#/home/fs71764/miro/Software/3rd-Party/Install/lib
-#SHADOW_INCLUDE_DIRS = -I$(SHADOW_HOME) -I$(SHADOW_HOME)/src -I$(SHADOW_HOME)/src/c -I$(SHADOW_HOME)/src/def -L$(SHADOW_HOME)/src/c -L$(SHADOW_HOME)/src 
-#SHADOW_LIBS = -L/usr/lib/gcc/x86_64-linux-gnu/11/libgfortran.a -L$(SHADOW_LIB_HOME) -L$(SHADOW_LIB_HOME)/libshadow3.a -L$(SHADOW_LIB_HOME)/libshadow3c.a -L$(SHADOW_LIB_HOME)/libshadow3c++.a 
-#more INCLUDE DIRS -I/usr/local/bin -I$(SHADOW_HOME) -I$(SHADOW_HOME)/src -I$(SHADOW_HOME)/src/c -I$(SHADOW_HOME)/src/def 
-############# Location for GSL ###############
+##################################################
+############# Location for EasyRNG ###############
+EASY_RNG_INCLUDE_DIR_LOC=/usr/include/easyRNG 
+EASY_RNG_INCLUDE_DIR_HPC=/home/fs71764/miro/Software/3rd-Party/Install/include/easyRNG
+##################################################
+############# Location for Shadow3 ###############
+SHADOW_HOME_LOC=/usr/local/include/shadow3
+SHADOW_LIB_DIR_LOC=/usr/local/lib
+SHADOW_HOME_HPC=/home/fs71764/miro/Software/3rd-Party/Download/shadow3
+SHADOW_LIB_DIR_HPC=/home/fs71764/miro/Software/3rd-Party/Install/lib
+##################################################
+############# Location for GSL ###################
 GSL_CFLAGS = `pkg-config --cflags gsl`
 GSL_LFLAGS = `pkg-config --libs gsl`
+##################################################
 ############# Location for SCIPLOT ###############
-SCIPLOT_INCLUDE_DIRS = -I/usr/local/include/sciplot #-I/usr/local/include/sciplot/specs #/home/fs71764/miro/Software/3rd-Party/Install/share/sciplot
+SCIPLOT_INCLUDE_DIRS = -I/usr/local/include/sciplot #/home/fs71764/miro/Software/3rd-Party/Install/share/sciplot
 SCIPLOT_LDFLAGS = -lsciplot
-############# Location for ENSMALLEN ###############
+##################################################
+############# Location for ENSMALLEN #############
 ENSMALLEN_INCLUDE_DIRS = -I/usr/include -I/usr/include/ensmallen_bits#/home/fs71764/miro/Software/3rd-Party/Install/lib/cmake/ensmallen
 ENSMALLEN_LDFLAGS = -lensmallen
-############# Location for HDF5 ###############
-HDF5_INCLUDE_DIR = -I/usr/include/hdf5/serial
-HDF5_LIB_DIR = -L/usr/lib/x86_64-linux-gnu/hdf5/serial
-############# Location for API-Libs ###############
+##################################################
+############# Location for HDF5 ##################
+HDF5_INCLUDE_DIR=/usr/include/hdf5/serial
+HDF5_LIB_DIR=/usr/lib/x86_64-linux-gnu/hdf5/serial
+
+############ END OF USER SPECIFIC DIRECTORIES #############
+########################################################### 
+
 VOXTRACE_LIB_DIR = -L$(BUILD_DIR)/api -L$(BUILD_DIR)/base -L$(BUILD_DIR)/tracer  -L$(BUILD_DIR)/io
-LOCAL_LIB_DIR = -L/usr/lib/x86_64-linux-gnu 
-HPC_LIB_DIR = -L/home/fs71764/miro/Software/1st-Party/voxTrace/build/src/api -L/home/fs71764/miro/Software/1st-Party/voxTrace/build/src/base -L/home/fs71764/miro/Software/3rd-Party/Install/lib -L/gpfs/opt/sw/spack-0.17.1/opt/spack/linux-almalinux8-zen3/gcc-11.2.0/armadillo-10.5.0-zzssso6lwzgjpsuubriirjj67cf2rin6/lib64 #-L/home/miro/Software/1st-party/voxTrace/build/src/api -L/home/miro/Software/1st-party/voxTrace/build/src/base -L/usr/lib/x86_64-linux-gnu
+
 ##########################################################
 ################### Project file structure ###############
 VOXTRACE_DIR    = $(CURDIR)
-
-# Source file directories:
+##################################################
+########## Source file directories ###############
 SRC_MAIN_DIR    = $(VOXTRACE_DIR)/src
 SRC_API_DIR     = $(SRC_MAIN_DIR)/api
 SRC_BASE_DIR    = $(SRC_MAIN_DIR)/base
 SRC_CUDA_DIR    = $(SRC_MAIN_DIR)/cuda
 SRC_IO_DIR      = $(SRC_MAIN_DIR)/io
 SRC_TRACER_DIR  = $(SRC_MAIN_DIR)/tracer
-
-# Build directory:
+##################################################
+############### Build directory ##################
 BUILD_DIR               = $(VOXTRACE_DIR)/build/src
 BUILD_BASE_DIR          = $(BUILD_DIR)/base
 BUILD_IO_DIR            = $(BUILD_DIR)/io
@@ -80,10 +89,9 @@ BUILD_CUDA_DIR          = $(BUILD_DIR)/cuda
 BUILD_API_OBJ_DIR       = $(BUILD_DIR)/api/obj
 BUILD_API_LIB_DIR       = $(BUILD_DIR)/api
 BUILD_SPHINX_DOC_DIR    = $(BUILD_DIR)/../doc/sphinx_doc
-
 #SPHINX_SOURCE = build/doc/xml
-
-############# Location for Documentation ##################
+##################################################
+######## Location for Documentation ##############
 XRayLibAPI_SOURCES      = $(SRC_API_DIR)/XRayLibAPI.cpp    
 XRayLibAPI_HEADERS      = $(SRC_API_DIR)/XRayLibAPI.hpp
 Shadow3API_SOURCES      = $(SRC_API_DIR)/Shadow3API.cpp    
@@ -94,9 +102,12 @@ PlotAPI_SOURCES         = $(SRC_API_DIR)/PlotAPI.cpp
 PlotAPI_HEADERS         = $(SRC_API_DIR)/PlotAPI.hpp 
 OptimizerAPI_SOURCES    = $(SRC_API_DIR)/OptimizerAPI.cpp  
 OptimizerAPI_HEADERS    = $(SRC_API_DIR)/OptimizerAPI.hpp 
+############ End of Project file structure ###############
+##########################################################
 
-########################################################### 
-#################### SOME CUDA STUFF ###################### 
+##########################################################
+################### SOME CUDA STUFF ######################
+
 ##############################
 # start deprecated interface #
 ##############################
@@ -220,8 +231,6 @@ else ifneq ($(TARGET_ARCH),$(HOST_ARCH))
         HOST_COMPILER ?= powerpc64le-linux-gnu-g++
     endif
 endif
-#################### END OF CUDA STUFF #################### 
-###########################################################
 
 HOST_COMPILER ?= g++
 NVCC          := $(CUDA_PATH)/bin/nvcc -ccbin $(HOST_COMPILER)
@@ -317,6 +326,10 @@ else ifeq ($(TARGET_ARCH),ppc64le)
     CUDA_INSTALL_TARGET_DIR = targets/ppc64le-linux/
 endif
 
+########################################################### 
+############### END OF CUDA STUFF ################# 
+###########################################################
+
 # Debug build flag
 ifeq ($(dbg),1)
       NVCCFLAGS += -g -G
@@ -339,8 +352,27 @@ ALL_LDFLAGS += $(addprefix -Xlinker ,$(LDFLAGS))
 ALL_LDFLAGS += $(addprefix -Xlinker ,$(EXTRA_LDFLAGS))
 
 # Common includes and paths for CUDA Local
-INCLUDES  := -I$(CUDA_PATH)/include $(XRAYLIB_INCLUDE_DIR_LOC) $(POLYCAP_INCLUDE_DIR_LOC) $(HDF5_INCLUDE_DIR) $(SHADOW_INCLUDE_DIRS) -I$(SRC_MAIN_DIR)/api 
-LIBRARIES := -L$(CUDA_PATH)/lib64 $(HDF5_LIB_DIR) $(VOXTRACE_LIB_DIR) $(LOCAL_LIB_DIR) $(SHADOW_LIBS) 
+
+# Set CUDA_PATH based on HPC variable
+ifeq ($(HPC),true)
+    ARMA_INCLUDE_DIR := $(ARMA_INCLUDE_DIR_HPC)
+    ARMA_LIB_DIR := $(ARMA_LIB_DIR_HPC)
+    SHADOW_LIB_DIR := $(SHADOW_LIB_DIR_HPC)
+    SHADOW_INCLUDE_DIRS := -I$(SHADOW_HOME_HPC) -I$(SHADOW_HOME_HPC)/src -I$(SHADOW_HOME_HPC)/src/c -I$(SHADOW_HOME_HPC)/src/def 
+    EASY_RNG_INCLUDE_DIR := $(EASY_RNG_INCLUDE_DIR_HPC)
+else
+    ARMA_INCLUDE_DIR := $(ARMA_INCLUDE_DIR_LOC)
+    ARMA_LIB_DIR := $(ARMA_LIB_DIR_LOC)
+    SHADOW_LIB_DIR := $(SHADOW_LIB_DIR_LOC)
+    SHADOW_INCLUDE_DIRS := -I$(SHADOW_HOME_LOC) -I$(SHADOW_HOME_LOC)/src -I$(SHADOW_HOME_LOC)/src/c -I$(SHADOW_HOME_LOC)/src/def #-I/usr/local/bin
+    EASY_RNG_INCLUDE_DIR := $(EASY_RNG_INCLUDE_DIR_LOC)
+endif
+
+INCLUDES  := -I$(CUDA_PATH)/include -I$(ARMA_INCLUDE_DIR) -I$(HDF5_INCLUDE_DIR) -I$(SRC_MAIN_DIR)/api $(SHADOW_INCLUDE_DIRS)
+LIBRARIES := -L$(CUDA_PATH)/lib64 -L$(ARMA_LIB_DIR) -L$(HDF5_LIB_DIR) $(VOXTRACE_LIB_DIR) -L$(SHADOW_LIB_DIR)
+CCLFLAGS += -larmadillo -lhdf5 -DARMA_USE_HDF5 -lxrl -l:libXRayLibAPI.a -lpolycap -l:libPolyCapAPI.a -l:libShadow3API.a -lshadow3 -lshadow3c -lshadow3c++ -l:libvt.base.a -l:libvt.tracer.a -l:libvt.io.a
+
+
 
 ################################################################################
 # Gencode arguments
@@ -366,59 +398,26 @@ GENCODE_FLAGS += -gencode arch=compute_$(HIGHEST_SM),code=compute_$(HIGHEST_SM) 
 endif
 endif
 ##########################################################
-CCLFLAGS := -larmadillo -lhdf5 -DARMA_USE_HDF5 -lxrl -l:libXRayLibAPI.a -lpolycap -l:libPolyCapAPI.a 
-CCLFLAGS += -l:libShadow3API.a -lshadow3 -lshadow3c -lshadow3c++ -l:libvt.base.a -l:libvt.tracer.a -l:libvt.io.a
-ALL_CCFLAGS += --std=c++17 -lcudart -lstdc++ -Xcompiler 
-ALT_CCFLAGS := --std=c++17 -lcudart -lstdc++ -Wall $(CCLFLAGS) #-fopenmp # -l:libxrl.a 
-##########################################################
-ifeq ($(SAMPLE_ENABLED),0)
-EXEC ?= @echo "[@]"
-endif
+ALT_CCFLAGS := $(ALL_CCFLAGS)
+ALT_CCFLAGS += --std=c++17 -lcudart -lstdc++ -fopenmp -Wall $(CCLFLAGS)
+ALL_CCFLAGS += --std=c++17 -lcudart -lstdc++ -Xcompiler -fopenmp $(CCLFLAGS)
+
+
 ##########################################################
 ###################### Target rules ######################
+all: build
 
-###################### APIs ######################
-apis: api_objects api_libs
+build: cuda_tracer SampleTracer.o SampleTracer
+
+fast: new cuda_tracer SampleTracer.o SampleTracer
+
+cuda_tracer: RayGPU.o ChemElementGPU.o MaterialGPU.o VoxelGPU.o TracerGPU.o
 
 api_objects: XRayLibAPI.o Shadow3API.o PolyCapAPI.o PlotAPI.o OptimizerAPI.o 
 
 api_libs: libXRayLibAPI.a libShadow3API.a libPolyCapAPI.a libPlotAPI.a libOptimizerAPI.a
 
-XRayLibAPI.o: $(XRayLibAPI_SOURCES) $(XRayLibAPI_HEADERS)
-	$(HOST_COMPILER) --std=c++17 $(XRAYLIB_CFLAGS) -c $(XRayLibAPI_SOURCES) -o $(BUILD_API_OBJ_DIR)/XRayLibAPI.o $(XRAYLIB_LFLAGS)
-
-libXRayLibAPI.a: $(BUILD_API_OBJ_DIR)/XRayLibAPI.o
-	ar rcs $(BUILD_API_LIB_DIR)/$@ $< 
-
-Shadow3API.o: $(Shadow3API_SOURCES) $(Shadow3API_HEADERS) 
-	$(HOST_COMPILER) --std=c++17 $(SHADOW_INCLUDE_DIRS) $(SHADOW_LIBS) -c $(Shadow3API_SOURCES) -o $(BUILD_API_OBJ_DIR)/Shadow3API.o -lshadow3 -lshadow3c -lshadow3c++
-
-libShadow3API.a: $(BUILD_API_OBJ_DIR)/Shadow3API.o
-	ar rcs $(BUILD_API_LIB_DIR)/$@ $< 
-
-PolyCapAPI.o: $(PolyCapAPI_SOURCES) $(PolyCapAPI_HEADERS)
-	$(HOST_COMPILER) --std=c++17 $(POLYCAP_CFLAGS) -c $(PolyCapAPI_SOURCES) -o $(BUILD_API_OBJ_DIR)/PolyCapAPI.o $(POLYCAP_LFLAGS)
-
-libPolyCapAPI.a: $(BUILD_API_OBJ_DIR)/PolyCapAPI.o
-	ar rcs $(BUILD_API_LIB_DIR)/$@ $< 
-
-PlotAPI.o: $(PlotAPI_SOURCES) $(PlotAPI_HEADERS)
-	$(HOST_COMPILER) --std=c++17 $(SCIPLOT_INCLUDE_DIRS) -c $(PlotAPI_SOURCES) -o $(BUILD_API_OBJ_DIR)/PlotAPI.o $(SCIPLOT_LDFLAGS)
-
-libPlotAPI.a: $(BUILD_API_OBJ_DIR)/PlotAPI.o
-	ar rcs $(BUILD_API_LIB_DIR)/$@ $< 
-
-OptimizerAPI.o: $(OptimizerAPI_SOURCES) $(OptimizerAPI_HEADERS)
-	$(HOST_COMPILER) --std=c++17 $(ENSMALLEN_INCLUDE_DIRS) -c $(OptimizerAPI_SOURCES) -o $(BUILD_API_OBJ_DIR)/OptimizerAPI.o $(ENSMALLEN_LDFLAGS)
-
-libOptimizerAPI.a: $(BUILD_API_OBJ_DIR)/OptimizerAPI.o
-	ar rcs $(BUILD_API_LIB_DIR)/$@ $<
-###################### APIs ######################
-all: build
-
-build: cuda_tracer Test-3.o Test-3
-
-cuda_tracer: RayGPU.o ChemElementGPU.o MaterialGPU.o VoxelGPU.o TracerGPU.o
+apis: api_objects api_libs
 
 new: clean apis base tracer io
 
@@ -427,54 +426,64 @@ doc:
 	$(SPHINX) -b html docs $(BUILD_SPHINX_DOC_DIR)
 
 RayGPU.o: $(SRC_CUDA_DIR)/RayGPU.cu
-	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $(BUILD_CUDA_DIR)/$@ -dc $<
+	$(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $(BUILD_CUDA_DIR)/$@ -dc $<
 
 ChemElementGPU.o: $(SRC_CUDA_DIR)/ChemElementGPU.cu
-	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $(BUILD_CUDA_DIR)/$@ -dc $<
+	$(NVCC) $(XRAYLIB_CFLAGS) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $(BUILD_CUDA_DIR)/$@ -dc $<
 
 MaterialGPU.o: $(SRC_CUDA_DIR)/MaterialGPU.cu
-	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $(BUILD_CUDA_DIR)/$@ -dc $<
+	$(NVCC) $(XRAYLIB_CFLAGS) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $(BUILD_CUDA_DIR)/$@ -dc $<
 
 VoxelGPU.o: $(SRC_CUDA_DIR)/VoxelGPU.cu
-	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $(BUILD_CUDA_DIR)/$@ -dc $<
+	$(NVCC) $(XRAYLIB_CFLAGS) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $(BUILD_CUDA_DIR)/$@ -dc $<
 
 SampleGPU.o: $(SRC_CUDA_DIR)/SampleGPU.cu
-	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $(BUILD_CUDA_DIR)/$@ -dc $<
+	$(NVCC) $(XRAYLIB_CFLAGS) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $(BUILD_CUDA_DIR)/$@ -dc $<
 
 TracerGPU.o: $(SRC_CUDA_DIR)/TracerGPU.cu $(SRC_CUDA_DIR)/TracerGPU.cuh
-	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $(BUILD_CUDA_DIR)/$@ -dc $<
-
-Main.o: src/Main.cpp
-	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $(BUILD_DIR)/$@ -dc $<
-
-Main: $(BUILD_DIR)/Main.o
-	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $(BUILD_DIR)/$@ $+ $(LIBRARIES) $(ALL_CCFLAGS) 
-
-Test-1.o: src/Test-1.cpp
-	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $(BUILD_DIR)/$@ -dc $< -Xcompiler -fPIC 
-
-Test-1: $(BUILD_DIR)/Test-1.o
-	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $(BUILD_DIR)/$@ $+ $(LIBRARIES) $(ALL_CCFLAGS) -Xcompiler -fPIC 
+	$(NVCC) $(XRAYLIB_CFLAGS) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $(BUILD_CUDA_DIR)/$@ -dc $<
     
-Test-2.o: src/Test-2.cpp
-	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $(BUILD_DIR)/$@ -dc $< 
+CapillaryTracer.o: src/CapillaryTracer.cpp
+	$(HOST_COMPILER) $(XRAYLIB_CFLAGS) -I$(EASY_RNG_INCLUDE_DIR) $(LIBRARIES) $(INCLUDES) $(ALT_CCFLAGS) -o $(BUILD_DIR)/$@ -dc $< 
 
-Test-2: $(BUILD_DIR)/Test-2.o
-	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $(BUILD_DIR)/$@ $+ $(LIBRARIES) $(ALL_CCFLAGS) 
+CapillaryTracer: $(BUILD_DIR)/CapillaryTracer.o
+	$(HOST_COMPILER) $(XRAYLIB_CFLAGS) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $(BUILD_DIR)/$@ $+ $(LIBRARIES) $(ALL_CCFLAGS) 
 
-Test-3.o: src/Test-3.cpp
-	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $(BUILD_DIR)/$@ -dc $< 
+SampleTracer.o: src/SampleTracer.cpp
+	$(NVCC) $(XRAYLIB_CFLAGS) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $(BUILD_DIR)/$@ -dc $< 
 
-Test-3: $(BUILD_DIR)/Test-3.o $(BUILD_CUDA_DIR)/TracerGPU.o
-	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $(BUILD_DIR)/$@ $+ $(LIBRARIES) $(ALL_CCFLAGS) 
+SampleTracer: $(BUILD_DIR)/SampleTracer.o $(BUILD_CUDA_DIR)/TracerGPU.o
+	$(NVCC) $(XRAYLIB_CFLAGS) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $(BUILD_DIR)/$@ $+ $(LIBRARIES) $(ALL_CCFLAGS) 
 
-Test-4.o: src/Test-4.cpp
-	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $(BUILD_DIR)/$@ -dc $< 
+XRayLibAPI.o: $(XRayLibAPI_SOURCES) $(XRayLibAPI_HEADERS)
+	$(HOST_COMPILER) $(XRAYLIB_CFLAGS) -c $(XRayLibAPI_SOURCES) -o $(BUILD_API_OBJ_DIR)/XRayLibAPI.o $(XRAYLIB_LFLAGS)
 
-Test-4: $(BUILD_DIR)/Test-4.o
-	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $(BUILD_DIR)/$@ $+ $(LIBRARIES) $(ALL_CCFLAGS) 
+libXRayLibAPI.a: $(BUILD_API_OBJ_DIR)/XRayLibAPI.o
+	ar rcs $(BUILD_API_LIB_DIR)/$@ $< 
 
- 
+Shadow3API.o: $(Shadow3API_SOURCES) $(Shadow3API_HEADERS) 
+	$(HOST_COMPILER) $(SHADOW_INCLUDE_DIRS) $(SHADOW_LIBS) -c $(Shadow3API_SOURCES) -o $(BUILD_API_OBJ_DIR)/Shadow3API.o -lshadow3 -lshadow3c -lshadow3c++
+
+libShadow3API.a: $(BUILD_API_OBJ_DIR)/Shadow3API.o
+	ar rcs $(BUILD_API_LIB_DIR)/$@ $< 
+
+PolyCapAPI.o: $(PolyCapAPI_SOURCES) $(PolyCapAPI_HEADERS)
+	$(HOST_COMPILER) $(POLYCAP_CFLAGS) -c $(PolyCapAPI_SOURCES) -o $(BUILD_API_OBJ_DIR)/PolyCapAPI.o $(POLYCAP_LFLAGS)
+
+libPolyCapAPI.a: $(BUILD_API_OBJ_DIR)/PolyCapAPI.o
+	ar rcs $(BUILD_API_LIB_DIR)/$@ $< 
+
+PlotAPI.o: $(PlotAPI_SOURCES) $(PlotAPI_HEADERS)
+	$(HOST_COMPILER) $(SCIPLOT_INCLUDE_DIRS) -c $(PlotAPI_SOURCES) -o $(BUILD_API_OBJ_DIR)/PlotAPI.o $(SCIPLOT_LDFLAGS)
+
+libPlotAPI.a: $(BUILD_API_OBJ_DIR)/PlotAPI.o
+	ar rcs $(BUILD_API_LIB_DIR)/$@ $< 
+
+OptimizerAPI.o: $(OptimizerAPI_SOURCES) $(OptimizerAPI_HEADERS)
+	$(HOST_COMPILER) $(ENSMALLEN_INCLUDE_DIRS) -c $(OptimizerAPI_SOURCES) -o $(BUILD_API_OBJ_DIR)/OptimizerAPI.o $(ENSMALLEN_LDFLAGS)
+
+libOptimizerAPI.a: $(BUILD_API_OBJ_DIR)/OptimizerAPI.o
+	ar rcs $(BUILD_API_LIB_DIR)/$@ $< 
 
 clean: 
 	rm -rf $(BUILD_DIR)/* *.o $(EXE)
@@ -488,7 +497,7 @@ libvt.base.a:
 	ar rcs $(BUILD_BASE_DIR)/$@ $(BUILD_BASE_DIR)/ChemElement.o $(BUILD_BASE_DIR)/Material.o $(BUILD_BASE_DIR)/Ray.o $(BUILD_BASE_DIR)/Sample.o $(BUILD_BASE_DIR)/Voxel.o $(BUILD_BASE_DIR)/XRBeam.o $< 
 
 $(BUILD_BASE_DIR)/%.o: $(SRC_BASE_DIR)/%.cpp $(SRC_BASE_DIR)/%.hpp | $(BUILD_BASE_DIR)
-	$(HOST_COMPILER) `pkg-config --cflags libxrl libpolycap` $(INCLUDES) $(ALT_CCFLAGS) -Wall -Werror -c $< -o $@ `pkg-config --libs libxrl libpolycap`
+	$(HOST_COMPILER) $(XRAYLIB_CFLAGS) $(POLYCAP_CFLAGS) $(INCLUDES) $(ALT_CCFLAGS) -Wall -Werror -c $< -o $@ $(XRAYLIB_LFLAGS) $(POLYCAP_LFLAGS)
 
 tracer: tracer_objects libvt.tracer.a
 
@@ -498,7 +507,7 @@ libvt.tracer.a:
 	ar rcs $(BUILD_TRACER_DIR)/$@ $(BUILD_TRACER_DIR)/PrimaryBeam.o $(BUILD_TRACER_DIR)/Tracer.o $< 
 
 $(BUILD_TRACER_DIR)/%.o: $(SRC_TRACER_DIR)/%.cpp $(SRC_TRACER_DIR)/%.hpp | $(BUILD_TRACER_DIR)
-	$(HOST_COMPILER) `pkg-config --cflags libxrl libpolycap` $(INCLUDES) $(ALT_CCFLAGS) -Wall -Werror -c $< -o $@ `pkg-config --libs libxrl libpolycap`
+	$(HOST_COMPILER) $(XRAYLIB_CFLAGS) $(POLYCAP_CFLAGS) $(INCLUDES) $(ALT_CCFLAGS) -Wall -Werror -c $< -o $@ $(XRAYLIB_LFLAGS) $(POLYCAP_LFLAGS)
 
 io: io_objects libvt.io.a
 
@@ -508,8 +517,4 @@ libvt.io.a:
 	ar rcs $(BUILD_IO_DIR)/$@ $(BUILD_IO_DIR)/SimulationParameter.o $< 
 
 $(BUILD_IO_DIR)/%.o: $(SRC_IO_DIR)/%.cpp $(SRC_IO_DIR)/%.hpp | $(BUILD_IO_DIR)
-	$(HOST_COMPILER) `pkg-config --cflags libxrl libpolycap` $(INCLUDES) $(ALT_CCFLAGS) -Wall -Werror -c $< -o $@ `pkg-config --libs libxrl libpolycap`
-
-fast: new cuda_tracer Test-3.o Test-3
-
-ffast: cuda_tracer Test-3.o Test-3
+	$(HOST_COMPILER) $(XRAYLIB_CFLAGS) $(POLYCAP_CFLAGS) $(INCLUDES) $(ALT_CCFLAGS) -Wall -Werror -c $< -o $@ $(XRAYLIB_LFLAGS) $(POLYCAP_LFLAGS)
