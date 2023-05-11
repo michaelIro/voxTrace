@@ -8,7 +8,7 @@
 
 int main() {
     
-    std::cout << "START: Test-2" << std::endl;
+    std::cout << "START: CapillaryTracer (polycap)" << std::endl;
     
     // set input and output directories
     std::string input_dir = "/media/miro/Data-1TB/simulation/triple-cross/post-sample";
@@ -36,6 +36,6 @@ int main() {
         }
     }
     
-    std::cout << "END: Test-2" << std::endl << std::endl;
+    std::cout << "END: CapillaryTracer (polycap)" << std::endl << std::endl;
     return 0;
 }

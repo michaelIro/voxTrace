@@ -2,6 +2,7 @@ Installation
 ============
 voxTrace is a CUDA C++ package that can theoretically be run on various plattforms after 
 modification of the MAKEFILE. voxTrace was developed and tested on Ubuntu 20.04 and 22.04.
+
 A reproducible code ocean capsule can be found
 
 Ubuntu 

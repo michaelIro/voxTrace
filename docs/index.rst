@@ -5,7 +5,7 @@ voxTrace
 
   introduction
   installation
-  classes
+  use
   licence
 
 

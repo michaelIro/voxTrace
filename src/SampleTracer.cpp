@@ -14,14 +14,14 @@
 
 int main(int argc, const char* argv[]) {
 
-	std::cout << "START: Test-3" << std::endl;
+	std::cout << "START: SampleTracer" << std::endl;
 //---------------------------------------------------------------------------------------------	
 
     SimulationParameter sim_param("/media/miro/Data-1TB/simulation/triple-cross");
     TracerGPU::callTraceNewBeam(sim_param);
     
 //---------------------------------------------------------------------------------------------
-    std::cout << "END: Test-3" << std::endl;
+    std::cout << "END: SampleTracer" << std::endl;
 
     return 0;
 }
