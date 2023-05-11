@@ -7,6 +7,8 @@ pip3 install breathe cython numpy sphinx-rtd-theme
 
 apt-get nvidia-cuda-toolkit
 
+#Install cuda 12.1
+
 cd ..
 mkdir installation
 cd installation
