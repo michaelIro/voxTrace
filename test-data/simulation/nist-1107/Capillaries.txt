@@ -1,7 +1,7 @@
 # Capillaries: Everything in um and °
 # Primary Capillary Geometry
 1075.0f		# Radius
-5100.0f 	# sdfdf
+5100.0f 	# Initial Distance to Detector
 16.5f 		# Single Capillary Diameter
 17.4f		# Energy in keV
 
@@ -18,4 +18,4 @@
 0.0f		# Z
 4900.0f		# Distance to Detector
 45.0f		# Angle
-950.0f		# Distance to Primary Capillary
+950.0f		# Radius of Input window of seconday capillary
