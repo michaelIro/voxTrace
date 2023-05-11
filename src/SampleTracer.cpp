@@ -13,11 +13,16 @@
 #include "io/SimulationParameter.hpp"
 
 int main(int argc, const char* argv[]) {
-
-	std::cout << "START: SampleTracer" << std::endl;
+    if (argc < 2) {
+        std::cout << "No Input Folder given!" << std::endl;
+        return 1;
+    }
+    
+    std::cout << "START: SampleTracer" << std::endl;
 //---------------------------------------------------------------------------------------------	
 
-    SimulationParameter sim_param("/media/miro/Data-1TB/simulation/triple-cross");
+    std::string simulation_dir = argv[1];
+    SimulationParameter sim_param(simulation_dir);
     TracerGPU::callTraceNewBeam(sim_param);
     
 //---------------------------------------------------------------------------------------------

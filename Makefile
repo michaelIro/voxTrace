@@ -409,7 +409,7 @@ all: build
 
 build: cuda_tracer SampleTracer.o SampleTracer
 
-fast: new cuda_tracer SampleTracer.o SampleTracer
+fast: new cuda_tracer SampleTracer.o SampleTracer CapillaryTracer.o CapillaryTracer
 
 cuda_tracer: RayGPU.o ChemElementGPU.o MaterialGPU.o VoxelGPU.o TracerGPU.o
 
