@@ -5,7 +5,7 @@ apt-get install autoconf automake autotools-dev build-essential cmake doxygen g+
 #cython cuda mlocate
 pip3 install breathe cython numpy sphinx-rtd-theme
 
-apt-get nvidia-cuda-toolkit
+#apt-get nvidia-cuda-toolkit
 
 #Install cuda 12.1
 
