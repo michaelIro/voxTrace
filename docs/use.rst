@@ -6,18 +6,19 @@ with two subfolders named post-sample and detector. The location of the folder
 should be given to the executables as a path. 
 
 The SampleTracer needs the following files:
-- [Capillaries](#capillaries)
-- [Sample](#sample)
-- [Simulation](#simulation)
-- [Materials](#materials)
+- `Capillaries <#capillaries_>`_
+- `Sample <#sample_>`_
+- `Simulation <#simulation_>`_
+- `Materials <#materials_>`_
 
 and writes to the post-sample folder.
 
 The CapillaryTracer needs the following files:
-- [Polycapillary](#polycapillary)
+- `Polycapillary <#polycapillary_>`_
 
 and writes to the detector folder.
 
+.. _capillaries:
 Capillaries
 ------------
 These parameters provide specific details about the capillaries' sizes, positions, 
@@ -47,6 +48,7 @@ Secondary Capillary Transformation Parameters (Position)
 - Angle between secondary polycapillary optical axis and sample surface: 45.0°
 - Radius of the Secondary Capillary input window: 950.0 μm
 
+.. _sample:
 Sample parameters
 -----------------
 These parameters provide specific details about the sample's size, position, and type.
@@ -73,7 +75,7 @@ Sample Type
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 - Type of the sample (for now not used in calculation only for overview): 0 = homogeneous, 1 = layered, 2 = heterogeneous
 
-
+.. _simulation:
 Simulation parameters
 ---------------------
 These parameters provide specific details about the simulation itself.
@@ -97,6 +99,7 @@ Scan-Path as offset in x, y, z in μm in coordinate system of the sample
 - Measurement Point 10: 0.0 μm, 0.0 μm, 40.0 μm
 - Measurement Point 11: 0.0 μm, 0.0 μm, 50.0 μm
 
+.. _materials:
 Materials
 ---------
 
@@ -203,25 +206,41 @@ Point 5
 - Elements Z: 26, 28, 29, 30, 50, 82
 - Element Mass Fractions: 0.0004, 0.001, 0.6119, 0.3741, 0.0107, 0.0019
 
-
+.. _polycapillary:
 Polycapillary
 --------------
 
-| Parameter                                        | Value               |
-|--------------------------------------------------|---------------------|
-| Secondary Polycapillary (PC-236)                 |                     |
-| Optic Length (cm)                                | 4.03                |
-| External Radius Upstream (cm)                    | 0.095               |
-| External Radius Downstream (cm)                  | 0.3175              |
-| Single Capillary Radius at Optic Entrance (cm)   | 0.0000975           |
-| Single Capillary Radius at Optic Exit (cm)       | 0.000325            |
-| Focal Distance on Entrance Window Side (cm)      | 0.49                |
-| Focal Distance on Exit Window Side (cm)          | 100000000.0         |
-| Amount of Elements in Optic Material             | 2                   |
-| Polycapillary Optic Material Composition         |                     |
-| (Atomic Numbers)                                 | [8, 14]             |
-| Polycapillary Optic Material Composition         |                     |
-| (Weight Percentages SiO2)                        | [53.0, 47.0]        |
-| Optic Material Density (g/cm^3)                  | 2.23                |
-| Surface Roughness (Angstrom)                     | 5.0                 |
-| Number of Capillaries in the Optic               | 240000.0            |
++----------------------------------------------+---------------------+
+| Parameter                                    | Value               |
++==============================================+=====================+
+| Secondary Polycapillary (PC-236)             |                     |
++----------------------------------------------+---------------------+
+| Optic Length (cm)                            | 4.03                |
++----------------------------------------------+---------------------+
+| External Radius Upstream (cm)                | 0.095               |
++----------------------------------------------+---------------------+
+| External Radius Downstream (cm)              | 0.3175              |
++----------------------------------------------+---------------------+
+| Single Capillary Radius at Optic Entrance    | 0.0000975           |
+| (cm)                                         |                     |
++----------------------------------------------+---------------------+
+| Single Capillary Radius at Optic Exit (cm)   | 0.000325            |
++----------------------------------------------+---------------------+
+| Focal Distance on Entrance Window Side (cm)  | 0.49                |
++----------------------------------------------+---------------------+
+| Focal Distance on Exit Window Side (cm)      | 100000000.0         |
++----------------------------------------------+---------------------+
+| Amount of Elements in Optic Material         | 2                   |
++----------------------------------------------+---------------------+
+| Polycapillary Optic Material Composition     |                     |
+| (Atomic Numbers)                             | [8, 14]             |
++----------------------------------------------+---------------------+
+| Polycapillary Optic Material Composition     |                     |
+| (Weight Percentages SiO2)                    | [53.0, 47.0]        |
++----------------------------------------------+---------------------+
+| Optic Material Density (g/cm^3)              | 2.23                |
++----------------------------------------------+---------------------+
+| Surface Roughness (Angstrom)                  | 5.0                 |
++----------------------------------------------+---------------------+
+| Number of Capillaries in the Optic            | 240000.0            |
++----------------------------------------------+---------------------+
