@@ -6,15 +6,15 @@ with two subfolders named post-sample and detector. The location of the folder
 should be given to the executables as a path. 
 
 The SampleTracer needs the following files:
-+ [Capillaries](#Capillaries)
-+ [Sample](#Sample)
-+ [Simulation](#Simulation)
-+ [Materials](#Materials)
+- [Capillaries](#capillaries)
+- [Sample](#sample)
+- [Simulation](#simulation)
+- [Materials](#materials)
 
 and writes to the post-sample folder.
 
 The CapillaryTracer needs the following files:
-+ [Polycapillary](#Polycapillary)
+- [Polycapillary](#polycapillary)
 
 and writes to the detector folder.
 
@@ -25,27 +25,27 @@ and their relationships to each other and the detector.
 
 Primary Capillary Geometry
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
-- Radius of the Primary Capillary exit window: 1075.0 &mu m
-- Initial distance from the Primary Capillary exit window to the sample: 5100.0 &mu m
-- Diameter of a single Capillary of the Primary Capillary: 16.5 &mu m
+- Radius of the Primary Capillary exit window: 1075.0 μm
+- Initial distance from the Primary Capillary exit window to the sample: 5100.0 μm
+- Diameter of a single Capillary of the Primary Capillary: 16.5 μm
 - Energy of the X-rays: 17.4 keV 
 
 Primary Capillary Transformation Parameters (Position)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-- X-Position of the Primary Capillary focal point: 150.0 &mu m
-- Y-Position of the Primary Capillary focal point: 150.0 &mu m
-- Z-Position of the Primary Capillary focal point: 0.0 &mu m
-- Focal distance of the Primary Capillary: 5100.0 &mu m
+- X-Position of the Primary Capillary focal point: 150.0 μm
+- Y-Position of the Primary Capillary focal point: 150.0 μm
+- Z-Position of the Primary Capillary focal point: 0.0 μm
+- Focal distance of the Primary Capillary: 5100.0 μm
 - Angle between primary polycapillary optical axis and sample surface: 45.0°
 
 Secondary Capillary Transformation Parameters (Position)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-- X-Position of the Secondary Capillary focal point: 150.0 &mu m  
-- Y-Position of the Secondary Capillary focal point: 150.0 &mu m
-- Z-Position of the Secondary Capillary focal point: 0.0 &mu m 
-- Distance from the sample to the Secondary Capillary input window: 4900.0 &mu m
+- X-Position of the Secondary Capillary focal point: 150.0 μm  
+- Y-Position of the Secondary Capillary focal point: 150.0 μm
+- Z-Position of the Secondary Capillary focal point: 0.0 μm 
+- Distance from the sample to the Secondary Capillary input window: 4900.0 μm
 - Angle between secondary polycapillary optical axis and sample surface: 45.0°
-- Radius of the Secondary Capillary input window: 950.0 &mu m
+- Radius of the Secondary Capillary input window: 950.0 μm
 
 Sample parameters
 -----------------
@@ -53,21 +53,21 @@ These parameters provide specific details about the sample's size, position, and
 
 Start Position
 ~~~~~~~~~~~~~~
-- X-Position of the sample: 0.0 &mu m
-- Y-Position of the sample: 0.0 &mu m
-- Z-Position of the sample: 0.0 &mu m
+- X-Position of the sample: 0.0 μm
+- Y-Position of the sample: 0.0 μm
+- Z-Position of the sample: 0.0 μm
 
 Sample Dimensions
 ~~~~~~~~~~~~~~~~~
-- X-Size of the sample: 300.0 &mu m
-- Y-Size of the sample: 300.0 &mu m
-- Z-Size of the sample: 150.0 &mu m
+- X-Size of the sample: 300.0 μm
+- Y-Size of the sample: 300.0 μm
+- Z-Size of the sample: 150.0 μm
 
 Voxel Dimensions
 ~~~~~~~~~~~~~~~~
-- X-Size of a voxel in um: 5.0 &mu m 
-- Y-Size of a voxel in um: 5.0 &mu m
-- Z-Size of a voxel in um: 5.0 &mu m
+- X-Size of a voxel: 5.0 μm 
+- Y-Size of a voxel: 5.0 μm
+- Z-Size of a voxel: 5.0 μm
 
 Sample Type 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -80,24 +80,22 @@ These parameters provide specific details about the simulation itself.
 
 General Parameters
 ~~~~~~~~~~~~~~~~~~
-
 - Number of Measurement Points: 11
 - Number of Rays to Simulate per Measurement Point Hitting the Secondary Polycapillary Window: 30000
 
-Scan-Path as Offset in x, y, z in um in Coordinate System of the Sample
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-- Measurement Point 1: 0.0 um, 0.0 um, -50.0 um
-- Measurement Point 2: 0.0 um, 0.0 um, -40.0 um
-- Measurement Point 3: 0.0 um, 0.0 um, -30.0 um
-- Measurement Point 4: 0.0 um, 0.0 um, -20.0 um
-- Measurement Point 5: 0.0 um, 0.0 um, -10.0 um
-- Measurement Point 6: 0.0 um, 0.0 um, 0.0 um
-- Measurement Point 7: 0.0 um, 0.0 um, 10.0 um
-- Measurement Point 8: 0.0 um, 0.0 um, 20.0 um
-- Measurement Point 9: 0.0 um, 0.0 um, 30.0 um
-- Measurement Point 10: 0.0 um, 0.0 um, 40.0 um
-- Measurement Point 11: 0.0 um, 0.0 um, 50.0 um
+Scan-Path as offset in x, y, z in μm in coordinate system of the sample
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Measurement Point 1: 0.0 μm, 0.0 μm, -50.0 μm
+- Measurement Point 2: 0.0 μm, 0.0 μm, -40.0 μm
+- Measurement Point 3: 0.0 μm, 0.0 μm, -30.0 μm
+- Measurement Point 4: 0.0 μm, 0.0 μm, -20.0 μm
+- Measurement Point 5: 0.0 μm, 0.0 μm, -10.0 μm
+- Measurement Point 6: 0.0 μm, 0.0 μm, 0.0 μm
+- Measurement Point 7: 0.0 μm, 0.0 μm, 10.0 μm
+- Measurement Point 8: 0.0 μm, 0.0 μm, 20.0 μm
+- Measurement Point 9: 0.0 μm, 0.0 μm, 30.0 μm
+- Measurement Point 10: 0.0 μm, 0.0 μm, 40.0 μm
+- Measurement Point 11: 0.0 μm, 0.0 μm, 50.0 μm
 
 Materials
 ---------
@@ -113,6 +111,11 @@ This file can be generated using the following code:
     # Define sample size and voxel size
     sample_size = np.array([600., 600., 200.])  # in units of micrometers
     voxel_size = np.array([5.0, 5.0, 5.0])  # in units of micrometers
+
+    path_start = "/media/miro/Data-1TB/simulation/triple-cross"
+
+    # Calculate number of voxels in each dimension
+    num_voxels = np.ceil(sample_size / voxel_size).astype(int)
 
     # Define materials Triple-Cross
     materials = [
@@ -157,10 +160,7 @@ This file can be generated using the following code:
                     f.write("Element Mass Fractions: {}\n\n".format(", ".join(map(str, material["mass_fractions"]))))
                     break
 
-    path_start = "/media/miro/Data-1TB/simulation/triple-cross"
 
-    # Calculate number of voxels in each dimension
-    num_voxels = np.ceil(sample_size / voxel_size).astype(int)
 
 
 Point 1
@@ -202,3 +202,26 @@ Point 5
 - Number of Elements: 6
 - Elements Z: 26, 28, 29, 30, 50, 82
 - Element Mass Fractions: 0.0004, 0.001, 0.6119, 0.3741, 0.0107, 0.0019
+
+
+Polycapillary
+--------------
+
+| Parameter                                        | Value               |
+|--------------------------------------------------|---------------------|
+| Secondary Polycapillary (PC-236)                 |                     |
+| Optic Length (cm)                                | 4.03                |
+| External Radius Upstream (cm)                    | 0.095               |
+| External Radius Downstream (cm)                  | 0.3175              |
+| Single Capillary Radius at Optic Entrance (cm)   | 0.0000975           |
+| Single Capillary Radius at Optic Exit (cm)       | 0.000325            |
+| Focal Distance on Entrance Window Side (cm)      | 0.49                |
+| Focal Distance on Exit Window Side (cm)          | 100000000.0         |
+| Amount of Elements in Optic Material             | 2                   |
+| Polycapillary Optic Material Composition         |                     |
+| (Atomic Numbers)                                 | [8, 14]             |
+| Polycapillary Optic Material Composition         |                     |
+| (Weight Percentages SiO2)                        | [53.0, 47.0]        |
+| Optic Material Density (g/cm^3)                  | 2.23                |
+| Surface Roughness (Angstrom)                     | 5.0                 |
+| Number of Capillaries in the Optic               | 240000.0            |
