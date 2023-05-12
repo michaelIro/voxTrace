@@ -1,74 +1,81 @@
 How to use voxTrace
 ====================
+voxTrace reads all parameters for the setup and the simulation from 5 txt-files.
+For the simulation to work properly these files should be located in a folder
+with two subfolders named post-sample and detector. The location of the folder 
+should be given to the executables as a path. 
 
-voxTrace reads all parameters for the setup and the simulation from 5 txt-files. The location of the folder of these files should be given to the executables as a path. In this folder, there should be two folders named post-sample and detector. The files are (with example values):
+The SampleTracer needs the following files:
++ [Capillaries](#Capillaries)
++ [Sample](#Sample)
++ [Simulation](#Simulation)
++ [Materials](#Materials)
 
-Capillaries: Everything in um and °
------------------------------------
+and writes to the post-sample folder.
 
-These parameters provide specific details about the capillaries' sizes, positions, and their relationships to each other and the detector.
+The CapillaryTracer needs the following files:
++ [Polycapillary](#Polycapillary)
+
+and writes to the detector folder.
+
+Capillaries
+------------
+These parameters provide specific details about the capillaries' sizes, positions, 
+and their relationships to each other and the detector.
 
 Primary Capillary Geometry
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-- Radius: 1075.0 um - Radius of the Primary Capillary exit window
-- Initial Distance to Detector: 5100.0 um - Initial distance from the Primary Capillary exit window to the sample
-- Single Capillary Diameter: 16.5 um - Diameter of a single Capillary of the Primary Capillary
-- Energy: 17.4 keV - Energy of the X-rays
+- Radius of the Primary Capillary exit window: 1075.0 &mu m
+- Initial distance from the Primary Capillary exit window to the sample: 5100.0 &mu m
+- Diameter of a single Capillary of the Primary Capillary: 16.5 &mu m
+- Energy of the X-rays: 17.4 keV 
 
 Primary Capillary Transformation Parameters (Position)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-- X: 150.0 - X-Position of the Primary Capillary
-- Y: 150.0 - Y-Position of the Primary Capillary
-- Z: 0.0 - Z-Position of the Primary Capillary
-- Distance to Detector: 5100.0 um - Focal distance of the Primary Capillary
-- Angle: 45.0° - Angle of the Primary Capillary to the sample surface
+- X-Position of the Primary Capillary focal point: 150.0 &mu m
+- Y-Position of the Primary Capillary focal point: 150.0 &mu m
+- Z-Position of the Primary Capillary focal point: 0.0 &mu m
+- Focal distance of the Primary Capillary: 5100.0 &mu m
+- Angle between primary polycapillary optical axis and sample surface: 45.0°
 
 Secondary Capillary Transformation Parameters (Position)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-- X: 150.0 - X-Position of the Secondary Capillary
-- Y: 150.0 - Y-Position of the Secondary Capillary
-- Z: 0.0 - Z-Position of the Secondary Capillary
-- Distance to Detector: 4900.0 um - Distance from the sample to the Secondary Capillary input window
-- Angle: 45.0° - Angle of the Secondary Capillary to the sample surface
-- Radius of Input window of the secondary capillary: 950.0 um - Radius of the Secondary Capillary input window
+- X-Position of the Secondary Capillary focal point: 150.0 &mu m  
+- Y-Position of the Secondary Capillary focal point: 150.0 &mu m
+- Z-Position of the Secondary Capillary focal point: 0.0 &mu m 
+- Distance from the sample to the Secondary Capillary input window: 4900.0 &mu m
+- Angle between secondary polycapillary optical axis and sample surface: 45.0°
+- Radius of the Secondary Capillary input window: 950.0 &mu m
 
 Sample parameters
 -----------------
-
 These parameters provide specific details about the sample's size, position, and type.
 
 Start Position
 ~~~~~~~~~~~~~~
-
-- X: 0.0 - X-Position of the sample
-- Y: 0.0 - Y-Position of the sample
-- Z: 0.0 - Z-Position of the sample
+- X-Position of the sample: 0.0 &mu m
+- Y-Position of the sample: 0.0 &mu m
+- Z-Position of the sample: 0.0 &mu m
 
 Sample Dimensions
 ~~~~~~~~~~~~~~~~~
-
-- X: 300.0 - X-Size of the sample in um
-- Y: 300.0 - Y-Size of the sample in um
-- Z: 150.0 - Z-Size of the sample in um
+- X-Size of the sample: 300.0 &mu m
+- Y-Size of the sample: 300.0 &mu m
+- Z-Size of the sample: 150.0 &mu m
 
 Voxel Dimensions
 ~~~~~~~~~~~~~~~~
+- X-Size of a voxel in um: 5.0 &mu m 
+- Y-Size of a voxel in um: 5.0 &mu m
+- Z-Size of a voxel in um: 5.0 &mu m
 
-- X: 5.0 - X-Size of a voxel in um
-- Y: 5.0 - Y-Size of a voxel in um
-- Z: 5.0 - Z-Size of a voxel in um
-
-Sample Type (0 = homogeneous, 1 = layered, 2 = heterogeneous)
+Sample Type 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Type of the sample (for now not used in calculation only for overview): 0 = homogeneous, 1 = layered, 2 = heterogeneous
 
-- Type: 0 - Type of the sample (for now not used in calculation only for overview)
 
 Simulation parameters
 ---------------------
-
 These parameters provide specific details about the simulation itself.
 
 General Parameters

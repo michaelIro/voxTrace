@@ -1,14 +1,16 @@
 Installation
 ============
-voxTrace is a CUDA C++ package that can theoretically be run on various plattforms after 
-modification of the MAKEFILE. voxTrace was developed and tested on Ubuntu 20.04 and 22.04. as well as almalinux on a HPC.
-Depending on whether you have admin rights or not the installation varies slightly. For ease of use the option HPC=true 
-can be set to store multiple paths for your local machine and your HPC without changing the MAKEFILE. Default for HPC is false.
+voxTrace is a CUDA C++ package that can theoretically be run on 
+various plattforms after modification of the MAKEFILE. voxTrace was 
+developed and tested on Ubuntu 20.04 and 22.04. as well as almalinux on a HPC.
+Depending on whether you have admin rights or not the installation varies slightly. 
+For ease of use the option HPC=true can be set to store multiple paths for your 
+local machine and your HPC without changing the MAKEFILE. Default for HPC is false.
 
 A reproducible code ocean capsule can be found
 
-Ubuntu 
--------
+Linux
+------
 This installation assumes a fresh install of Ubuntu 20.04 or Ubuntu 22.04. with admin rights.
 
 * Run the script pre-install.sh to install all dependencies or install them manually
@@ -19,8 +21,8 @@ This installation assumes a fresh install of Ubuntu 20.04 or Ubuntu 22.04. with 
 * Run the CapillaryTracer with run ./build/src/CapillaryTracer ./test-data/simulation/nist-1107
 
 Modify the Capillaries.txt, Sample.txt, Simulation.txt and Polycapillary.txt to your needs. 
-You can use the Jupyter-UI to create your own Materials.txt. For further assistance please write to michael.iro@tuwien.ac.at   
-
+You can use the Jupyter-UI to create your own Materials.txt. 
+For further assistance please write to michael.iro@tuwien.ac.at   
 
 A short statement by the author, concerning licencing: 
 -------------------------------------------------------
