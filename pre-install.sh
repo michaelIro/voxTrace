@@ -13,7 +13,7 @@ cd ..
 mkdir installation
 cd installation
 
-wget http://lvserver.ugent.be/xraylib/xraylib-4.1.3.tar.gz && \
+wget https://github.com/tschoonj/xraylib/releases/download/xraylib-4.1.3/xraylib-4.1.3.tar.gz
     tar -xzvf xraylib-4.1.3.tar.gz && \
     cd xraylib-4.1.3 && \
     ./configure && \
@@ -94,6 +94,6 @@ wget https://ensmallen.org/files/ensmallen-2.19.1.tar.gz
     cd build
     cmake ..
     make install
-    cd ../..
+    cd ../../..
 
  rm -r installation
