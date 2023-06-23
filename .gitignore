@@ -2,7 +2,7 @@
 #!build/src/
 #build/doc/*
 #!build/doc/
-#!build/
+build/
 .vscode/*
 .vs/*
 .ipynb_checkpoints/*
