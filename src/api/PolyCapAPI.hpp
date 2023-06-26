@@ -80,14 +80,14 @@ class PolyCapAPI{
 	int n_energies;					// number of discrete photon energies
 	double* energies;				// energies for which transmission efficiency should be calculated, in keV
 
-    void load_source_param(char* path);
-    void load_cap_param(char* path);
+    void load_source_param(std::string path);
+    void load_cap_param(std::string path);
     void compareBeams(arma::Mat<double> shadowBeam);
     void overwritePhoton(arma::rowvec shadowRay, polycap_photon *photon);
 
   public:
     PolyCapAPI() = delete;
-    PolyCapAPI(char* path);
+    PolyCapAPI(std::string path);
     //PolyCapAPI(const PolyCapAPI& polyCapAPI);
     
 	vector<Ray> traceFast(arma::Mat<double> shadowBeam);

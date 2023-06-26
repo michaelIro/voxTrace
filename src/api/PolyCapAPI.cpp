@@ -6,10 +6,10 @@
 //}
 
 /** Standard Constructor */
-PolyCapAPI::PolyCapAPI(char* path){
+PolyCapAPI::PolyCapAPI(std::string path){
 
-	load_cap_param(path);
-	load_source_param(path);
+	load_cap_param(path+"Polycapillary.txt");
+	load_source_param(path+"Source.txt");
 
 	// initialize error
 	error = NULL;
@@ -28,7 +28,7 @@ PolyCapAPI::PolyCapAPI(char* path){
 /** Load policapillary parameters from File
  *  @param path to .txt-File containing parameters for description of the capillary optic
  */
-void PolyCapAPI::load_cap_param(char* path){
+void PolyCapAPI::load_cap_param(std::string path){
 	std::ifstream inFile;
 	std::string x;
 	inFile.open(path);
@@ -88,11 +88,11 @@ void PolyCapAPI::load_cap_param(char* path){
 /** Define PolyCap X-Ray-Source 
  *  @param path to .txt-File containing parameters for description of the photon source
 */
-void PolyCapAPI::load_source_param(char* path){
+void PolyCapAPI::load_source_param(std::string path){
 
 	std::ifstream inFile;
 	std::string x;
-	inFile.open((char*) "../test-data/in/polycap/source-descr.txt"); //FIXME: Path
+	inFile.open(path); //FIXME: Path
 
 	std::getline(inFile, x);
 	//std::cout << x << std::endl<< std::endl;

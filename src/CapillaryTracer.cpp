@@ -24,8 +24,9 @@ int main(int argc, char* argv[]) {
     // Create output directory if it does not exist
     std::filesystem::create_directory(output_dir);
 
+
     // Construct the path to the Polycapillary.txt file
-    std::string poly_cap_file = base_dir + "/Polycapillary.txt";
+    //std::string poly_cap_file = base_dir + "Polycapillary.txt";
 
     // Iterate over all files in the input directory
     for (const auto& entry : std::filesystem::directory_iterator(input_dir)) {
@@ -38,7 +39,7 @@ int main(int argc, char* argv[]) {
             arma::Mat<double> sec_beam_mat;
             sec_beam_mat.load(arma::hdf5_name(path_in, "my_data"));
 
-            PolyCapAPI mySecondaryPolycap((char*)poly_cap_file.c_str());
+            PolyCapAPI mySecondaryPolycap(base_dir);
             XRBeam myDetectorBeam(mySecondaryPolycap.traceFast(sec_beam_mat));
 
             std::cout << "Detector size: " << myDetectorBeam.getRays().size() << std::endl;
