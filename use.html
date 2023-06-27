@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>How to use voxTrace &mdash; voxTrace  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="License" href="licence.html" />
+    <link rel="prev" title="Installation" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            voxTrace
+          </a>
+              <div class="version">
+                1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">What is voxTrace?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">How to use voxTrace</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#capillaries">Capillaries</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#primary-capillary-geometry">Primary Capillary Geometry</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#primary-capillary-transformation-parameters-position">Primary Capillary Transformation Parameters (Position)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#secondary-capillary-transformation-parameters-position">Secondary Capillary Transformation Parameters (Position)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#sample-parameters">Sample parameters</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#start-position">Start Position</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sample-dimensions">Sample Dimensions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#voxel-dimensions">Voxel Dimensions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sample-type">Sample Type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#simulation-parameters">Simulation parameters</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#general-parameters">General Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scan-path-as-offset-in-x-y-z-in-m-in-coordinate-system-of-the-sample">Scan-Path as offset in x, y, z in μm in coordinate system of the sample</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#materials">Materials</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#point-1">Point 1</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#point-2">Point 2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#point-3">Point 3</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#point-4">Point 4</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#point-5">Point 5</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#polycapillary">Polycapillary</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="licence.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">voxTrace</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">How to use voxTrace</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/use.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="how-to-use-voxtrace">
+<h1>How to use voxTrace<a class="headerlink" href="#how-to-use-voxtrace" title="Permalink to this headline"></a></h1>
+<p>voxTrace reads all parameters for the setup and the simulation from 5 txt-files.
+For the simulation to work properly these files should be located in a folder
+with two subfolders named post-sample and detector. The location of the folder
+should be given to the executables as a path.</p>
+<p>The SampleTracer needs the following files:
+- Capillaries
+- Sample
+- Simulation
+- Materials</p>
+<p>and writes to the post-sample folder.</p>
+<p>The CapillaryTracer needs the following files:
+- Polycapillary</p>
+<p>and writes to the detector folder.</p>
+<section id="capillaries">
+<h2>Capillaries<a class="headerlink" href="#capillaries" title="Permalink to this headline"></a></h2>
+<p>These parameters provide specific details about the capillaries’ sizes, positions,
+and their relationships to each other and the detector.</p>
+<section id="primary-capillary-geometry">
+<h3>Primary Capillary Geometry<a class="headerlink" href="#primary-capillary-geometry" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p>Radius of the Primary Capillary exit window: 1075.0 μm</p></li>
+<li><p>Initial distance from the Primary Capillary exit window to the sample: 5100.0 μm</p></li>
+<li><p>Diameter of a single Capillary of the Primary Capillary: 16.5 μm</p></li>
+<li><p>Energy of the X-rays: 17.4 keV</p></li>
+</ul>
+</section>
+<section id="primary-capillary-transformation-parameters-position">
+<h3>Primary Capillary Transformation Parameters (Position)<a class="headerlink" href="#primary-capillary-transformation-parameters-position" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p>X-Position of the Primary Capillary focal point: 150.0 μm</p></li>
+<li><p>Y-Position of the Primary Capillary focal point: 150.0 μm</p></li>
+<li><p>Z-Position of the Primary Capillary focal point: 0.0 μm</p></li>
+<li><p>Focal distance of the Primary Capillary: 5100.0 μm</p></li>
+<li><p>Angle between primary polycapillary optical axis and sample surface: 45.0°</p></li>
+</ul>
+</section>
+<section id="secondary-capillary-transformation-parameters-position">
+<h3>Secondary Capillary Transformation Parameters (Position)<a class="headerlink" href="#secondary-capillary-transformation-parameters-position" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p>X-Position of the Secondary Capillary focal point: 150.0 μm</p></li>
+<li><p>Y-Position of the Secondary Capillary focal point: 150.0 μm</p></li>
+<li><p>Z-Position of the Secondary Capillary focal point: 0.0 μm</p></li>
+<li><p>Distance from the sample to the Secondary Capillary input window: 4900.0 μm</p></li>
+<li><p>Angle between secondary polycapillary optical axis and sample surface: 45.0°</p></li>
+<li><p>Radius of the Secondary Capillary input window: 950.0 μm</p></li>
+</ul>
+</section>
+</section>
+<section id="sample-parameters">
+<h2>Sample parameters<a class="headerlink" href="#sample-parameters" title="Permalink to this headline"></a></h2>
+<p>These parameters provide specific details about the sample’s size, position, and type.</p>
+<section id="start-position">
+<h3>Start Position<a class="headerlink" href="#start-position" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p>X-Position of the sample: 0.0 μm</p></li>
+<li><p>Y-Position of the sample: 0.0 μm</p></li>
+<li><p>Z-Position of the sample: 0.0 μm</p></li>
+</ul>
+</section>
+<section id="sample-dimensions">
+<h3>Sample Dimensions<a class="headerlink" href="#sample-dimensions" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p>X-Size of the sample: 300.0 μm</p></li>
+<li><p>Y-Size of the sample: 300.0 μm</p></li>
+<li><p>Z-Size of the sample: 150.0 μm</p></li>
+</ul>
+</section>
+<section id="voxel-dimensions">
+<h3>Voxel Dimensions<a class="headerlink" href="#voxel-dimensions" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p>X-Size of a voxel: 5.0 μm</p></li>
+<li><p>Y-Size of a voxel: 5.0 μm</p></li>
+<li><p>Z-Size of a voxel: 5.0 μm</p></li>
+</ul>
+</section>
+<section id="sample-type">
+<h3>Sample Type<a class="headerlink" href="#sample-type" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p>Type of the sample (for now not used in calculation only for overview): 0 = homogeneous, 1 = layered, 2 = heterogeneous</p></li>
+</ul>
+</section>
+</section>
+<section id="simulation-parameters">
+<h2>Simulation parameters<a class="headerlink" href="#simulation-parameters" title="Permalink to this headline"></a></h2>
+<p>These parameters provide specific details about the simulation itself.</p>
+<section id="general-parameters">
+<h3>General Parameters<a class="headerlink" href="#general-parameters" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p>Number of Measurement Points: 11</p></li>
+<li><p>Number of Rays to Simulate per Measurement Point Hitting the Secondary Polycapillary Window: 30000</p></li>
+</ul>
+</section>
+<section id="scan-path-as-offset-in-x-y-z-in-m-in-coordinate-system-of-the-sample">
+<h3>Scan-Path as offset in x, y, z in μm in coordinate system of the sample<a class="headerlink" href="#scan-path-as-offset-in-x-y-z-in-m-in-coordinate-system-of-the-sample" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p>Measurement Point 1: 0.0 μm, 0.0 μm, -50.0 μm</p></li>
+<li><p>Measurement Point 2: 0.0 μm, 0.0 μm, -40.0 μm</p></li>
+<li><p>Measurement Point 3: 0.0 μm, 0.0 μm, -30.0 μm</p></li>
+<li><p>Measurement Point 4: 0.0 μm, 0.0 μm, -20.0 μm</p></li>
+<li><p>Measurement Point 5: 0.0 μm, 0.0 μm, -10.0 μm</p></li>
+<li><p>Measurement Point 6: 0.0 μm, 0.0 μm, 0.0 μm</p></li>
+<li><p>Measurement Point 7: 0.0 μm, 0.0 μm, 10.0 μm</p></li>
+<li><p>Measurement Point 8: 0.0 μm, 0.0 μm, 20.0 μm</p></li>
+<li><p>Measurement Point 9: 0.0 μm, 0.0 μm, 30.0 μm</p></li>
+<li><p>Measurement Point 10: 0.0 μm, 0.0 μm, 40.0 μm</p></li>
+<li><p>Measurement Point 11: 0.0 μm, 0.0 μm, 50.0 μm</p></li>
+</ul>
+</section>
+</section>
+<section id="materials">
+<h2>Materials<a class="headerlink" href="#materials" title="Permalink to this headline"></a></h2>
+<p>These parameters provide specific details about the materials in each voxel of the sample.</p>
+<p>This file can be generated using the following code:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="c1"># Define sample size and voxel size</span>
+<span class="n">sample_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">600.</span><span class="p">,</span> <span class="mf">600.</span><span class="p">,</span> <span class="mf">200.</span><span class="p">])</span>  <span class="c1"># in units of micrometers</span>
+<span class="n">voxel_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">5.0</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">])</span>  <span class="c1"># in units of micrometers</span>
+
+<span class="n">path_start</span> <span class="o">=</span> <span class="s2">&quot;/media/miro/Data-1TB/simulation/triple-cross&quot;</span>
+
+<span class="c1"># Calculate number of voxels in each dimension</span>
+<span class="n">num_voxels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">sample_size</span> <span class="o">/</span> <span class="n">voxel_size</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+<span class="c1"># Define materials Triple-Cross</span>
+<span class="n">materials</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;z_range&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">50</span><span class="p">),</span>
+        <span class="s2">&quot;elements&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">24</span><span class="p">],</span>
+        <span class="s2">&quot;mass_fractions&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.999651886257307</span><span class="p">,</span> <span class="mf">0.00034811374269286</span><span class="p">]</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;z_range&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span>
+        <span class="s2">&quot;elements&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">27</span><span class="p">],</span>
+        <span class="s2">&quot;mass_fractions&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.999543658490524</span><span class="p">,</span> <span class="mf">0.000456341509475796</span><span class="p">]</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;z_range&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">150</span><span class="p">),</span>
+        <span class="s2">&quot;elements&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">30</span><span class="p">],</span>
+        <span class="s2">&quot;mass_fractions&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.999378760356556</span><span class="p">,</span> <span class="mf">0.000621239643443875</span><span class="p">]</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;z_range&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">150</span><span class="p">,</span> <span class="mi">200</span><span class="p">),</span>
+        <span class="s2">&quot;elements&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">6</span><span class="p">],</span>
+        <span class="s2">&quot;mass_fractions&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">]</span>
+    <span class="p">}</span>
+<span class="p">]</span>
+
+<span class="c1"># Write output to text file</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path_start</span> <span class="o">+</span> <span class="s2">&quot;/Materials.txt&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="c1"># Write header</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Materials</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;=========</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">num_voxels</span><span class="p">)):</span>
+        <span class="c1"># Write point information</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unravel_index</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">num_voxels</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">material</span> <span class="ow">in</span> <span class="n">materials</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">material</span><span class="p">[</span><span class="s2">&quot;z_range&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">voxel_size</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">z</span> <span class="o">&lt;</span> <span class="n">material</span><span class="p">[</span><span class="s2">&quot;z_range&quot;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">voxel_size</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Point </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">80</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Coordinates (x, y, z): </span><span class="si">{}</span><span class="s2">, </span><span class="si">{}</span><span class="s2">, </span><span class="si">{}</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">))</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Number of Elements: </span><span class="si">{}</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">material</span><span class="p">[</span><span class="s2">&quot;elements&quot;</span><span class="p">])))</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;  Elements Z: </span><span class="si">{}</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">material</span><span class="p">[</span><span class="s2">&quot;elements&quot;</span><span class="p">]))))</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Element Mass Fractions: </span><span class="si">{}</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">material</span><span class="p">[</span><span class="s2">&quot;mass_fractions&quot;</span><span class="p">]))))</span>
+                <span class="k">break</span>
+</pre></div>
+</div>
+<section id="point-1">
+<h3>Point 1<a class="headerlink" href="#point-1" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p>Coordinates (x, y, z): 0, 0, 0</p></li>
+<li><p>Number of Elements: 6</p></li>
+<li><p>Elements Z: 26, 28, 29, 30, 50, 82</p></li>
+<li><p>Element Mass Fractions: 0.0004, 0.001, 0.6119, 0.3741, 0.0107, 0.0019</p></li>
+</ul>
+</section>
+<section id="point-2">
+<h3>Point 2<a class="headerlink" href="#point-2" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p>Coordinates (x, y, z): 0, 0, 1</p></li>
+<li><p>Number of Elements: 6</p></li>
+<li><p>Elements Z: 26, 28, 29, 30, 50, 82</p></li>
+<li><p>Element Mass Fractions: 0.0004, 0.001, 0.6119, 0.3741, 0.0107, 0.0019</p></li>
+</ul>
+</section>
+<section id="point-3">
+<h3>Point 3<a class="headerlink" href="#point-3" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p>Coordinates (x, y, z): 0, 0, 2</p></li>
+<li><p>Number of Elements: 6</p></li>
+<li><p>Elements Z: 26, 28, 29, 30, 50, 82</p></li>
+<li><p>Element Mass Fractions: 0.0004, 0.001, 0.6119, 0.3741, 0.0107, 0.0019</p></li>
+</ul>
+</section>
+<section id="point-4">
+<h3>Point 4<a class="headerlink" href="#point-4" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p>Coordinates (x, y, z): 0, 0, 3</p></li>
+<li><p>Number of Elements: 6</p></li>
+<li><p>Elements Z: 26, 28, 29, 30, 50, 82</p></li>
+<li><p>Element Mass Fractions: 0.0004, 0.001, 0.6119, 0.3741, 0.0107, 0.0019</p></li>
+</ul>
+</section>
+<section id="point-5">
+<h3>Point 5<a class="headerlink" href="#point-5" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p>Coordinates (x, y, z): 0, 0, 4</p></li>
+<li><p>Number of Elements: 6</p></li>
+<li><p>Elements Z: 26, 28, 29, 30, 50, 82</p></li>
+<li><p>Element Mass Fractions: 0.0004, 0.001, 0.6119, 0.3741, 0.0107, 0.0019</p></li>
+</ul>
+</section>
+</section>
+<section id="polycapillary">
+<h2>Polycapillary<a class="headerlink" href="#polycapillary" title="Permalink to this headline"></a></h2>
+<ul class="simple">
+<li><p>Optic Length: 4.03 cm</p></li>
+<li><p>External Radius Upstream: 0.095 cm</p></li>
+<li><p>External Radius Downstream: 0.3175 cm</p></li>
+<li><p>Single Capillary Radius at Optic Entrance: 0.0000975 cm</p></li>
+<li><p>Single Capillary Radius at Optic Exit: 0.000325 cm</p></li>
+<li><p>Focal Distance on Entrance Window Side: 0.49 cm</p></li>
+<li><p>Focal Distance on Exit Window Side: 100000000.0 cm</p></li>
+<li><p>Amount of Elements in Optic Material: 2</p></li>
+<li><p>Polycapillary Optic Material Composition - Atomic Numbers: 8, 14                              |</p></li>
+<li><p>Polycapillary Optic Material Composition - Weight Percentages SiO2: 53.0, 47.0</p></li>
+<li><p>Optic Material Density: 2.23 g/cm^3</p></li>
+<li><p>Surface Roughness: 5.0 Angstrom</p></li>
+<li><p>Number of Capillaries in the Optic: 240000</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="licence.html" class="btn btn-neutral float-right" title="License" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Michael Iro.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

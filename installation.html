@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Installation &mdash; voxTrace  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="How to use voxTrace" href="use.html" />
+    <link rel="prev" title="What is voxTrace?" href="introduction.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            voxTrace
+          </a>
+              <div class="version">
+                1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">What is voxTrace?</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#linux">Linux</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#a-short-statement-by-the-author-concerning-licencing">A short statement by the author, concerning licencing:</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="use.html">How to use voxTrace</a></li>
+<li class="toctree-l1"><a class="reference internal" href="licence.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">voxTrace</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Installation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/installation.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline"></a></h1>
+<p>voxTrace is a CUDA C++ package that can theoretically be run on
+various plattforms after modification of the MAKEFILE. voxTrace was
+developed and tested on Ubuntu 20.04 and 22.04. as well as almalinux on a HPC.
+Depending on whether you have admin rights or not the installation varies slightly.
+For ease of use the option HPC=true can be set to store multiple paths for your
+local machine and your HPC without changing the MAKEFILE. Default for HPC is false.</p>
+<p>A reproducible code ocean capsule can be found</p>
+<section id="linux">
+<h2>Linux<a class="headerlink" href="#linux" title="Permalink to this headline"></a></h2>
+<p>This installation assumes a fresh install of Ubuntu 20.04 or Ubuntu 22.04. with admin rights.</p>
+<ul class="simple">
+<li><p>Run the script pre-install.sh to install all dependencies or install them manually</p></li>
+<li><p>Install <a class="reference external" href="https://developer.nvidia.com/cuda-downloads">CUDA 12.1</a></p></li>
+<li><p>Run make fast to compile the code</p></li>
+<li><p>Create the dirs ./test-data/simulation/nist-1107/post-sample and ./test-data/simulation/nist-1107/detector</p></li>
+<li><p>Run the SampleTracer with run ./build/src/SampleTracer ./test-data/simulation/nist-1107</p></li>
+<li><p>Run the CapillaryTracer with run ./build/src/CapillaryTracer ./test-data/simulation/nist-1107</p></li>
+</ul>
+<p>Modify the Capillaries.txt, Sample.txt, Simulation.txt and Polycapillary.txt to your needs.
+You can use the Jupyter-UI to create your own Materials.txt.
+For further assistance please write to <a class="reference external" href="mailto:michael&#46;iro&#37;&#52;&#48;tuwien&#46;ac&#46;at">michael<span>&#46;</span>iro<span>&#64;</span>tuwien<span>&#46;</span>ac<span>&#46;</span>at</a></p>
+</section>
+<section id="a-short-statement-by-the-author-concerning-licencing">
+<h2>A short statement by the author, concerning licencing:<a class="headerlink" href="#a-short-statement-by-the-author-concerning-licencing" title="Permalink to this headline"></a></h2>
+<p>This codes is supposed to be free to use, without any warranty from my side.
+I therefore chose the <a class="reference external" href="https://michaeliro.github.io/voxTrace/licence.html">MIT Licence</a>. Nevertheless, before
+using/redistributing this code in a commercial way you should notice that some
+of the packages this code naturally depends on have different licences:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://arma.sourceforge.net/">Armadillo</a>: a C++ library for linear algebra &amp; scientific computing</p></li>
+<li><p><a class="reference external" href="https://ensmallen.org/">Ensmallen</a>: a flexible C++ library for efficient numerical optimization</p></li>
+<li><p><a class="reference external" href="https://www.gnu.org/software/gsl/">GSL</a> - GNU Scientific Library (for flobal optimization algorithms)</p></li>
+<li><p><a class="reference external" href="https://sciplot.github.io/">SciPlot</a>: a C++ scientific plotiing library powerd by gnupolot</p></li>
+<li><p><a class="reference external" href="https://github.com/tschoonj/xraylib/wiki">XrayLib</a>: a library for interactions of X-rays with matter</p></li>
+<li><p><a class="reference external" href="https://github.com/oasys-kit/shadow3">Shadow3</a>: an open source ray tracing code for modeling optical systems</p></li>
+<li><p><a class="reference external" href="https://github.com/PieterTack/polycap">PolyCap</a>: a C library to calculate X-ray transmission through polycapillaries</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="introduction.html" class="btn btn-neutral float-left" title="What is voxTrace?" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="use.html" class="btn btn-neutral float-right" title="How to use voxTrace" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Michael Iro.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
