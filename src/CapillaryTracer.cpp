@@ -39,6 +39,26 @@ int main(int argc, char* argv[]) {
             arma::Mat<double> sec_beam_mat;
             sec_beam_mat.load(arma::hdf5_name(path_in, "my_data"));
 
+            /**********************************************************************/
+
+            auto transformMatrix = [](arma::Mat<double>& matrix, double x_shift, double y_shift, double z_shift, double rot_x, double rot_y, double rot_z) {
+                matrix.col(0) += x_shift;
+                matrix.col(1) += y_shift;
+                matrix.col(2) += z_shift;
+
+                // Rot around x,y and z axis
+                arma::Col<double> c3 = cosf(rot_z)*cosf(rot_y)*matrix.col(3)    - (cosf(rot_z)*sinf(rot_y)*sinf(rot_x)-sinf(rot_z)*cosf(rot_x))*matrix.col(4)   + (cosf(rot_z)*sinf(rot_y)*cosf(rot_x)+sinf(rot_z)*sinf(rot_x))*matrix.col(5) ;
+                arma::Col<double> c4 = sinf(rot_z)*cosf(rot_y)*matrix.col(3)    - (sinf(rot_z)*sinf(rot_y)*sinf(rot_x)-cosf(rot_z)*cosf(rot_x))*matrix.col(4)   + (sinf(rot_z)*sinf(rot_y)*cosf(rot_x)-cosf(rot_z)*sinf(rot_x))*matrix.col(5) ;  
+                arma::Col<double> c5 = -sinf(rot_y)*matrix.col(3)               + (cosf(rot_y)*sinf(rot_x))*matrix.col(4)                                       + (cosf(rot_y)*cosf(rot_x))*matrix.col(5) ;
+                matrix.col(3) = c3;
+                matrix.col(4) = c4;
+                matrix.col(5) = c5;
+            };
+
+            transformMatrix(sec_beam_mat, 0.0,0.0125,0.0, 0.002,0.000,0.000);
+            
+            /**********************************************************************/       
+            
             PolyCapAPI mySecondaryPolycap(base_dir);
             XRBeam myDetectorBeam(mySecondaryPolycap.traceFast(sec_beam_mat));
 
