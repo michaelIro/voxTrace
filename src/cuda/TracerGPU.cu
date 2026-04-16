@@ -97,7 +97,7 @@ __device__  void TracerGPU::traceForward(RayGPU* ray, VoxelGPU* currentVoxel, cu
 
 		// Selection of chemical Element to interact with	
     randomN = curand_uniform(localState);
-		ChemElementGPU* interactingElement = currentVoxel->getMaterial()->getInteractingElement(rayEnergy,randomN);
+		ChemElement* interactingElement = currentVoxel->getMaterial()->getInteractingElement(rayEnergy,randomN);
 
 		// Selection of interaction type
     randomN = curand_uniform(localState);
@@ -200,8 +200,8 @@ void TracerGPU::callTracePreBeam(){
   yLV_ = yL_/((float)(yN_));
   zLV_ = zL_/((float)(zN_));
 
-  ChemElementGPU* elements;
-  cudaMallocManaged(&elements, sizeof(ChemElementGPU)*n_elements);
+  ChemElement* elements;
+  cudaMallocManaged(&elements, sizeof(ChemElement)*n_elements);
 
   float* weights;
   cudaMallocManaged(&weights, sizeof(float)*n_elements*xN_*yN_*zN_);
@@ -218,12 +218,12 @@ void TracerGPU::callTracePreBeam(){
   SampleGPU* sample;
   cudaMallocManaged(&sample, sizeof(SampleGPU));
 
-  ChemElementGPU fe(26);
-  ChemElementGPU ni(28);
-  ChemElementGPU cu(29);
-  ChemElementGPU zn(30);
-  ChemElementGPU sn(50);
-  ChemElementGPU pb(82);
+  ChemElement fe(26);
+  ChemElement ni(28);
+  ChemElement cu(29);
+  ChemElement zn(30);
+  ChemElement sn(50);
+  ChemElement pb(82);
 
   elements[0] = cu;
   elements[1] = fe;
@@ -366,8 +366,8 @@ void TracerGPU::callTraceNewBeam(SimulationParameter& simp){
   for (int i = 0; i < n_el; i++) 
     els_[i] = simp.getUniqueElements()[i];
   
-  ChemElementGPU* elements;
-  cudaMallocManaged(&elements, sizeof(ChemElementGPU)*n_el);
+  ChemElement* elements;
+  cudaMallocManaged(&elements, sizeof(ChemElement)*n_el);
 
   float* weights;
   cudaMallocManaged(&weights, sizeof(float)*n_el*xN_*yN_*zN_);
@@ -409,7 +409,7 @@ void TracerGPU::callTraceNewBeam(SimulationParameter& simp){
     prim_geom[i] = simp.getPrimCapGeom()[i];
 
   for(int i = 0; i< n_el; i++)
-    elements[i] = ChemElementGPU(els_[i]); 
+    elements[i] = ChemElement(els_[i]); 
  
   for (auto& point : simp.getMaterialPoints()) {
     int i = (int)point.x;

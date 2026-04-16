@@ -3,13 +3,13 @@
 
 /** Material-Object for GPU */
 
-#include "../cuda/ChemElementGPU.cu"
+#include "../cuda/ChemElement.cu"
 #include <device_launch_parameters.h>
 
 class MaterialGPU {
 	private:
 		int num_elements_;
-		ChemElementGPU* elements_;
+		ChemElement* elements_;
 		float* weights_;
 		float rho_;
 
@@ -17,14 +17,14 @@ class MaterialGPU {
 
   		__host__ __device__ MaterialGPU(){};
 
-	 	__host__ __device__ MaterialGPU(int num_elements, ChemElementGPU* elements, float* weights, float density){ 
+	 	__host__ __device__ MaterialGPU(int num_elements, ChemElement* elements, float* weights, float density){ 
 			num_elements_ = num_elements;
 			elements_ = elements;
 			weights_ = weights;
 			rho_ = density; 
 		};
 
-		__host__ __device__ MaterialGPU(int num_elements, ChemElementGPU* elements, float* weights){ 
+		__host__ __device__ MaterialGPU(int num_elements, ChemElement* elements, float* weights){ 
 			num_elements_ = num_elements;
 			elements_ = elements;
 			weights_ = weights;
@@ -45,7 +45,7 @@ class MaterialGPU {
 		
 		__device__ float CS_Tot_Lin(float energy) const { return (CS_Tot(energy) * rho_); };
 
-		__device__ ChemElementGPU* getInteractingElement(float energy, float randomN) const {
+		__device__ ChemElement* getInteractingElement(float energy, float randomN) const {
 
 			float muMassTot = CS_Tot(energy);
 			float sum = 0.;

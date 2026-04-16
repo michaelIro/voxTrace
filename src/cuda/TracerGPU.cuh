@@ -10,7 +10,7 @@
 #include <filesystem>
 
 #include "../cuda/RayGPU.cu"
-#include "../cuda/ChemElementGPU.cu"
+#include "../cuda/ChemElement.cu"
 #include "../cuda/MaterialGPU.cu"
 #include "../cuda/VoxelGPU.cu"
 #include "../cuda/SampleGPU.cu"

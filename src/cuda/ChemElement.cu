@@ -1,5 +1,5 @@
-#ifndef ChemElementGPU_H
-#define ChemElementGPU_H
+#ifndef ChemElement_H
+#define ChemElement_H
 
 /** Chemical-Element-Object for GPU */
 
@@ -9,7 +9,7 @@
 #include <device_launch_parameters.h>
 #include "../api/XRayLibAPI.hpp"
 
-class ChemElementGPU {
+class ChemElement {
 	private:
 		int z_;																		// Atomic number
 		float a_;																	// Atomic Mass number [g/mol]
@@ -88,9 +88,9 @@ class ChemElementGPU {
 
   	public:
 
-  		__host__ ChemElementGPU() {};
+  		__host__ ChemElement() {};
 
-		__host__ ChemElementGPU(const int& z){
+		__host__ ChemElement(const int& z){
 			z_ =	z;
 			discretize();
 			//getMemorySize();

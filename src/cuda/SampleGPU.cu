@@ -6,7 +6,7 @@
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
 
-#include "../cuda/ChemElementGPU.cu"
+#include "../cuda/ChemElement.cu"
 #include "../cuda/MaterialGPU.cu"
 #include "../cuda/VoxelGPU.cu"
 

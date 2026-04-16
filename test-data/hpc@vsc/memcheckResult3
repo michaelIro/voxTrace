@@ -3,7 +3,7 @@
 ========= Please use the compute-sanitizer tool as a drop-in replacement
 START: Test-3
 ========= Invalid __global__ read of size 4
-=========     at 0x000002a0 in _ZNK14ChemElementGPU7Fluor_YEi
+=========     at 0x000002a0 in _ZNK14ChemElement7Fluor_YEi
 =========     by thread (0,0,0) in block (30,0,0)
 =========     Address 0x7f41e81859a0 is out of bounds
 =========     Saved host backtrace up to driver entry point at kernel launch time

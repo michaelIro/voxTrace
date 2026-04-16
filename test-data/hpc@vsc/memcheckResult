@@ -7,8 +7,8 @@
 =========     at 0xb0 in cudaFree
 =========     by thread (0,0,0) in block (246,0,0)
 =========     Address 0x7f6c0afff890
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:295:ChemElementGPU::interpolate(float, float, const float *) const [0x15e0]
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:110:ChemElementGPU::CS_Tot(float) const [0x2b0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:295:ChemElement::interpolate(float, float, const float *) const [0x15e0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:110:ChemElement::CS_Tot(float) const [0x2b0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:41:MaterialGPU::CS_Tot(float) const [0x8c0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:46:MaterialGPU::CS_Tot_Lin(float) const [0x270]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:52:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x7b0]
@@ -41,8 +41,8 @@
 =========     at 0xb0 in cudaFree
 =========     by thread (0,0,0) in block (436,0,0)
 =========     Address 0x7f6c0afff890
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:295:ChemElementGPU::interpolate(float, float, const float *) const [0x15e0]
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:110:ChemElementGPU::CS_Tot(float) const [0x2b0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:295:ChemElement::interpolate(float, float, const float *) const [0x15e0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:110:ChemElement::CS_Tot(float) const [0x2b0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:41:MaterialGPU::CS_Tot(float) const [0x8c0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:46:MaterialGPU::CS_Tot_Lin(float) const [0x270]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:52:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x7b0]
@@ -75,8 +75,8 @@
 =========     at 0xb0 in cudaFree
 =========     by thread (0,0,0) in block (322,0,0)
 =========     Address 0x7f6c0afff890
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:295:ChemElementGPU::interpolate(float, float, const float *) const [0x15e0]
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:110:ChemElementGPU::CS_Tot(float) const [0x2b0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:295:ChemElement::interpolate(float, float, const float *) const [0x15e0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:110:ChemElement::CS_Tot(float) const [0x2b0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:41:MaterialGPU::CS_Tot(float) const [0x8c0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:46:MaterialGPU::CS_Tot_Lin(float) const [0x270]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:52:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x7b0]
@@ -109,8 +109,8 @@
 =========     at 0xb0 in cudaFree
 =========     by thread (0,0,0) in block (360,0,0)
 =========     Address 0x7f6c0afff890
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:295:ChemElementGPU::interpolate(float, float, const float *) const [0x15e0]
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:110:ChemElementGPU::CS_Tot(float) const [0x2b0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:295:ChemElement::interpolate(float, float, const float *) const [0x15e0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:110:ChemElement::CS_Tot(float) const [0x2b0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:41:MaterialGPU::CS_Tot(float) const [0x8c0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:46:MaterialGPU::CS_Tot_Lin(float) const [0x270]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:52:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x7b0]
@@ -143,8 +143,8 @@
 =========     at 0xb0 in cudaFree
 =========     by thread (0,0,0) in block (398,0,0)
 =========     Address 0x7f6c0afff890
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:295:ChemElementGPU::interpolate(float, float, const float *) const [0x15e0]
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:110:ChemElementGPU::CS_Tot(float) const [0x2b0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:295:ChemElement::interpolate(float, float, const float *) const [0x15e0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:110:ChemElement::CS_Tot(float) const [0x2b0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:41:MaterialGPU::CS_Tot(float) const [0x8c0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:46:MaterialGPU::CS_Tot_Lin(float) const [0x270]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:52:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x7b0]
@@ -177,8 +177,8 @@
 =========     at 0xb0 in cudaFree
 =========     by thread (0,0,0) in block (588,0,0)
 =========     Address 0x7f6c0afff890
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:295:ChemElementGPU::interpolate(float, float, const float *) const [0x15e0]
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:110:ChemElementGPU::CS_Tot(float) const [0x2b0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:295:ChemElement::interpolate(float, float, const float *) const [0x15e0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:110:ChemElement::CS_Tot(float) const [0x2b0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:41:MaterialGPU::CS_Tot(float) const [0x8c0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:46:MaterialGPU::CS_Tot_Lin(float) const [0x270]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:52:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x7b0]
@@ -211,8 +211,8 @@
 =========     at 0xb0 in cudaFree
 =========     by thread (0,0,0) in block (474,0,0)
 =========     Address 0x7f6c0afff890
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:295:ChemElementGPU::interpolate(float, float, const float *) const [0x15e0]
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:110:ChemElementGPU::CS_Tot(float) const [0x2b0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:295:ChemElement::interpolate(float, float, const float *) const [0x15e0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:110:ChemElement::CS_Tot(float) const [0x2b0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:41:MaterialGPU::CS_Tot(float) const [0x8c0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:46:MaterialGPU::CS_Tot_Lin(float) const [0x270]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:52:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x7b0]
@@ -245,8 +245,8 @@
 =========     at 0xb0 in cudaFree
 =========     by thread (0,0,0) in block (512,0,0)
 =========     Address 0x7f6c0afff890
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:295:ChemElementGPU::interpolate(float, float, const float *) const [0x15e0]
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:110:ChemElementGPU::CS_Tot(float) const [0x2b0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:295:ChemElement::interpolate(float, float, const float *) const [0x15e0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:110:ChemElement::CS_Tot(float) const [0x2b0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:41:MaterialGPU::CS_Tot(float) const [0x8c0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:46:MaterialGPU::CS_Tot_Lin(float) const [0x270]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:52:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x7b0]
@@ -279,8 +279,8 @@
 =========     at 0xb0 in cudaFree
 =========     by thread (0,0,0) in block (550,0,0)
 =========     Address 0x7f6c0afff890
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:295:ChemElementGPU::interpolate(float, float, const float *) const [0x15e0]
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:110:ChemElementGPU::CS_Tot(float) const [0x2b0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:295:ChemElement::interpolate(float, float, const float *) const [0x15e0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:110:ChemElement::CS_Tot(float) const [0x2b0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:41:MaterialGPU::CS_Tot(float) const [0x8c0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:46:MaterialGPU::CS_Tot_Lin(float) const [0x270]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:52:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x7b0]
@@ -313,8 +313,8 @@
 =========     at 0xb0 in cudaFree
 =========     by thread (0,0,0) in block (719,0,0)
 =========     Address 0x7f6c0afff890
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:295:ChemElementGPU::interpolate(float, float, const float *) const [0x15e0]
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:110:ChemElementGPU::CS_Tot(float) const [0x2b0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:295:ChemElement::interpolate(float, float, const float *) const [0x15e0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:110:ChemElement::CS_Tot(float) const [0x2b0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:41:MaterialGPU::CS_Tot(float) const [0x8c0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:46:MaterialGPU::CS_Tot_Lin(float) const [0x270]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:52:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x7b0]
@@ -347,8 +347,8 @@
 =========     at 0xb0 in cudaFree
 =========     by thread (0,0,0) in block (37,0,0)
 =========     Address 0x7f6c0afff890
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:295:ChemElementGPU::interpolate(float, float, const float *) const [0x15e0]
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:110:ChemElementGPU::CS_Tot(float) const [0x2b0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:295:ChemElement::interpolate(float, float, const float *) const [0x15e0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:110:ChemElement::CS_Tot(float) const [0x2b0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:41:MaterialGPU::CS_Tot(float) const [0x8c0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:46:MaterialGPU::CS_Tot_Lin(float) const [0x270]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:52:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x7b0]
@@ -381,8 +381,8 @@
 =========     at 0xb0 in cudaFree
 =========     by thread (0,0,0) in block (75,0,0)
 =========     Address 0x7f6c0afff890
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:295:ChemElementGPU::interpolate(float, float, const float *) const [0x15e0]
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:110:ChemElementGPU::CS_Tot(float) const [0x2b0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:295:ChemElement::interpolate(float, float, const float *) const [0x15e0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:110:ChemElement::CS_Tot(float) const [0x2b0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:41:MaterialGPU::CS_Tot(float) const [0x8c0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:46:MaterialGPU::CS_Tot_Lin(float) const [0x270]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:52:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x7b0]
@@ -415,8 +415,8 @@
 =========     at 0xb0 in cudaFree
 =========     by thread (0,0,0) in block (113,0,0)
 =========     Address 0x7f6c0afff890
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:295:ChemElementGPU::interpolate(float, float, const float *) const [0x15e0]
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:110:ChemElementGPU::CS_Tot(float) const [0x2b0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:295:ChemElement::interpolate(float, float, const float *) const [0x15e0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:110:ChemElement::CS_Tot(float) const [0x2b0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:41:MaterialGPU::CS_Tot(float) const [0x8c0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:46:MaterialGPU::CS_Tot_Lin(float) const [0x270]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:52:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x7b0]
@@ -449,8 +449,8 @@
 =========     at 0xb0 in cudaFree
 =========     by thread (0,0,0) in block (151,0,0)
 =========     Address 0x7f6c0afff890
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:295:ChemElementGPU::interpolate(float, float, const float *) const [0x15e0]
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:110:ChemElementGPU::CS_Tot(float) const [0x2b0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:295:ChemElement::interpolate(float, float, const float *) const [0x15e0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:110:ChemElement::CS_Tot(float) const [0x2b0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:41:MaterialGPU::CS_Tot(float) const [0x8c0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:46:MaterialGPU::CS_Tot_Lin(float) const [0x270]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:52:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x7b0]
@@ -483,8 +483,8 @@
 =========     at 0xb0 in cudaFree
 =========     by thread (0,0,0) in block (189,0,0)
 =========     Address 0x7f6c0afff890
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:295:ChemElementGPU::interpolate(float, float, const float *) const [0x15e0]
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:110:ChemElementGPU::CS_Tot(float) const [0x2b0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:295:ChemElement::interpolate(float, float, const float *) const [0x15e0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:110:ChemElement::CS_Tot(float) const [0x2b0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:41:MaterialGPU::CS_Tot(float) const [0x8c0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:46:MaterialGPU::CS_Tot_Lin(float) const [0x270]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:52:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x7b0]
@@ -517,8 +517,8 @@
 =========     at 0xb0 in cudaFree
 =========     by thread (0,0,0) in block (227,0,0)
 =========     Address 0x7f6c0afff890
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:295:ChemElementGPU::interpolate(float, float, const float *) const [0x15e0]
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:110:ChemElementGPU::CS_Tot(float) const [0x2b0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:295:ChemElement::interpolate(float, float, const float *) const [0x15e0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:110:ChemElement::CS_Tot(float) const [0x2b0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:41:MaterialGPU::CS_Tot(float) const [0x8c0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:46:MaterialGPU::CS_Tot_Lin(float) const [0x270]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:52:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x7b0]
@@ -551,8 +551,8 @@
 =========     at 0xb0 in cudaFree
 =========     by thread (0,0,0) in block (265,0,0)
 =========     Address 0x7f6c0afff890
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:295:ChemElementGPU::interpolate(float, float, const float *) const [0x15e0]
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:110:ChemElementGPU::CS_Tot(float) const [0x2b0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:295:ChemElement::interpolate(float, float, const float *) const [0x15e0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:110:ChemElement::CS_Tot(float) const [0x2b0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:41:MaterialGPU::CS_Tot(float) const [0x8c0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:46:MaterialGPU::CS_Tot_Lin(float) const [0x270]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:52:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x7b0]
@@ -585,8 +585,8 @@
 =========     at 0xb0 in cudaFree
 =========     by thread (0,0,0) in block (303,0,0)
 =========     Address 0x7f6c0afff890
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:295:ChemElementGPU::interpolate(float, float, const float *) const [0x15e0]
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:110:ChemElementGPU::CS_Tot(float) const [0x2b0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:295:ChemElement::interpolate(float, float, const float *) const [0x15e0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:110:ChemElement::CS_Tot(float) const [0x2b0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:41:MaterialGPU::CS_Tot(float) const [0x8c0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:46:MaterialGPU::CS_Tot_Lin(float) const [0x270]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:52:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x7b0]
@@ -619,8 +619,8 @@
 =========     at 0xb0 in cudaFree
 =========     by thread (0,0,0) in block (341,0,0)
 =========     Address 0x7f6c0afff890
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:295:ChemElementGPU::interpolate(float, float, const float *) const [0x15e0]
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:110:ChemElementGPU::CS_Tot(float) const [0x2b0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:295:ChemElement::interpolate(float, float, const float *) const [0x15e0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:110:ChemElement::CS_Tot(float) const [0x2b0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:41:MaterialGPU::CS_Tot(float) const [0x8c0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:46:MaterialGPU::CS_Tot_Lin(float) const [0x270]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:52:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x7b0]
@@ -653,8 +653,8 @@
 =========     at 0xb0 in cudaFree
 =========     by thread (0,0,0) in block (379,0,0)
 =========     Address 0x7f6c0afff890
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:295:ChemElementGPU::interpolate(float, float, const float *) const [0x15e0]
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:110:ChemElementGPU::CS_Tot(float) const [0x2b0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:295:ChemElement::interpolate(float, float, const float *) const [0x15e0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:110:ChemElement::CS_Tot(float) const [0x2b0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:41:MaterialGPU::CS_Tot(float) const [0x8c0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:46:MaterialGPU::CS_Tot_Lin(float) const [0x270]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:52:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x7b0]
@@ -687,8 +687,8 @@
 =========     at 0xb0 in cudaFree
 =========     by thread (0,0,0) in block (417,0,0)
 =========     Address 0x7f6c0afff890
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:295:ChemElementGPU::interpolate(float, float, const float *) const [0x15e0]
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:110:ChemElementGPU::CS_Tot(float) const [0x2b0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:295:ChemElement::interpolate(float, float, const float *) const [0x15e0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:110:ChemElement::CS_Tot(float) const [0x2b0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:41:MaterialGPU::CS_Tot(float) const [0x8c0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:46:MaterialGPU::CS_Tot_Lin(float) const [0x270]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:52:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x7b0]
@@ -721,8 +721,8 @@
 =========     at 0xb0 in cudaFree
 =========     by thread (0,0,0) in block (455,0,0)
 =========     Address 0x7f6c0afff890
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:295:ChemElementGPU::interpolate(float, float, const float *) const [0x15e0]
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:110:ChemElementGPU::CS_Tot(float) const [0x2b0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:295:ChemElement::interpolate(float, float, const float *) const [0x15e0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:110:ChemElement::CS_Tot(float) const [0x2b0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:41:MaterialGPU::CS_Tot(float) const [0x8c0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:46:MaterialGPU::CS_Tot_Lin(float) const [0x270]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:52:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x7b0]
@@ -755,8 +755,8 @@
 =========     at 0xb0 in cudaFree
 =========     by thread (0,0,0) in block (493,0,0)
 =========     Address 0x7f6c0afff890
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:295:ChemElementGPU::interpolate(float, float, const float *) const [0x15e0]
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:110:ChemElementGPU::CS_Tot(float) const [0x2b0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:295:ChemElement::interpolate(float, float, const float *) const [0x15e0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:110:ChemElement::CS_Tot(float) const [0x2b0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:41:MaterialGPU::CS_Tot(float) const [0x8c0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:46:MaterialGPU::CS_Tot_Lin(float) const [0x270]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:52:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x7b0]
@@ -789,8 +789,8 @@
 =========     at 0xb0 in cudaFree
 =========     by thread (0,0,0) in block (531,0,0)
 =========     Address 0x7f6c0afff890
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:295:ChemElementGPU::interpolate(float, float, const float *) const [0x15e0]
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:110:ChemElementGPU::CS_Tot(float) const [0x2b0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:295:ChemElement::interpolate(float, float, const float *) const [0x15e0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:110:ChemElement::CS_Tot(float) const [0x2b0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:41:MaterialGPU::CS_Tot(float) const [0x8c0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:46:MaterialGPU::CS_Tot_Lin(float) const [0x270]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:52:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x7b0]
@@ -823,8 +823,8 @@
 =========     at 0xb0 in cudaFree
 =========     by thread (0,0,0) in block (569,0,0)
 =========     Address 0x7f6c0afff890
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:295:ChemElementGPU::interpolate(float, float, const float *) const [0x15e0]
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:110:ChemElementGPU::CS_Tot(float) const [0x2b0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:295:ChemElement::interpolate(float, float, const float *) const [0x15e0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:110:ChemElement::CS_Tot(float) const [0x2b0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:41:MaterialGPU::CS_Tot(float) const [0x8c0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:46:MaterialGPU::CS_Tot_Lin(float) const [0x270]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:52:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x7b0]
@@ -857,8 +857,8 @@
 =========     at 0xb0 in cudaFree
 =========     by thread (0,0,0) in block (607,0,0)
 =========     Address 0x7f6c0afff890
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:295:ChemElementGPU::interpolate(float, float, const float *) const [0x15e0]
-=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElementGPU.cu:110:ChemElementGPU::CS_Tot(float) const [0x2b0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:295:ChemElement::interpolate(float, float, const float *) const [0x15e0]
+=========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/ChemElement.cu:110:ChemElement::CS_Tot(float) const [0x2b0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:41:MaterialGPU::CS_Tot(float) const [0x8c0]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/MaterialGPU.cu:46:MaterialGPU::CS_Tot_Lin(float) const [0x270]
 =========     Device Frame:/home/miro/Software/1st-party/voxTrace/src/cuda/TracerGPU.cu:52:TracerGPU::traceForward(RayGPU *, VoxelGPU *, int *, SampleGPU *, curandStateXORWOW *) [0x7b0]
