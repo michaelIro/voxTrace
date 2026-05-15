@@ -1,73 +1,134 @@
 HPC ?= false
 
-# ── Paths ────────────────────────────────────────────────────────────────────
+# ── Kokkos ─────────────────────────────────────────────────────────────────────
+# Kokkos 4.x is installed via CMake (no Makefile.kokkos in 4.x).
+# KOKKOS_INSTALL points to the CMake install prefix (cmake --install).
+# Override on the command line:  make KOKKOS_INSTALL=/path/to/kokkos-install
+# For CUDA:  make KOKKOS_INSTALL=... KOKKOS_CXX=$(HOME)/kokkos/bin/nvcc_wrapper
+KOKKOS_INSTALL ?= $(HOME)/kokkos-install
+KOKKOS_INC    := $(KOKKOS_INSTALL)/include
+KOKKOS_LIB    := $(KOKKOS_INSTALL)/lib
+
+# ── Paths ──────────────────────────────────────────────────────────────────────
+UNAME_S := $(shell uname -s)
+
 ifeq ($(HPC),true)
-    CUDA_PATH ?= /gpfs/opt/sw/spack-0.17.1/opt/spack/linux-almalinux8-zen3/gcc-11.2.0/cuda-11.5.0-ao7cp7wu3mvop6eocjixhdcda25p24r5
     ARMA_INC  := /gpfs/opt/sw/spack-0.17.1/opt/spack/linux-almalinux8-zen3/gcc-11.2.0/armadillo-10.5.0-zzssso6lwzgjpsuubriirjj67cf2rin6/include
     ARMA_LIB  := /gpfs/opt/sw/spack-0.17.1/opt/spack/linux-almalinux8-zen3/gcc-11.2.0/armadillo-10.5.0-zzssso6lwzgjpsuubriirjj67cf2rin6/lib64
-	GSL_INC   := 
-	GSL_LIB   := 
-    ENS_INC   := 
-
+    GSL_INC   :=
+    GSL_LIB   :=
+    ENS_INC   :=
+    HDF5_INC_ := /usr/lib/aarch64-linux-gnu/
+    HDF5_LIB_ := /usr/lib/aarch64-linux-gnu/hdf5/serial/
+else ifeq ($(UNAME_S),Darwin)
+    BREW      := $(shell brew --prefix 2>/dev/null || echo /opt/homebrew)
+    ARMA_INC  := $(BREW)/include
+    ARMA_LIB  := $(BREW)/lib
+    GSL_INC   := $(BREW)/include
+    GSL_LIB   := $(BREW)/lib
+    ENS_INC   := $(BREW)/include
+    HDF5_INC_ := $(BREW)/include
+    HDF5_LIB_ := $(BREW)/lib
 else
-    CUDA_PATH ?= 
     ARMA_INC  := /usr/include/armadillo_bits
     ARMA_LIB  := /usr/lib
-	GSL_INC   := /usr/include/gsl
-	GSL_LIB   := /usr/lib/aarch64-linux-gnu
+    GSL_INC   := /usr/include/gsl
+    GSL_LIB   := /usr/lib/aarch64-linux-gnu
     ENS_INC   := /usr/include
-
+    HDF5_INC_ := /usr/lib/aarch64-linux-gnu/
+    HDF5_LIB_ := /usr/lib/aarch64-linux-gnu/hdf5/serial/
 endif
 
-# ── Compilers ─────────────────────────────────────────────────────────────────
+# ── Compilers ──────────────────────────────────────────────────────────────────
 HOST_COMPILER ?= g++
-NVCC          := $(CUDA_PATH)/bin/nvcc -ccbin $(HOST_COMPILER)
+# KOKKOS_CXX can be overridden to nvcc_wrapper for CUDA or hipcc for HIP.
+KOKKOS_CXX    ?= $(HOST_COMPILER)
+CXX           := $(KOKKOS_CXX)
 
-# ── Directory layout ──────────────────────────────────────────────────────────
+# ── Directory layout ───────────────────────────────────────────────────────────
 SRC       := $(CURDIR)/src
 BUILD     := $(CURDIR)/build/src
-CUDA_BLD  := $(BUILD)/cuda
+CORE_BLD  := $(BUILD)/core
 API_OBJ   := $(BUILD)/api/obj
 API_LIB   := $(BUILD)/api
 IO_BLD    := $(BUILD)/io
+TESTS_BLD := $(BUILD)/tests
 
-# ── External dependencies ─────────────────────────────────────────────────────
-XRAY_CF   := $(shell pkg-config --cflags libxrl)
-XRAY_LF   := $(shell pkg-config --libs   libxrl)
-HDF5_INC  := /usr/lib/aarch64-linux-gnu/
-HDF5_LIB  := /usr/lib/aarch64-linux-gnu/hdf5/serial/
+# ── Apple Silicon / Metal (arm64 only) ─────────────────────────────────────────
+UNAME_M := $(shell uname -m)
 
-INCLUDES  := -I$(CUDA_PATH)/include -I$(ARMA_INC) -I$(HDF5_INC) -I$(SRC)/api
-LIBRARIES := -L$(CUDA_PATH)/lib64 -L$(ARMA_LIB) -L$(HDF5_LIB) -L$(API_LIB) -L$(IO_BLD)
-LINK_LIBS := -larmadillo -lhdf5 -DARMA_USE_HDF5 -lxrl \
-             -l:libXRayLibAPI.a -l:libPlotAPI.a -l:libOptimizerAPI.a -l:libvt.io.a
-
-# ── NVCC / compiler flags ─────────────────────────────────────────────────────
-SMS           ?= 50 52 60 61 70 75 80 86
-GENCODE_FLAGS := $(foreach sm,$(SMS),-gencode arch=compute_$(sm),code=sm_$(sm))
-GENCODE_FLAGS += -gencode arch=compute_$(lastword $(sort $(SMS))),code=compute_$(lastword $(sort $(SMS))) \
-                 -Wno-deprecated-gpu-targets
-ifeq ($(dbg),1)
-    NVCCFLAGS := -g -G
+ifeq ($(UNAME_M),arm64)
+    METAL_BLD   := $(BUILD)/metal
+    METAL_FLAGS := -DVOXTRACE_METAL
+    METAL_LIBS  := -framework Metal -framework Foundation
+    METAL_AIR   := $(METAL_BLD)/Tracer.air
+    METAL_LIB   := $(METAL_BLD)/Tracer.metallib
+    METAL_OBJ   := $(METAL_BLD)/MetalTracer.o
+else
+    METAL_FLAGS :=
+    METAL_LIBS  :=
+    METAL_AIR   :=
+    METAL_LIB   :=
+    METAL_OBJ   :=
 endif
-NVCCFLAGS += -m64 --std=c++17 -lcudart -lstdc++ -Xcompiler -fopenmp
-CCFLAGS   := --std=c++17 -fopenmp
 
-# ── CUDA object list ──────────────────────────────────────────────────────────
-CUDA_NAMES := RayGPU ChemElement MaterialGPU VoxelGPU TracerGPU
-CUDA_OBJS  := $(addprefix $(CUDA_BLD)/,$(addsuffix .o,$(CUDA_NAMES)))
+# ── External dependencies ──────────────────────────────────────────────────────
+HDF5_INC := $(HDF5_INC_)
+HDF5_LIB := $(HDF5_LIB_)
+# Use pkg-config when available; otherwise fall back to bare -lxrl
+PKGCFG   := $(shell command -v pkg-config 2>/dev/null)
+ifneq ($(PKGCFG),)
+    XRAY_CF := $(shell pkg-config --cflags libxrl 2>/dev/null)
+    XRAY_LF := $(shell pkg-config --libs   libxrl 2>/dev/null)
+else
+    XRAY_CF :=
+    XRAY_LF := -lxrl
+endif
 
-.PHONY: all clean test polycap-test
+INCLUDES  := -I$(KOKKOS_INC) \
+             -I$(ARMA_INC) -I$(HDF5_INC) \
+             -I$(SRC) -I$(SRC)/core \
+             $(XRAY_CF)
+
+LIBRARIES := -L$(ARMA_LIB) -L$(HDF5_LIB) -L$(API_LIB) -L$(IO_BLD)
+
+LINK_LIBS := -larmadillo -lhdf5 -DARMA_USE_HDF5 -lxrl \
+             -l:libXRayLibAPI.a -l:libPlotAPI.a -l:libOptimizerAPI.a -l:libvt.io.a \
+             $(METAL_LIBS)
+
+# ── OpenMP flags (macOS: Homebrew libomp; Linux: -fopenmp) ────────────────────
+ifeq ($(UNAME_S),Darwin)
+    LIBOMP      := $(shell brew --prefix libomp 2>/dev/null || echo /opt/homebrew/opt/libomp)
+    OMP_CFLAGS  := -Xpreprocessor -fopenmp -I$(LIBOMP)/include
+    OMP_LFLAGS  := -L$(LIBOMP)/lib -lomp
+else
+    OMP_CFLAGS  := -fopenmp
+    OMP_LFLAGS  := -fopenmp
+endif
+
+# ── Kokkos static libs ──────────────────────────────────────────────────────────
+KOKKOS_LIBS := $(KOKKOS_LIB)/libkokkoscore.a $(KOKKOS_LIB)/libkokkoscontainers.a
+
+# ── Compiler flags ─────────────────────────────────────────────────────────────
+CXXFLAGS := --std=c++20 $(OMP_CFLAGS) $(METAL_FLAGS)
+LDFLAGS  := -L$(KOKKOS_LIB) $(OMP_LFLAGS)
+
+# ── Core objects (only Tracer.cpp needs compilation; physics is header-only) ───
+CORE_OBJS := $(CORE_BLD)/Tracer.o
+
+.PHONY: all clean test test2 polycap-test
 
 all: $(BUILD)/SampleTracer
 
 test: $(BUILD)/Test
 
+test2: $(BUILD)/Test2
+
 polycap-test: $(BUILD)/PolyCapTraceTest
 
-# ── CUDA device objects (pattern rule) ───────────────────────────────────────
-$(CUDA_BLD)/%.o: $(SRC)/cuda/%.cu | $(CUDA_BLD)
-	$(NVCC) $(XRAY_CF) $(INCLUDES) $(NVCCFLAGS) $(GENCODE_FLAGS) -dc -o $@ $<
+# ── Core object ───────────────────────────────────────────────────────────────
+$(CORE_BLD)/Tracer.o: $(SRC)/core/Tracer.cpp $(SRC)/core/Tracer.hpp | $(CORE_BLD)
+	$(CXX) $(INCLUDES) $(CXXFLAGS) -c -o $@ $<
 
 # ── API objects ───────────────────────────────────────────────────────────────
 $(API_OBJ)/XRayLibAPI.o: $(SRC)/api/XRayLibAPI.cpp $(SRC)/api/XRayLibAPI.hpp | $(API_OBJ)
@@ -77,61 +138,101 @@ $(API_OBJ)/PlotAPI.o: $(SRC)/api/PlotAPI.cpp $(SRC)/api/PlotAPI.hpp | $(API_OBJ)
 	$(HOST_COMPILER) -I/usr/include/sciplot -c $< -o $@ -lsciplot
 
 $(API_OBJ)/OptimizerAPI.o: $(SRC)/api/OptimizerAPI.cpp $(SRC)/api/OptimizerAPI.hpp | $(API_OBJ)
-	$(HOST_COMPILER) -I/usr/include -I/usr/include/ensmallen_bits -c $< -o $@ -lensmallen
+	$(HOST_COMPILER) -I$(ENS_INC) -I$(ENS_INC)/ensmallen_bits -c $< -o $@
 
-# ── API static libraries (pattern rule) ───────────────────────────────────────
+# ── API static libraries ──────────────────────────────────────────────────────
 $(API_LIB)/lib%.a: $(API_OBJ)/%.o | $(API_LIB)
 	ar rcs $@ $<
 
 # ── SimulationParameter (io) ──────────────────────────────────────────────────
 $(IO_BLD)/SimulationParameter.o: $(SRC)/io/SimulationParameter.cpp $(SRC)/io/SimulationParameter.hpp | $(IO_BLD)
-	$(HOST_COMPILER) $(XRAY_CF) $(INCLUDES) $(CCFLAGS) -Wall -Werror -c $< -o $@ $(XRAY_LF)
+	$(HOST_COMPILER) $(INCLUDES) --std=c++17 -Wall -Werror -c $< -o $@
 
 $(IO_BLD)/libvt.io.a: $(IO_BLD)/SimulationParameter.o
 	ar rcs $@ $<
 
-# ── Main binary ───────────────────────────────────────────────────────────────
-$(BUILD)/SampleTracer.o: $(SRC)/SampleTracer.cpp | $(BUILD)
-	$(NVCC) $(XRAY_CF) $(INCLUDES) $(NVCCFLAGS) $(GENCODE_FLAGS) -dc -o $@ $<
+# ── Metal (arm64 only) ────────────────────────────────────────────────────────
+ifneq ($(METAL_AIR),)
+$(METAL_BLD):
+	mkdir -p $@
 
-$(BUILD)/SampleTracer: $(BUILD)/SampleTracer.o $(CUDA_OBJS) \
+$(METAL_AIR): $(SRC)/metal/Tracer.metal | $(METAL_BLD)
+	xcrun -sdk macosx metal -c $< -o $@ -I$(SRC)
+
+$(METAL_LIB): $(METAL_AIR)
+	xcrun -sdk macosx metallib $< -o $@
+
+$(METAL_OBJ): $(SRC)/metal/MetalTracer.mm $(METAL_LIB) | $(METAL_BLD)
+	$(HOST_COMPILER) --std=c++17 $(METAL_FLAGS) -I$(SRC) -fobjc-arc -c $< -o $@
+endif
+
+# ── Main binary ───────────────────────────────────────────────────────────────
+$(TESTS_BLD)/SampleTracer.o: $(SRC)/tests/SampleTracer.cpp | $(TESTS_BLD)
+	$(CXX) $(INCLUDES) $(CXXFLAGS) -c -o $@ $<
+
+$(BUILD)/SampleTracer: $(TESTS_BLD)/SampleTracer.o $(CORE_OBJS) \
     $(API_LIB)/libXRayLibAPI.a $(API_LIB)/libPlotAPI.a $(API_LIB)/libOptimizerAPI.a \
-    $(IO_BLD)/libvt.io.a
-	$(NVCC) $(XRAY_CF) $(NVCCFLAGS) $(GENCODE_FLAGS) \
-	    -o $@ $(BUILD)/SampleTracer.o $(CUDA_OBJS) $(LIBRARIES) $(LINK_LIBS)
+    $(IO_BLD)/libvt.io.a $(METAL_OBJ) $(METAL_LIB)
+	$(CXX) $(CXXFLAGS) -o $@ \
+	    $(TESTS_BLD)/SampleTracer.o $(CORE_OBJS) $(METAL_OBJ) \
+	    $(LIBRARIES) $(LINK_LIBS) $(LDFLAGS)
+
+# ── Test binary ───────────────────────────────────────────────────────────────
+$(TESTS_BLD)/Test.o: $(SRC)/tests/Test.cpp | $(TESTS_BLD)
+	$(HOST_COMPILER) $(INCLUDES) --std=c++20 -DVOXTRACE_HOST_ONLY -c $< -o $@
+
+$(BUILD)/Test: $(TESTS_BLD)/Test.o \
+    $(API_LIB)/libXRayLibAPI.a \
+    $(API_LIB)/libOptimizerAPI.a
+	$(HOST_COMPILER) --std=c++20 -o $@ \
+	    $(TESTS_BLD)/Test.o \
+	    $(API_LIB)/libOptimizerAPI.a \
+	    $(API_LIB)/libXRayLibAPI.a \
+	    -L$(ARMA_LIB) -L$(GSL_LIB) \
+	    -larmadillo -lgsl -lgslcblas \
+	    $(XRAY_LF)
+
+# ── PolyCapTraceTest binary ───────────────────────────────────────────────────
+$(TESTS_BLD)/PolyCapTraceTest.o: $(SRC)/tests/PolyCapTraceTest.cpp | $(TESTS_BLD)
+	$(HOST_COMPILER) $(INCLUDES) --std=c++20 -DVOXTRACE_HOST_ONLY -c $< -o $@
+
+$(BUILD)/PolyCapTraceTest: $(TESTS_BLD)/PolyCapTraceTest.o \
+    $(API_LIB)/libXRayLibAPI.a
+	$(HOST_COMPILER) --std=c++20 -o $@ \
+	    $(TESTS_BLD)/PolyCapTraceTest.o \
+	    $(API_LIB)/libXRayLibAPI.a \
+	    -L$(ARMA_LIB) -larmadillo \
+	    $(XRAY_LF)
+
+# ── Test2: polycap benchmark (voxTrace Kokkos vs polycap library) ─────────────
+POLYCAP_CF   := $(shell pkg-config --cflags polycap 2>/dev/null)
+POLYCAP_LF   := $(shell pkg-config --libs   polycap 2>/dev/null || echo -lpolycap)
+POLYCAP_RPATH := -Wl,-rpath,$(shell pkg-config --variable=libdir polycap 2>/dev/null || echo /opt/homebrew/lib)
+
+$(TESTS_BLD)/Test2.o: $(SRC)/tests/Test-2.cpp | $(TESTS_BLD)
+	$(CXX) $(INCLUDES) $(POLYCAP_CF) $(CXXFLAGS) -c -o $@ $<
+
+$(BUILD)/Test2: $(TESTS_BLD)/Test2.o
+	$(CXX) $(CXXFLAGS) -o $@ $< \
+	    $(POLYCAP_LF) $(POLYCAP_RPATH) \
+	    $(XRAY_LF) \
+	    $(KOKKOS_LIBS) $(LDFLAGS)
+
+# ── TestMuXRF: full µXRF depth-scan simulation ───────────────────────────────
+$(TESTS_BLD)/TestMuXRF.o: $(SRC)/tests/Test-muXRF.cpp | $(TESTS_BLD)
+	$(CXX) $(INCLUDES) $(CXXFLAGS) -c -o $@ $<
+
+$(BUILD)/TestMuXRF: $(TESTS_BLD)/TestMuXRF.o
+	$(CXX) $(CXXFLAGS) -o $@ $< \
+	    $(XRAY_LF) \
+	    $(KOKKOS_LIBS) $(LDFLAGS)
+
+.PHONY: testmuxrf
+testmuxrf: $(BUILD)/TestMuXRF
 
 # ── Build directory creation ──────────────────────────────────────────────────
-$(CUDA_BLD) $(API_OBJ) $(API_LIB) $(IO_BLD) $(BUILD):
+$(CORE_BLD) $(API_OBJ) $(API_LIB) $(IO_BLD) $(BUILD) $(TESTS_BLD):
 	mkdir -p $@
 
 clean:
 	rm -rf $(BUILD)
-
-# ── TEST ──────────────────────────────────────────────────
-$(BUILD)/Test.o: $(SRC)/Test.cpp | $(BUILD)
-	$(HOST_COMPILER) $(XRAY_CF) $(INCLUDES) $(CCFLAGS) -c $< -o $@
-
-$(BUILD)/Test: $(BUILD)/Test.o \
-    $(API_LIB)/libXRayLibAPI.a \
-    $(API_LIB)/libOptimizerAPI.a
-	$(HOST_COMPILER) $(CCFLAGS) -o $@ $< \
-	    -L$(API_LIB) \
-	    -L$(ARMA_LIB) \
-	    -L$(GSL_LIB) \
-	    -l:libOptimizerAPI.a \
-	    -l:libXRayLibAPI.a \
-	    -larmadillo -lgsl -lgslcblas \
-	    $(XRAY_LF)
-
-# ── POLYCAP TRACE TEST ───────────────────────────────────────────────────────
-$(BUILD)/PolyCapTraceTest.o: $(SRC)/tests/PolyCapTraceTest.cpp | $(BUILD)
-	$(HOST_COMPILER) $(XRAY_CF) $(INCLUDES) $(CCFLAGS) -c $< -o $@
-
-$(BUILD)/PolyCapTraceTest: $(BUILD)/PolyCapTraceTest.o \
-    $(API_LIB)/libXRayLibAPI.a
-	$(HOST_COMPILER) $(CCFLAGS) -o $@ $< \
-	    -L$(API_LIB) \
-	    -L$(ARMA_LIB) \
-	    -l:libXRayLibAPI.a \
-	    -larmadillo \
-	    $(XRAY_LF)

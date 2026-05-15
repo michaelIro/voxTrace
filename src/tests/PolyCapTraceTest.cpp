@@ -8,9 +8,10 @@
 #include <filesystem>
 
 #include "../api/XRayLibAPI.hpp"
-#include "../cuda/RayGPU.cu"
-#include "../cuda/PolyCap.cu"
-#include "../cuda/Source.cu"
+#include "../core/Ray.hpp"
+#include "../core/RNG.hpp"
+#include "../core/PolyCap.hpp"
+#include "../core/Source.hpp"
 
 // ============================================================================
 // Data structures to hold parsed parameters
@@ -238,14 +239,14 @@ PolycapParameter readPolycapDescription(const std::string& filepath) {
 // ============================================================================
 
 /**
- * Generate rays from the source as RayGPU objects
- * Uses realistic source parameters with RayGPU structure
+ * Generate rays from the source as Ray objects
+ * Uses realistic source parameters with Ray structure
  */
-std::vector<RayGPU> generateRaysFromSourceGPU(
+std::vector<Ray> generateRaysFromSourceGPU(
     const SourceParameter& source,
     int numRaysPerEnergy = 10)
 {
-    std::vector<RayGPU> rays;
+    std::vector<Ray> rays;
     
     // Random number generators
     std::mt19937 gen(42); // Fixed seed for reproducibility
@@ -284,10 +285,10 @@ std::vector<RayGPU> generateRaysFromSourceGPU(
                 dirZ /= norm;
             }
             
-            // Create RayGPU object
+            // Create Ray object
             // Parameters: startX, startY, startZ, dirX, dirY, dirZ, 
             //            asX, asY, asZ, flag, k, q, opd, fS, fP, apX, apY, apZ, prob
-            RayGPU ray(
+            Ray ray(
                 posX, posY, posZ,           // start position
                 dirX, dirY, dirZ,           // direction
                 0.0f, 0.0f, 0.0f,          // s-polarization vector
@@ -309,10 +310,10 @@ std::vector<RayGPU> generateRaysFromSourceGPU(
 }
 
 /**
- * Trace rays through polycap using GPU accelerated RayGPU and PolyCap classes
+ * Trace rays through polycap using GPU accelerated Ray and PolyCap classes
  */
-std::vector<RayGPU> traceRaysThrooughPolycapGPU(
-    const std::vector<RayGPU>& inputRays,
+std::vector<Ray> traceRaysThrooughPolycapGPU(
+    const std::vector<Ray>& inputRays,
     const PolycapParameter& polycap)
 {
     std::cout << "\n=== Ray Tracing Through Polycap (GPU) ===" << std::endl;
@@ -354,18 +355,18 @@ std::vector<RayGPU> traceRaysThrooughPolycapGPU(
     optic.print();
     
     // Trace each ray through the polycap
-    std::vector<RayGPU> outputRays;
+    std::vector<Ray> outputRays;
     int transmittedCount = 0;
     
     for (size_t i = 0; i < inputRays.size(); i++) {
-        RayGPU ray = inputRays[i];
+        Ray ray = inputRays[i];
         
         // Trace single ray through polycap
         // The ray interacts with the optics; modification is in-place
-        optic.trace(&ray);
+        optic.trace(ray);
         
         // Check if ray was transmitted (probability > 0)
-        if (ray.prob > 0.0f) {
+        if (ray.getIAFlag()) {
             outputRays.push_back(ray);
             transmittedCount++;
         }
@@ -450,12 +451,12 @@ int main(int argc, char* argv[]) {
     std::cout << "Number of capillaries: " << polycap.numCapillaries << std::endl;
     
     // ========================================================================
-    // Step 2: Generate rays from source using RayGPU
+    // Step 2: Generate rays from source using Ray
     // ========================================================================
     
     int numRaysPerEnergy = 10;
-    std::cout << "\n=== Generating Rays from Source (RayGPU) ===" << std::endl;
-    std::vector<RayGPU> sourceRays = generateRaysFromSourceGPU(source, numRaysPerEnergy);
+    std::cout << "\n=== Generating Rays from Source (Ray) ===" << std::endl;
+    std::vector<Ray> sourceRays = generateRaysFromSourceGPU(source, numRaysPerEnergy);
     std::cout << "Total rays generated: " << sourceRays.size() << std::endl;
     
     // Print some example ray statistics
@@ -483,7 +484,7 @@ int main(int argc, char* argv[]) {
     // Step 3: Trace rays through polycap using GPU acceleration
     // ========================================================================
     
-    std::vector<RayGPU> exitRays = traceRaysThrooughPolycapGPU(sourceRays, polycap);
+    std::vector<Ray> exitRays = traceRaysThrooughPolycapGPU(sourceRays, polycap);
     
     // ========================================================================
     // Step 4: Output results
