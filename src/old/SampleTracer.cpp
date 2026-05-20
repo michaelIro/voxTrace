@@ -10,7 +10,7 @@
 #include "cuda/SampleGPU.cu"
 #include "cuda/TracerGPU.cuh"
 
-#include "io/SimulationParameter.hpp"
+#include "core/SimulationParameter.hpp"
 
 int main(int argc, const char* argv[]) {
     if (argc < 2) {

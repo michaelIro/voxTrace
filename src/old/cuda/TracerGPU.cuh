@@ -15,7 +15,7 @@
 #include "../cuda/VoxelGPU.cu"
 #include "../cuda/SampleGPU.cu"
 
-#include "../io/SimulationParameter.hpp"
+#include "../core/SimulationParameter.hpp"
 
 #include <cuda.h>
 #include <cuda_runtime.h>

@@ -25,7 +25,7 @@ public:
           xN_(xN),   yN_(yN),   zN_(zN) {}
 
     // Flat linear index; -1 = out of bounds
-    KOKKOS_INLINE_FUNCTION int getVoxelIdx(float x, float y, float z) const {
+    KOKKOS_INLINE_FUNCTION int getVoxelIdx(float x, float y, float z) const VT_CONST_METH {
         int xi = (int)floorf((x - x_) / xLV_);
         int yi = (int)floorf((y - y_) / yLV_);
         int zi = (int)floorf((z - z_) / zLV_);
@@ -34,7 +34,7 @@ public:
     }
 
     // Entry voxel for a new ray (propagates to sample boundary if needed)
-    KOKKOS_INLINE_FUNCTION int findStartVoxelIdx(const Ray& ray) const {
+    KOKKOS_INLINE_FUNCTION int findStartVoxelIdx(const VT_THREAD Ray& ray) const VT_CONST_METH {
         float xi = ray.getStartX(), yi = ray.getStartY(), zi = ray.getStartZ();
 
         // Primary ray: propagate down to sample top face (z = z_)
@@ -56,6 +56,6 @@ public:
         return getVoxelIdx(xi, yi, zi);
     }
 
-    KOKKOS_INLINE_FUNCTION int voxN() const { return xN_ * yN_ * zN_; }
-    KOKKOS_INLINE_FUNCTION float getZPos() const { return z_; }
+    KOKKOS_INLINE_FUNCTION int voxN() const VT_CONST_METH { return xN_ * yN_ * zN_; }
+    KOKKOS_INLINE_FUNCTION float getZPos() const VT_CONST_METH { return z_; }
 };

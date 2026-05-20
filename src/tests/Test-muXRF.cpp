@@ -452,7 +452,7 @@ int main(int argc, char** argv)
         printf("\nTotal simulation time: %.2f s\n", ms_total * 1e-3);
 
         // ── Write spectra to CSV ───────────────────────────────────────────────
-        const char* out_path = "build/muXRF_spectra.csv";
+        const char* out_path = "test-data/out/muXRF_spectra.csv";
         FILE* fp = fopen(out_path, "w");
         if (fp) {
             // Header: energy column, then one column per scan point

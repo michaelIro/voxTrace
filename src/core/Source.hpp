@@ -30,7 +30,7 @@ public:
     }
 
     // Generate a ray — identical physics to original generateRayGPU
-    KOKKOS_INLINE_FUNCTION Ray generate(int index, RNG& rng) const {
+    KOKKOS_INLINE_FUNCTION Ray generate(int index, VT_THREAD RNG& rng) const VT_CONST_METH {
         float x0 = rng.normal() / 3.0f * sourceRadius_;
         float z0 = rng.normal() / 3.0f * sourceRadius_;
         float xD = rng.normal() / 3.0f * divergence_;

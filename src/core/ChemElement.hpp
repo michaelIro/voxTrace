@@ -1,7 +1,7 @@
 #pragma once
 #include "Platform.hpp"
 
-#ifndef __METAL_VERSION__
+#if !defined(__METAL_VERSION__) && !defined(VOXTRACE_METAL)
     #include <cmath>
     #include <cstdio>
     #include "../api/XRayLibAPI.hpp"
@@ -17,16 +17,16 @@ class ChemElement {
     float a_;
     float rho_;
 
-    static constexpr float energy_resolution = 0.2f;
-    static constexpr float max_energy        = 20.0f;
-    static constexpr int   energy_entries    = (int)(max_energy / energy_resolution);
+    VT_SCONSTEXPR float energy_resolution = 0.2f;
+    VT_SCONSTEXPR float max_energy        = 20.0f;
+    VT_SCONSTEXPR int   energy_entries    = 100;   // max_energy / energy_resolution
 
-    static constexpr float angle_resolution  = 0.005f;
-    static constexpr float max_angle         = VT_PI;
-    static constexpr int   angle_entries     = (int)(max_angle / angle_resolution);
+    VT_SCONSTEXPR float angle_resolution  = 0.005f;
+    VT_SCONSTEXPR float max_angle         = 3.14159265358979323846f;
+    VT_SCONSTEXPR int   angle_entries     = 628;   // (int)(VT_PI / 0.005)
 
-    static constexpr int line_entries  = 382;
-    static constexpr int shell_entries = 25;
+    VT_SCONSTEXPR int line_entries  = 382;
+    VT_SCONSTEXPR int shell_entries = 25;
 
     float cs_tot         [energy_entries];
     float cs_phot_prob   [energy_entries];
@@ -39,7 +39,7 @@ class ChemElement {
     float rad_rate       [line_entries];
     float fluor_yield    [shell_entries];
 
-#ifndef __METAL_VERSION__
+#if !defined(__METAL_VERSION__) && !defined(VOXTRACE_METAL)
     inline void discretize() {
         a_   = XRayLibAPI::A(z_);
         rho_ = XRayLibAPI::Rho(z_);
@@ -86,43 +86,43 @@ public:
 
     KOKKOS_INLINE_FUNCTION ChemElement() {}
 
-#ifndef __METAL_VERSION__
+#if !defined(__METAL_VERSION__) && !defined(VOXTRACE_METAL)
     inline ChemElement(int z) : z_(z) { discretize(); }
 #endif
 
     // ── Basic properties ──────────────────────────────────────────────────────
-    KOKKOS_INLINE_FUNCTION float A()   const { return a_; }
-    KOKKOS_INLINE_FUNCTION int   Z()   const { return z_; }
-    KOKKOS_INLINE_FUNCTION float Rho() const { return rho_; }
+    KOKKOS_INLINE_FUNCTION float A()   const VT_DEVICE_METH { return a_; }
+    KOKKOS_INLINE_FUNCTION int   Z()   const VT_DEVICE_METH { return z_; }
+    KOKKOS_INLINE_FUNCTION float Rho() const VT_DEVICE_METH { return rho_; }
 
     // ── DB accessors ──────────────────────────────────────────────────────────
-    KOKKOS_INLINE_FUNCTION float Fluor_Y      (int shell) const { return fluor_yield[shell]; }
-    KOKKOS_INLINE_FUNCTION float Rad_Rate     (int line)  const { return rad_rate[line]; }
-    KOKKOS_INLINE_FUNCTION float Line_Energy  (int line)  const { return line_energies[line]; }
+    KOKKOS_INLINE_FUNCTION float Fluor_Y      (int shell) const VT_DEVICE_METH { return fluor_yield[shell]; }
+    KOKKOS_INLINE_FUNCTION float Rad_Rate     (int line)  const VT_DEVICE_METH { return rad_rate[line]; }
+    KOKKOS_INLINE_FUNCTION float Line_Energy  (int line)  const VT_DEVICE_METH { return line_energies[line]; }
 
-    KOKKOS_INLINE_FUNCTION float CS_Tot        (float e) const { return interpolate(e, energy_resolution, cs_tot); }
-    KOKKOS_INLINE_FUNCTION float CS_Phot_Prob  (float e) const { return interpolate(e, energy_resolution, cs_phot_prob); }
-    KOKKOS_INLINE_FUNCTION float CS_Rayl_Prob  (float e) const { return interpolate(e, energy_resolution, cs_ray_prob); }
-    KOKKOS_INLINE_FUNCTION float CS_Compt_Prob (float e) const { return interpolate(e, energy_resolution, cs_compt_prob); }
-    KOKKOS_INLINE_FUNCTION float CS_Phot_Part_Prob(int shell, float e) const {
+    KOKKOS_INLINE_FUNCTION float CS_Tot        (float e) const VT_DEVICE_METH { return interpolate(e, energy_resolution, cs_tot); }
+    KOKKOS_INLINE_FUNCTION float CS_Phot_Prob  (float e) const VT_DEVICE_METH { return interpolate(e, energy_resolution, cs_phot_prob); }
+    KOKKOS_INLINE_FUNCTION float CS_Rayl_Prob  (float e) const VT_DEVICE_METH { return interpolate(e, energy_resolution, cs_ray_prob); }
+    KOKKOS_INLINE_FUNCTION float CS_Compt_Prob (float e) const VT_DEVICE_METH { return interpolate(e, energy_resolution, cs_compt_prob); }
+    KOKKOS_INLINE_FUNCTION float CS_Phot_Part_Prob(int shell, float e) const VT_DEVICE_METH {
         return interpolate(e, energy_resolution, cs_phot_part[shell]);
     }
-    KOKKOS_INLINE_FUNCTION float DCS_Rayl(float e, float a) const {
+    KOKKOS_INLINE_FUNCTION float DCS_Rayl(float e, float a) const VT_DEVICE_METH {
         return interpolate(a, angle_resolution, dcs_rayl[(int)lroundf(e / energy_resolution)]);
     }
-    KOKKOS_INLINE_FUNCTION float DCS_Compt(float e, float a) const {
+    KOKKOS_INLINE_FUNCTION float DCS_Compt(float e, float a) const VT_DEVICE_METH {
         return interpolate(a, angle_resolution, dcs_comp[(int)lroundf(e / energy_resolution)]);
     }
 
     // ── Sampling decisions ────────────────────────────────────────────────────
 
-    KOKKOS_INLINE_FUNCTION int getInteractionType(float e, float r) const {
+    KOKKOS_INLINE_FUNCTION int getInteractionType(float e, float r) const VT_DEVICE_METH {
         if (r <= CS_Phot_Prob(e))                          return 0;
         if (r <= CS_Phot_Prob(e) + CS_Rayl_Prob(e))       return 1;
         return 2;
     }
 
-    KOKKOS_INLINE_FUNCTION int getExcitedShell(float e, float r) const {
+    KOKKOS_INLINE_FUNCTION int getExcitedShell(float e, float r) const VT_DEVICE_METH {
         float sum = 0.f;
         int s = 0;
         for (; s < shell_entries; ++s) {
@@ -132,19 +132,19 @@ public:
         return s;
     }
 
-    KOKKOS_INLINE_FUNCTION float getThetaRayl(float e, float r) const {
+    KOKKOS_INLINE_FUNCTION float getThetaRayl(float e, float r) const VT_DEVICE_METH {
         return _sampleAngle(e, r, dcs_rayl);
     }
 
-    KOKKOS_INLINE_FUNCTION float getThetaCompt(float e, float r) const {
+    KOKKOS_INLINE_FUNCTION float getThetaCompt(float e, float r) const VT_DEVICE_METH {
         return _sampleAngle(e, r, dcs_comp);
     }
 
-    KOKKOS_INLINE_FUNCTION float getComptEnergy(float e, float theta) const {
+    KOKKOS_INLINE_FUNCTION float getComptEnergy(float e, float theta) const VT_DEVICE_METH {
         return e / (1.0f + (e / 510.998928f) * (1.0f - cosf(theta)));
     }
 
-    KOKKOS_INLINE_FUNCTION int getTransition(int shell, float r) const {
+    KOKKOS_INLINE_FUNCTION int getTransition(int shell, float r) const VT_DEVICE_METH {
         const int shell_lines[shell_entries][2] = {
             {0,28},
             {29,57},{85,112},{113,135},
@@ -164,7 +164,7 @@ public:
     }
 
     // ── Helper ────────────────────────────────────────────────────────────────
-    KOKKOS_INLINE_FUNCTION float interpolate(float arg, float step, const float* vec) const {
+    KOKKOS_INLINE_FUNCTION float interpolate(float arg, float step, const VT_DEVICE float* vec) const VT_DEVICE_METH {
         float x = arg / step;
         int   i = (int)ceilf(x);
         if (i < 1) return vec[0];
@@ -174,7 +174,7 @@ public:
 
 private:
     KOKKOS_INLINE_FUNCTION float _sampleAngle(float e, float r,
-                                               const float tbl[energy_entries][angle_entries]) const {
+                                               const VT_DEVICE float tbl[energy_entries][angle_entries]) const VT_DEVICE_METH {
         int ei = (int)lroundf(e / energy_resolution);
         int i = 0;
         float sum = 0.f;

@@ -6,7 +6,7 @@
 #include "Material.hpp"
 #include "ChemElement.hpp"
 #include "RNG.hpp"
-#include "../io/SimulationParameter.hpp"
+#include "SimulationParameter.hpp"
 
 // ── Tracer ────────────────────────────────────────────────────────────────────
 // Orchestrates the Monte-Carlo ray tracing loop.

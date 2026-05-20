@@ -6,11 +6,8 @@
 #include <metal_stdlib>
 using namespace metal;
 
-// Shim: make shared headers compile under MSL
-#define KOKKOS_INLINE_FUNCTION inline
-#define KOKKOS_FUNCTION        inline
-static constexpr float VT_PI = 3.14159265358979323846f;
-#define __METAL_VERSION__ 1   // guard std:: / XRayLib includes in headers
+// Platform.hpp (included by each physics header) provides KOKKOS_INLINE_FUNCTION,
+// VT_SCONSTEXPR, VT_PI, and math-function aliases for Metal automatically.
 
 // Pull in the shared physics headers
 #include "../core/RNG.hpp"

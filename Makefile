@@ -57,13 +57,24 @@ TESTS_BLD := $(BUILD)/tests
 # ── Apple Silicon / Metal (arm64 only) ─────────────────────────────────────────
 UNAME_M := $(shell uname -m)
 
+METAL_COMPILER := $(shell xcrun --find metal 2>/dev/null)
+
 ifeq ($(UNAME_M),arm64)
+ifeq ($(METAL_COMPILER),)
+    # arm64 but Xcode.app not installed — build without Metal
+    METAL_FLAGS :=
+    METAL_LIBS  :=
+    METAL_AIR   :=
+    METAL_LIB   :=
+    METAL_OBJ   :=
+else
     METAL_BLD   := $(BUILD)/metal
     METAL_FLAGS := -DVOXTRACE_METAL
     METAL_LIBS  := -framework Metal -framework Foundation
     METAL_AIR   := $(METAL_BLD)/Tracer.air
     METAL_LIB   := $(METAL_BLD)/Tracer.metallib
     METAL_OBJ   := $(METAL_BLD)/MetalTracer.o
+endif
 else
     METAL_FLAGS :=
     METAL_LIBS  :=
@@ -90,10 +101,10 @@ INCLUDES  := -I$(KOKKOS_INC) \
              -I$(SRC) -I$(SRC)/core \
              $(XRAY_CF)
 
-LIBRARIES := -L$(ARMA_LIB) -L$(HDF5_LIB) -L$(API_LIB) -L$(IO_BLD)
+LIBRARIES := -L$(ARMA_LIB) -L$(HDF5_LIB) -L$(API_LIB)
 
 LINK_LIBS := -larmadillo -lhdf5 -DARMA_USE_HDF5 -lxrl \
-             -l:libXRayLibAPI.a -l:libPlotAPI.a -l:libOptimizerAPI.a -l:libvt.io.a \
+             $(API_LIB)/libXRayLibAPI.a $(API_LIB)/libOptimizerAPI.a \
              $(METAL_LIBS)
 
 # ── OpenMP flags (macOS: Homebrew libomp; Linux: -fopenmp) ────────────────────
@@ -128,14 +139,11 @@ polycap-test: $(BUILD)/PolyCapTraceTest
 
 # ── Core object ───────────────────────────────────────────────────────────────
 $(CORE_BLD)/Tracer.o: $(SRC)/core/Tracer.cpp $(SRC)/core/Tracer.hpp | $(CORE_BLD)
-	$(CXX) $(INCLUDES) $(CXXFLAGS) -c -o $@ $<
+	$(CXX) $(INCLUDES) --std=c++20 $(OMP_CFLAGS) -c -o $@ $<
 
 # ── API objects ───────────────────────────────────────────────────────────────
 $(API_OBJ)/XRayLibAPI.o: $(SRC)/api/XRayLibAPI.cpp $(SRC)/api/XRayLibAPI.hpp | $(API_OBJ)
 	$(HOST_COMPILER) $(XRAY_CF) -c $< -o $@ $(XRAY_LF)
-
-$(API_OBJ)/PlotAPI.o: $(SRC)/api/PlotAPI.cpp $(SRC)/api/PlotAPI.hpp | $(API_OBJ)
-	$(HOST_COMPILER) -I/usr/include/sciplot -c $< -o $@ -lsciplot
 
 $(API_OBJ)/OptimizerAPI.o: $(SRC)/api/OptimizerAPI.cpp $(SRC)/api/OptimizerAPI.hpp | $(API_OBJ)
 	$(HOST_COMPILER) -I$(ENS_INC) -I$(ENS_INC)/ensmallen_bits -c $< -o $@
@@ -144,12 +152,7 @@ $(API_OBJ)/OptimizerAPI.o: $(SRC)/api/OptimizerAPI.cpp $(SRC)/api/OptimizerAPI.h
 $(API_LIB)/lib%.a: $(API_OBJ)/%.o | $(API_LIB)
 	ar rcs $@ $<
 
-# ── SimulationParameter (io) ──────────────────────────────────────────────────
-$(IO_BLD)/SimulationParameter.o: $(SRC)/io/SimulationParameter.cpp $(SRC)/io/SimulationParameter.hpp | $(IO_BLD)
-	$(HOST_COMPILER) $(INCLUDES) --std=c++17 -Wall -Werror -c $< -o $@
-
-$(IO_BLD)/libvt.io.a: $(IO_BLD)/SimulationParameter.o
-	ar rcs $@ $<
+# ── SimulationParameter (now header-only in core) ──────────────────────────────
 
 # ── Metal (arm64 only) ────────────────────────────────────────────────────────
 ifneq ($(METAL_AIR),)
@@ -171,11 +174,11 @@ $(TESTS_BLD)/SampleTracer.o: $(SRC)/tests/SampleTracer.cpp | $(TESTS_BLD)
 	$(CXX) $(INCLUDES) $(CXXFLAGS) -c -o $@ $<
 
 $(BUILD)/SampleTracer: $(TESTS_BLD)/SampleTracer.o $(CORE_OBJS) \
-    $(API_LIB)/libXRayLibAPI.a $(API_LIB)/libPlotAPI.a $(API_LIB)/libOptimizerAPI.a \
-    $(IO_BLD)/libvt.io.a $(METAL_OBJ) $(METAL_LIB)
+    $(API_LIB)/libXRayLibAPI.a $(API_LIB)/libOptimizerAPI.a \
+    $(METAL_OBJ) $(METAL_LIB)
 	$(CXX) $(CXXFLAGS) -o $@ \
 	    $(TESTS_BLD)/SampleTracer.o $(CORE_OBJS) $(METAL_OBJ) \
-	    $(LIBRARIES) $(LINK_LIBS) $(LDFLAGS)
+	    $(LIBRARIES) $(LINK_LIBS) $(KOKKOS_LIBS) $(LDFLAGS)
 
 # ── Test binary ───────────────────────────────────────────────────────────────
 $(TESTS_BLD)/Test.o: $(SRC)/tests/Test.cpp | $(TESTS_BLD)

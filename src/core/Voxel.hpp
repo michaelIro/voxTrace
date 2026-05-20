@@ -31,25 +31,22 @@ public:
         for (int i = 0; i < 27; ++i) nn_[i] = indices[i];
     }
 
-    KOKKOS_INLINE_FUNCTION int getNN(int dir)       const { return nn_[dir]; }
-    KOKKOS_INLINE_FUNCTION int getMaterialIdx()     const { return mat_idx_; }
-    KOKKOS_INLINE_FUNCTION bool isOOB()             const { return mat_idx_ < 0; }
+    KOKKOS_INLINE_FUNCTION int getNN(int dir)       const VT_DEVICE_METH { return nn_[dir]; }
+    KOKKOS_INLINE_FUNCTION int getMaterialIdx()     const VT_DEVICE_METH { return mat_idx_; }
+    KOKKOS_INLINE_FUNCTION bool isOOB()             const VT_DEVICE_METH { return mat_idx_ < 0; }
 
-    KOKKOS_INLINE_FUNCTION float getX0() const { return x0_; }
-    KOKKOS_INLINE_FUNCTION float getY0() const { return y0_; }
-    KOKKOS_INLINE_FUNCTION float getZ0() const { return z0_; }
-    KOKKOS_INLINE_FUNCTION float getX1() const { return x0_ + x1_; }
-    KOKKOS_INLINE_FUNCTION float getY1() const { return y0_ + y1_; }
-    KOKKOS_INLINE_FUNCTION float getZ1() const { return z0_ + z1_; }
+    KOKKOS_INLINE_FUNCTION float getX0() const VT_DEVICE_METH { return x0_; }
+    KOKKOS_INLINE_FUNCTION float getY0() const VT_DEVICE_METH { return y0_; }
+    KOKKOS_INLINE_FUNCTION float getZ0() const VT_DEVICE_METH { return z0_; }
+    KOKKOS_INLINE_FUNCTION float getX1() const VT_DEVICE_METH { return x0_ + x1_; }
+    KOKKOS_INLINE_FUNCTION float getY1() const VT_DEVICE_METH { return y0_ + y1_; }
+    KOKKOS_INLINE_FUNCTION float getZ1() const VT_DEVICE_METH { return z0_ + z1_; }
 
     // ── Ray-box slab intersection ─────────────────────────────────────────────
     // Modifies ray.nextVoxel and ray.tIn in place. Returns path length through voxel.
-    KOKKOS_INLINE_FUNCTION float intersect(Ray& ray) const {
+    KOKKOS_INLINE_FUNCTION float intersect(VT_THREAD Ray& ray) const VT_DEVICE_METH {
         float t0x, t1x, t0y, t1y, t0z, t1z;
         bool  xDir = true, yDir = true, zDir = true;
-
-        auto _vmin = [](float a, float b) { return a < b ? a : b; };
-        auto _vmax = [](float a, float b) { return a > b ? a : b; };
 
         if (ray.getDirX() != 0.f) {
             t0x = (getX0() - ray.getStartX()) / ray.getDirX();
@@ -77,9 +74,9 @@ public:
             ray.getStartZ() >= z0_ && ray.getStartZ() <= z1_) {
             t0_max = 0.0f;
         } else {
-            t0_max = _vmax(_vmax(t0x, t0y), t0z);
+            t0_max = fmaxf(fmaxf(t0x, t0y), t0z);
         }
-        t1_min = _vmin(_vmin(t1x, t1y), t1z);
+        t1_min = fminf(fminf(t1x, t1y), t1z);
 
         // Determine which face the ray exits through → set nextVoxel
         if      (t1_min==t1z && t1_min!=t1y && t1_min!=t1x) ray.setNextVoxel(zDir ? 22 : 4);

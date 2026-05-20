@@ -27,6 +27,8 @@
 #  undef N_AVOG
 #endif
 #include <polycap.h>
+#include <polycap-photon.h>
+#include <polycap-source.h>
 
 // ── xraylib ─────────────────────────────────────────────────────────────────
 #include <xraylib.h>
@@ -53,7 +55,7 @@ static constexpr double SRC_DIST        = 100.0;      // cm source-to-entrance
 static constexpr double SRC_CONE_ANGLE  = PC_REXT_IN / SRC_DIST; // rad, ~9.5e-4
 
 // ── benchmark parameters ──────────────────────────────────────────────────────
-static constexpr int N_PHOTONS          = 100'000;
+static constexpr int N_PHOTONS          = 1000;
 static constexpr double ENERGIES[]      = {4.0, 6.0, 8.0, 10.0, 12.0};
 static constexpr int    N_ENERGIES      = 5;
 
@@ -71,7 +73,7 @@ static void runVoxTrace(PolyCap optic,      // by value: setMuRho per energy
                         double& efficiency,
                         double& ms)
 {
-    const int N = N_PHOTONS;
+    const int N = N_PHOTONS*10000;
     double sumW = 0.0;
 
     // ── Per-energy linear attenuation coefficient via xraylib ─────────────────
@@ -210,6 +212,188 @@ static void runPolycap(double energyKeV,
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Section C: Beam-profile collection
+// For each energy, collect exit (x,z) positions and propagate to 5 planes:
+//   0  exit window       d = 0
+//   1  half focal        d = PC_FOCAL_OUT / 2
+//   2  focal             d = PC_FOCAL_OUT
+//   3  1.5 × focal       d = PC_FOCAL_OUT * 1.5
+//   4  2 × focal         d = PC_FOCAL_OUT * 2.0
+// CSV: plane_idx,x_cm,z_cm,weight
+// ─────────────────────────────────────────────────────────────────────────────
+static const double BEAM_PLANE_D[5] = {
+    0.0,
+    PC_FOCAL_OUT * 0.5,
+    PC_FOCAL_OUT,
+    PC_FOCAL_OUT * 1.5,
+    PC_FOCAL_OUT * 2.0
+};
+
+// ── C1: voxTrace – Kokkos parallel_for stores per-ray exit data ───────────────
+// Trace N_PHOTONS/efficiency photons so ~N_PHOTONS exit photons are collected.
+// voxTrace efficiency ≈ 2.2%, so N_BEAM ≈ 50 × N_PHOTONS gives ~1100 exits.
+static constexpr int N_BEAM = N_PHOTONS * 50;   // ~50 000 → ~1 100 exits
+
+static void saveVoxTraceBeamProfile(PolyCap optic, double energyKeV)
+{
+    const int N = N_BEAM;
+
+    float mu = 0.f;
+    for (int i = 0; i < PC_NELEM; ++i)
+        mu += (float)(PC_WT[i] / 100.0) * (float)CS_Total(PC_Z[i], energyKeV, nullptr);
+    optic.setMuRho(mu * (float)PC_DENSITY);
+
+    const float openArea = (float)(PC_NCAP * PC_RCAP_IN * PC_RCAP_IN
+                                   / (PC_REXT_IN * PC_REXT_IN));
+
+    Kokkos::View<float*> d_ex("ex",N), d_ez("ez",N);
+    Kokkos::View<float*> d_dx("dx",N), d_dy("dy",N), d_dz("dz",N);
+    Kokkos::View<float*> d_prob("prob",N);
+    Kokkos::View<int*>   d_flag("flag",N);
+
+    Kokkos::parallel_for("vt_beam_prof", N,
+        KOKKOS_LAMBDA(int idx) {
+            RNG rng(775289ULL ^ (uint64_t)idx * 6364136223846793005ULL);
+
+            float h2=0.f, h3=0.f, f=0.5f, g=1.f/3.f;
+            int n2=idx+1, n3=idx+1;
+            while (n2) { h2 += f*(float)(n2&1); f*=0.5f; n2>>=1; }
+            while (n3) { int d=n3%3; h3+=g*(float)d; g/=3.f; n3/=3; }
+
+            float r   = sqrtf(h2) * (float)PC_REXT_IN;
+            float phi = 2.f * VT_PI * h3;
+            float ex  = r * cosf(phi);
+            float ez  = r * sinf(phi);
+
+            if (rng.frand() >= openArea) { d_flag(idx)=0; return; }
+
+            float ddx=ex, ddy=(float)SRC_DIST, ddz=ez;
+            float dl=sqrtf(ddx*ddx+ddy*ddy+ddz*ddz);
+            ddx/=dl; ddy/=dl; ddz/=dl;
+
+            Ray ray(0.f,-(float)SRC_DIST,0.f, ddx,ddy,ddz,
+                    1.f,0.f,0.f, false,0.f,idx, 0.f,0.f,0.f, ddx,ddy,ddz,1.f);
+            ray.setEnergyKeV((float)energyKeV);
+            optic.trace(ray);
+
+            d_flag(idx) = ray.getIAFlag() ? 1 : 0;
+            d_ex(idx)   = ray.getStartX();
+            d_ez(idx)   = ray.getStartZ();
+            d_dx(idx)   = ray.getDirX();
+            d_dy(idx)   = ray.getDirY();
+            d_dz(idx)   = ray.getDirZ();
+            d_prob(idx) = ray.getProb();
+        });
+    Kokkos::fence();
+
+    auto h_ex   = Kokkos::create_mirror_view(d_ex);
+    auto h_ez   = Kokkos::create_mirror_view(d_ez);
+    auto h_dx   = Kokkos::create_mirror_view(d_dx);
+    auto h_dy   = Kokkos::create_mirror_view(d_dy);
+    auto h_dz   = Kokkos::create_mirror_view(d_dz);
+    auto h_prob = Kokkos::create_mirror_view(d_prob);
+    auto h_flag = Kokkos::create_mirror_view(d_flag);
+    Kokkos::deep_copy(h_ex,   d_ex);
+    Kokkos::deep_copy(h_ez,   d_ez);
+    Kokkos::deep_copy(h_dx,   d_dx);
+    Kokkos::deep_copy(h_dy,   d_dy);
+    Kokkos::deep_copy(h_dz,   d_dz);
+    Kokkos::deep_copy(h_prob, d_prob);
+    Kokkos::deep_copy(h_flag, d_flag);
+
+    char fname[256];
+    snprintf(fname, sizeof(fname), "test-data/out/beam_vt_E%.1f.csv", energyKeV);
+    FILE* fp = fopen(fname, "w");
+    if (!fp) { fprintf(stderr, "Cannot open %s\n", fname); return; }
+    fprintf(fp, "plane_idx,x_cm,z_cm,weight\n");
+
+    for (int i = 0; i < N; ++i) {
+        if (!h_flag(i)) continue;
+        float ex=h_ex(i), ez=h_ez(i);
+        // Discard rays whose exit position lies outside the circular exit aperture.
+        if (ex*ex + ez*ez > (float)(PC_REXT_OUT * PC_REXT_OUT)) continue;
+        float dx=h_dx(i), dy=h_dy(i), dz=h_dz(i), w=h_prob(i);
+        for (int p = 0; p < 5; ++p) {
+            float dist = (float)BEAM_PLANE_D[p];
+            float t    = (fabsf(dy) > 1e-10f) ? dist / dy : 0.f;
+            fprintf(fp, "%d,%.6f,%.6f,%.6f\n", p, ex+t*dx, ez+t*dz, w);
+        }
+    }
+    fclose(fp);
+    printf("  voxTrace -> %s\n", fname);
+}
+
+// ── C2: polycap – per-photon tracing (polycap_photon_launch, no images overhead)
+static void savePolycapBeamProfile(double energyKeV)
+{
+    polycap_error* err = nullptr;
+
+    int    iz[PC_NELEM]; double wi[PC_NELEM];
+    for (int i = 0; i < PC_NELEM; ++i) { iz[i]=PC_Z[i]; wi[i]=PC_WT[i]; }
+
+    polycap_profile* prof = polycap_profile_new(
+        POLYCAP_PROFILE_ELLIPSOIDAL, PC_LENGTH,
+        PC_REXT_IN, PC_REXT_OUT, PC_RCAP_IN, PC_RCAP_OUT,
+        PC_FOCAL_IN, PC_FOCAL_OUT, &err);
+
+    polycap_description* desc = polycap_description_new(
+        prof, PC_ROUGHNESS, PC_NCAP,
+        PC_NELEM, iz, wi, PC_DENSITY, &err);
+    polycap_profile_free(prof);
+
+    double energies[1] = { energyKeV };
+    polycap_source* src = polycap_source_new(
+        desc, SRC_DIST,
+        PC_REXT_IN, PC_REXT_IN, -1.0, -1.0, 0.0, 0.0, 1.0,
+        1, energies, &err);
+
+    polycap_rng* rng = polycap_rng_new_with_seed(12345UL);
+
+    char fname[256];
+    snprintf(fname, sizeof(fname), "test-data/out/beam_pc_E%.1f.csv", energyKeV);
+    FILE* fp = fopen(fname, "w");
+    if (!fp) {
+        fprintf(stderr, "Cannot open %s\n", fname);
+        polycap_rng_free(rng);
+        polycap_source_free(src);
+        polycap_description_free(desc);
+        return;
+    }
+    fprintf(fp, "plane_idx,x_cm,z_cm,weight\n");
+
+    int64_t n_exit = 0;
+    int64_t n_sim  = 0;
+    while (n_exit < (int64_t)N_PHOTONS) {
+        polycap_photon* ph = polycap_source_get_photon(src, rng, &err);
+        if (!ph) { if (err) { polycap_error_free(err); err = nullptr; } continue; }
+        ++n_sim;
+        double* weights = nullptr;
+        int ret = polycap_photon_launch(ph, 1, energies, &weights, false, &err);
+        if (err) { polycap_error_free(err); err = nullptr; }
+        if (ret == 1) {
+            polycap_vector3 ec = polycap_photon_get_exit_coords(ph);
+            polycap_vector3 ed = polycap_photon_get_exit_direction(ph);
+            double w = (weights) ? weights[0] : 1.0;
+            for (int p = 0; p < 5; ++p) {
+                double dist = BEAM_PLANE_D[p];
+                double t    = (ed.z > 1e-10) ? dist / ed.z : 0.0;
+                fprintf(fp, "%d,%.6f,%.6f,%.6f\n", p, ec.x+t*ed.x, ec.y+t*ed.y, w);
+            }
+            ++n_exit;
+        }
+        if (weights) { polycap_free(weights); weights = nullptr; }
+        polycap_photon_free(ph);
+    }
+    fclose(fp);
+    printf("  polycap  -> %s  (%lld exits / %lld simulated)\n", fname,
+           (long long)n_exit, (long long)n_sim);
+
+    polycap_rng_free(rng);
+    polycap_source_free(src);
+    polycap_description_free(desc);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 int main(int argc, char** argv)
 {
     Kokkos::initialize(argc, argv);
@@ -258,6 +442,17 @@ int main(int argc, char** argv)
                    e, vtEff, pcEff, pcEff / openArea, vtMs, pcMs,
                    (vtMs > 0) ? pcMs / vtMs : 0.0);
         }
+
+        // ── Beam-profile CSVs ─────────────────────────────────────────────────
+        printf("\n\nCollecting beam profiles  (planes: exit, f/2, f, 3f/2, 2f)...\n");
+        printf("%s\n", std::string(40, '-').c_str());
+        for (int ei = 0; ei < N_ENERGIES; ++ei) {
+            double e = ENERGIES[ei];
+            printf("%.1f keV\n", e);
+            saveVoxTraceBeamProfile(optic, e);
+            savePolycapBeamProfile(e);
+        }
+        printf("\nPlot with:  python3 plot_beam_comparison.py\n");
     }
     Kokkos::finalize();
     return 0;

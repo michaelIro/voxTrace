@@ -4,7 +4,7 @@
 
 #include <Kokkos_Core.hpp>
 #include "../core/Tracer.hpp"
-#include "../io/SimulationParameter.hpp"
+#include "../core/SimulationParameter.hpp"
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {

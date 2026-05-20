@@ -7,7 +7,11 @@
 // elements. Element data lives in a shared ChemElement array passed at call
 // sites — avoiding pointer members so the struct is MSL-compatible.
 
-static constexpr int MAX_ELEMENTS = 8;
+#ifdef __METAL_VERSION__
+    constant constexpr int MAX_ELEMENTS = 8;
+#else
+    static constexpr int MAX_ELEMENTS = 8;
+#endif
 
 class Material {
     int   num_elements_  = 0;
@@ -18,6 +22,7 @@ public:
 
     KOKKOS_INLINE_FUNCTION Material() {}
 
+#ifndef __METAL_VERSION__
     // Host-side construction: density computed from element densities
     KOKKOS_INLINE_FUNCTION Material(int n, const float* w, const ChemElement* elems)
         : num_elements_(n) {
@@ -26,23 +31,24 @@ public:
             rho_ += elems[i].Rho() * w[i];
         }
     }
+#endif
 
-    KOKKOS_INLINE_FUNCTION float Rho() const { return rho_; }
+    KOKKOS_INLINE_FUNCTION float Rho() const VT_DEVICE_METH { return rho_; }
 
-    KOKKOS_INLINE_FUNCTION float CS_Tot(float e, const ChemElement* elems) const {
+    KOKKOS_INLINE_FUNCTION float CS_Tot(float e, const VT_DEVICE ChemElement* elems) const VT_DEVICE_METH {
         float tot = 0.f;
         for (int i = 0; i < num_elements_; ++i)
             tot += weights_[i] * elems[i].CS_Tot(e);
         return tot;
     }
 
-    KOKKOS_INLINE_FUNCTION float CS_Tot_Lin(float e, const ChemElement* elems) const {
+    KOKKOS_INLINE_FUNCTION float CS_Tot_Lin(float e, const VT_DEVICE ChemElement* elems) const VT_DEVICE_METH {
         return CS_Tot(e, elems) * rho_;
     }
 
     // Returns index of the interacting element in the shared elements array
     KOKKOS_INLINE_FUNCTION int getInteractingElementIdx(float e, float r,
-                                                         const ChemElement* elems) const {
+                                                         const VT_DEVICE ChemElement* elems) const VT_DEVICE_METH {
         float muTot = CS_Tot(e, elems);
         float sum   = 0.f;
         for (int i = 0; i < num_elements_ - 1; ++i) {

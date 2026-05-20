@@ -3,7 +3,7 @@
 #include <armadillo>
 #include "api/XRayLibAPI.hpp"
 #include "api/Shadow3API.hpp"
-#include "io/SimulationParameter.hpp"
+#include "core/SimulationParameter.hpp"
 
 int main() {
 	std::cout << "START: Test-4" << std::endl;
