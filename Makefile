@@ -129,7 +129,7 @@ CORE_OBJS := $(CORE_BLD)/Tracer.o
 
 .PHONY: all clean test test2 polycap-test
 
-all: $(BUILD)/SampleTracer
+all: $(BUILD)/Test
 
 test: $(BUILD)/Test
 
@@ -207,19 +207,15 @@ $(BUILD)/PolyCapTraceTest: $(TESTS_BLD)/PolyCapTraceTest.o \
 	    -L$(ARMA_LIB) -larmadillo \
 	    $(XRAY_LF)
 
-# ── Test2: polycap benchmark (voxTrace Kokkos vs polycap library) ─────────────
-POLYCAP_CF   := $(shell pkg-config --cflags polycap 2>/dev/null)
-POLYCAP_LF   := $(shell pkg-config --libs   polycap 2>/dev/null || echo -lpolycap)
-POLYCAP_RPATH := -Wl,-rpath,$(shell pkg-config --variable=libdir polycap 2>/dev/null || echo /opt/homebrew/lib)
-
 $(TESTS_BLD)/Test2.o: $(SRC)/tests/Test-2.cpp | $(TESTS_BLD)
-	$(CXX) $(INCLUDES) $(POLYCAP_CF) $(CXXFLAGS) -c -o $@ $<
+	$(HOST_COMPILER) $(INCLUDES) --std=c++20 -DVOXTRACE_HOST_ONLY -c $< -o $@
 
-$(BUILD)/Test2: $(TESTS_BLD)/Test2.o
-	$(CXX) $(CXXFLAGS) -o $@ $< \
-	    $(POLYCAP_LF) $(POLYCAP_RPATH) \
-	    $(XRAY_LF) \
-	    $(KOKKOS_LIBS) $(LDFLAGS)
+$(BUILD)/Test2: $(TESTS_BLD)/Test2.o \
+    $(API_LIB)/libXRayLibAPI.a
+	$(HOST_COMPILER) --std=c++20 -o $@ \
+	    $(TESTS_BLD)/Test2.o \
+	    $(API_LIB)/libXRayLibAPI.a \
+	    $(XRAY_LF)
 
 # ── TestMuXRF: full µXRF depth-scan simulation ───────────────────────────────
 $(TESTS_BLD)/TestMuXRF.o: $(SRC)/tests/Test-muXRF.cpp | $(TESTS_BLD)

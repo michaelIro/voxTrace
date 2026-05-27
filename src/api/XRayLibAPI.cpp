@@ -17,6 +17,10 @@ double XRayLibAPI::Rho(int z){
     return XRayLib::ElementDensity(z, NULL);
 }
 
+double XRayLibAPI::Fi(int z, double energy){
+    return XRayLib::Fi(z, energy, NULL);
+}
+
 double XRayLibAPI::CS_Tot(int z, double energy){
     return XRayLib::CS_Total(z, energy, NULL);
 }

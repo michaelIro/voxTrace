@@ -15,9 +15,13 @@
 #include <algorithm>
 #include <stdexcept>
 
-#include "ChemElement.hpp"
-#include "Ray.hpp"
-#include "../api/XRayLibAPI.hpp"
+#ifdef __cplusplus
+extern "C" {
+#endif
+#include <xraylib.h>
+#ifdef __cplusplus
+}
+#endif
 
 // Undefine macros that may be set by polycap.h before entering our namespace
 #ifdef HC
@@ -182,7 +186,6 @@ struct Description {
     double  open_area = 0.;  // entrance open-area fraction
     std::vector<int>    iz;  // atomic numbers
     std::vector<double> wi;  // weight fractions (must sum to 1)
-    std::vector<ChemElement> elements;
     Profile profile;
 
     Description() = default;
@@ -191,39 +194,13 @@ struct Description {
                 std::vector<int> iz_, std::vector<double> wi_, double density_)
         : profile(std::move(prof))
         , sig_rough(sig_rough_), density(density_), n_cap(n_cap_)
-        , iz(std::move(iz_))
-        , wi(normalize_weights(std::move(wi_)))
-        , elements(build_elements(iz))
+        , iz(std::move(iz_)), wi(std::move(wi_))
     {
-        if (iz.size() != wi.size()) {
-            throw std::invalid_argument("PolyCap description needs one weight per element");
-        }
-
         // Open area (same formula as polycap_source_new_from_file)
         double ns  = (std::round(std::sqrt(12.*n_cap - 3.)/6. - 0.5) + 0.5) * 6.;
         double nct = (ns*ns + 3.) / 12.;
         open_area  = (profile.cap[0]*profile.cap[0]*M_PI*nct) /
                      (3.*std::sin(M_PI/3.) * profile.ext[0]*profile.ext[0]);
-    }
-
-private:
-    static std::vector<double> normalize_weights(std::vector<double> weights) {
-        double sum = 0.;
-        for (double weight : weights) sum += weight;
-        if (sum <= 0.) {
-            throw std::invalid_argument("PolyCap weights must sum to a positive value");
-        }
-        for (double& weight : weights) weight /= sum;
-        return weights;
-    }
-
-    static std::vector<ChemElement> build_elements(const std::vector<int>& atomic_numbers) {
-        std::vector<ChemElement> elements_;
-        elements_.reserve(atomic_numbers.size());
-        for (int atomic_number : atomic_numbers) {
-            elements_.emplace_back(atomic_number);
-        }
-        return elements_;
     }
 };
 
@@ -257,14 +234,6 @@ struct SimResult {
     int64_t n_launched    = 0;          // total photons launched (all attempts)
 };
 
-struct RayTraceResult {
-    Ray ray;
-    std::vector<double> weights;
-    int64_t n_refl = 0;
-    double d_travel = 0.;
-    bool transmitted = false;
-};
-
 // ═══════════════════════════ Internal implementation ═════════════════════════
 namespace detail {
 
@@ -278,86 +247,6 @@ struct PhotonState {
     double  d_travel = 0.;
 };
 
-inline Vec3 repo_to_pc(const Vec3& v) {
-    return {v.x, v.z, v.y};
-}
-
-inline Vec3 pc_to_repo(const Vec3& v) {
-    return {v.x, v.z, v.y};
-}
-
-inline Vec3 orthogonal_basis(const Vec3& dir) {
-    Vec3 ref = (std::fabs(dir.x) < 0.9) ? Vec3{1., 0., 0.} : Vec3{0., 1., 0.};
-    Vec3 perp = ref - dir * dir.dot(ref);
-    if (perp.norm2() < 1.e-12) {
-        perp = Vec3{0., 0., 1.} - dir * dir.z;
-    }
-    perp.normalize();
-    return perp;
-}
-
-inline Vec3 orthogonalize(const Vec3& dir, const Vec3& candidate) {
-    Vec3 perp = candidate - dir * dir.dot(candidate);
-    if (perp.norm2() < 1.e-12) {
-        return orthogonal_basis(dir);
-    }
-    perp.normalize();
-    return perp;
-}
-
-inline PhotonState photon_from_ray(const Ray& ray) {
-    PhotonState ph;
-    ph.start_coords = repo_to_pc({ray.getStartX(), ray.getStartY(), ray.getStartZ()});
-
-    Vec3 start_dir = repo_to_pc({ray.getDirX(), ray.getDirY(), ray.getDirZ()});
-    start_dir.normalize();
-
-    // The core tracer launches from the optic entrance plane (z = 0 in PC space).
-    if (ph.start_coords.z < 0. && start_dir.z > 0.) {
-        double dt = -ph.start_coords.z / start_dir.z;
-        ph.start_coords += start_dir * dt;
-        ph.start_coords.z = 0.;
-    }
-
-    ph.exit_coords = ph.start_coords;
-    ph.start_dir = start_dir;
-    ph.exit_dir = start_dir;
-
-    Vec3 start_elecv = repo_to_pc({ray.getSPolX(), ray.getSPolY(), ray.getSPolZ()});
-    start_elecv = orthogonalize(start_dir, start_elecv);
-    ph.start_elecv = start_elecv;
-    ph.exit_elecv = start_elecv;
-
-    ph.src_start_coords = ph.start_coords;
-    ph.energies = {ray.getEnergyKeV()};
-    ph.weight = {ray.getProb()};
-    return ph;
-}
-
-inline Ray ray_from_photon(const Ray& input, const PhotonState& ph,
-                           const Vec3& exit_pt, double weight) {
-    Ray output = input;
-
-    Vec3 repo_exit = pc_to_repo(exit_pt);
-    Vec3 repo_dir = pc_to_repo(ph.exit_dir);
-    Vec3 repo_s = orthogonalize(repo_dir, pc_to_repo(ph.exit_elecv));
-    Vec3 repo_p = repo_dir.cross(repo_s);
-    if (repo_p.norm2() < 1.e-12) {
-        repo_p = orthogonal_basis(repo_dir);
-    } else {
-        repo_p.normalize();
-    }
-
-    output.setStartCoordinates((float)repo_exit.x, (float)repo_exit.y, (float)repo_exit.z);
-    output.setEndCoordinates((float)repo_dir.x, (float)repo_dir.y, (float)repo_dir.z);
-    output.setSPol((float)repo_s.x, (float)repo_s.y, (float)repo_s.z);
-    output.setPPol((float)repo_p.x, (float)repo_p.y, (float)repo_p.z);
-    output.setProb((float)weight);
-    output.setIAFlag(true);
-    output.setIANum((int)ph.i_refl);
-    return output;
-}
-
 // ── X-ray material properties via xraylib ────────────────────────────────────
 inline void compute_scatf(PhotonState& ph, const Description& desc) {
     int ne = (int)ph.energies.size();
@@ -365,12 +254,10 @@ inline void compute_scatf(PhotonState& ph, const Description& desc) {
     ph.scatf.resize(ne);
     for (int i = 0; i < ne; ++i) {
         double totmu = 0., sf = 0.;
-        for (int j = 0; j < (int)desc.elements.size(); ++j) {
-            const ChemElement& element = desc.elements[j];
-            int atomic_number = element.Z();
-            totmu += XRayLibAPI::CS_Tot(atomic_number, ph.energies[i]) * desc.wi[j];
-            sf    += (atomic_number + XRayLibAPI::Fi(atomic_number, ph.energies[i])) *
-                     (desc.wi[j] / element.A());
+        for (int j = 0; j < (int)desc.iz.size(); ++j) {
+            totmu += CS_Total(desc.iz[j], ph.energies[i], nullptr) * desc.wi[j];
+            sf    += (desc.iz[j] + Fi(desc.iz[j], ph.energies[i], nullptr)) *
+                     (desc.wi[j] / AtomicWeight(desc.iz[j], nullptr));
         }
         ph.amu[i]   = totmu * desc.density;
         ph.scatf[i] = sf;
@@ -737,27 +624,6 @@ inline int launch_photon(PhotonState& ph, const Description& desc) {
     return 1;  // reached exit
 }
 
-inline bool project_to_exit(const PhotonState& ph, const Description& desc, Vec3& exit_pt) {
-    const Profile& prof = desc.profile;
-    double z_exit = prof.z[prof.nmax];
-    double n_shells = std::round(std::sqrt(12.*desc.n_cap - 3.)/6. - 0.5);
-
-    if (ph.exit_dir.z <= 0.) {
-        return false;
-    }
-
-    double dt = (z_exit - ph.exit_coords.z) / ph.exit_dir.z;
-    exit_pt = ph.exit_coords + ph.exit_dir * dt;
-    exit_pt.z = z_exit;
-
-    if (n_shells == 0.) {
-        double r2 = exit_pt.x*exit_pt.x + exit_pt.y*exit_pt.y;
-        double re = prof.ext[prof.nmax];
-        return r2 <= re*re;
-    }
-    return within_hex_boundary(prof.ext[prof.nmax], exit_pt);
-}
-
 // ── Generate a source photon (polycap_source_get_photon) ─────────────────────
 template<class RNG>
 inline PhotonState generate_photon(const SourceParams& sp,
@@ -879,9 +745,23 @@ inline SimResult simulate(const SourceParams& sp, const Description& desc,
 
         // iesc == 1: photon reached end; check if within exit window
         Vec3 exit_pt;
-        if (!detail::project_to_exit(ph, desc, exit_pt)) {
+        if (ph.exit_dir.z > 0.) {
+            double dt = (z_exit - ph.exit_coords.z) / ph.exit_dir.z;
+            exit_pt = ph.exit_coords + ph.exit_dir * dt;
+            exit_pt.z = z_exit;
+        } else {
             continue;  // degenerate: skip
         }
+
+        bool in_exit;
+        if (n_shells == 0.) {
+            double r2 = exit_pt.x*exit_pt.x + exit_pt.y*exit_pt.y;
+            double re = prof.ext[prof.nmax];
+            in_exit = (r2 <= re*re);
+        } else {
+            in_exit = detail::within_hex_boundary(prof.ext[prof.nmax], exit_pt);
+        }
+        if (!in_exit) continue;
 
         // Record transmitted photon
         TransmittedPhoton tp;
@@ -909,40 +789,6 @@ inline SimResult simulate(const SourceParams& sp, const Description& desc,
     for (int e = 0; e < ne; ++e)
         result.efficiencies[e] = sum_weights[e] / (double)result.n_launched;
 
-    return result;
-}
-
-inline RayTraceResult trace(const Ray& input, const Description& desc) {
-    RayTraceResult result;
-    result.ray = input;
-    result.ray.setIAFlag(false);
-    result.ray.setProb(0.f);
-
-    detail::PhotonState ph = detail::photon_from_ray(input);
-    int iesc = detail::launch_photon(ph, desc);
-    if (iesc != 1) {
-        return result;
-    }
-
-    Vec3 exit_pt;
-    if (!detail::project_to_exit(ph, desc, exit_pt)) {
-        return result;
-    }
-
-    result.weights = ph.weight;
-    double input_weight = input.getProb();
-    for (double& weight : result.weights) {
-        weight *= input_weight;
-    }
-
-    result.n_refl = ph.i_refl;
-    result.d_travel = ph.d_travel + (exit_pt - ph.exit_coords).norm();
-    result.transmitted = true;
-    result.ray = detail::ray_from_photon(
-        input,
-        ph,
-        exit_pt,
-        result.weights.empty() ? 0. : result.weights.front());
     return result;
 }
 

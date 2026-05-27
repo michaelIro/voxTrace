@@ -41,6 +41,7 @@ class XRayLibAPI{
         static double SymToZ(const char* symbol);
         static double A(int z);
         static double Rho(int z);
+        static double Fi(int z, double energy);
 
         // X-ray - Cross-sections
         static double CS_Tot(int z, double energy);

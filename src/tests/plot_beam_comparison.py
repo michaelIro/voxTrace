@@ -1,10 +1,10 @@
 """
-Beam cross-section comparison: voxTrace vs polycap
-Reads CSV files produced by Test-2 (beam_vt_E*.csv, beam_pc_E*.csv).
+Beam cross-section comparison: PolyCap trace vs simulate
+Reads CSV files produced by Test-2 (beam_trace_E*.csv, beam_sim_E*.csv).
 
 Layout per energy:  2 rows × 5 columns
-  Row 0 – voxTrace  (blue)
-  Row 1 – polycap   (red)
+    Row 0 – trace     (blue)
+    Row 1 – simulate  (red)
   Columns – exit window | f/2 | focal | 3f/2 | 2f
 
 Run from the project root after building and executing Test2:
@@ -101,8 +101,8 @@ def main():
     out_dir = os.path.join(base_dir, "test-data", "out")
 
     for energy in ENERGIES:
-        vt_file = os.path.join(out_dir, f"beam_vt_E{energy:.1f}.csv")
-        pc_file = os.path.join(out_dir, f"beam_pc_E{energy:.1f}.csv")
+        vt_file = os.path.join(out_dir, f"beam_trace_E{energy:.1f}.csv")
+        pc_file = os.path.join(out_dir, f"beam_sim_E{energy:.1f}.csv")
 
         vt = load_beam(vt_file)
         pc = load_beam(pc_file)
@@ -120,8 +120,8 @@ def main():
         )
 
         rows = [
-            (vt, "voxTrace", "steelblue"),
-            (pc, "polycap",  "firebrick"),
+            (vt, "trace", "steelblue"),
+            (pc, "simulate",  "firebrick"),
         ]
 
         # Per-column symmetric axis limits (same for both rows → fair comparison)
