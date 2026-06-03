@@ -63,10 +63,10 @@ double halton(int index, int base) {
     return result;
 }
 
-PC::Description build_description() {
+PolyCap build_optic() {
     std::vector<int> atomic_numbers(PC_Z, PC_Z + PC_NELEM);
     std::vector<double> weights(PC_WT, PC_WT + PC_NELEM);
-    PC::Profile profile = PC::Profile::ellipsoidal(
+    PolyCapProfile profile = PolyCapProfile::ellipsoidal(
         PC_LENGTH,
         PC_REXT_IN,
         PC_REXT_OUT,
@@ -74,13 +74,8 @@ PC::Description build_description() {
         PC_RCAP_OUT,
         PC_FOCAL_IN,
         PC_FOCAL_OUT);
-    return PC::Description(
-        profile,
-        PC_ROUGHNESS,
-        PC_NCAP,
-        atomic_numbers,
-        weights,
-        PC_DENSITY);
+    PolyCapWall wall(atomic_numbers, weights, PC_DENSITY, PC_ROUGHNESS);
+    return PolyCap(profile, wall, PC_NCAP);
 }
 
 Ray make_trace_ray(double energy_keV, int index) {
@@ -109,21 +104,18 @@ Ray make_trace_ray(double energy_keV, int index) {
     return ray;
 }
 
-PC::SourceParams make_source_params(double energy_keV) {
-    PC::SourceParams params;
-    params.d_source = SRC_DIST;
-    params.src_x = PC_REXT_IN;
-    params.src_y = PC_REXT_IN;
-    params.src_sigx = -1.0;
-    params.src_sigy = -1.0;
-    params.src_shiftx = 0.0;
-    params.src_shifty = 0.0;
-    params.hor_pol = 1.0;
-    params.energies = {energy_keV};
-    return params;
+PolyCapSource make_source(double energy_keV) {
+    PolyCapSource source;
+    source.setSourceDistanceCm(SRC_DIST);
+    source.setSourceHalfSizeCm(PC_REXT_IN, PC_REXT_IN);
+    source.setAngularSpread(-1.0, -1.0);
+    source.setSourceShiftCm(0.0, 0.0);
+    source.setHorizontalPolarization(1.0);
+    (void)energy_keV;
+    return source;
 }
 
-void run_trace_benchmark(const PC::Description& description,
+void run_trace_benchmark(const PolyCap& optic,
                          double energy_keV,
                          double& efficiency,
                          double& ms) {
@@ -131,9 +123,9 @@ void run_trace_benchmark(const PC::Description& description,
     auto t0 = std::chrono::steady_clock::now();
 
     for (int i = 0; i < N_TRACE_PHOTONS; ++i) {
-        PC::RayTraceResult traced = PC::trace(make_trace_ray(energy_keV, i), description);
+        PolyCapTraceResult traced = optic.trace(make_trace_ray(energy_keV, i));
         if (traced.transmitted) {
-            sum_weights += traced.ray.getProb();
+            sum_weights += traced.primaryWeight();
         }
     }
 
@@ -142,18 +134,18 @@ void run_trace_benchmark(const PC::Description& description,
     efficiency = sum_weights / (double)N_TRACE_PHOTONS;
 }
 
-void run_simulate_benchmark(const PC::Description& description,
+void run_simulate_benchmark(const PolyCap& optic,
                             double energy_keV,
                             double& efficiency,
                             double& ms) {
-    PC::SourceParams params = make_source_params(energy_keV);
+    PolyCapSource source = make_source(energy_keV);
 
     auto t0 = std::chrono::steady_clock::now();
-    PC::SimResult result = PC::simulate(params, description, N_SIM_PHOTONS, 12345ULL);
+    PolyCapSimulationResult result = optic.simulate(source, {energy_keV}, N_SIM_PHOTONS, 12345ULL);
     auto t1 = std::chrono::steady_clock::now();
 
     ms = std::chrono::duration<double, std::milli>(t1 - t0).count();
-    efficiency = result.efficiencies.empty() ? 0.0 : result.efficiencies.front();
+    efficiency = result.energies.empty() ? 0.0 : result.energies.front().efficiency;
 }
 
 void write_trace_planes(FILE* fp, const Ray& ray, double weight) {
@@ -170,20 +162,20 @@ void write_trace_planes(FILE* fp, const Ray& ray, double weight) {
     }
 }
 
-void write_sim_planes(FILE* fp, const PC::TransmittedPhoton& photon) {
+void write_sim_planes(FILE* fp, const PolyCapExitPhoton& photon) {
     for (int plane = 0; plane < 5; ++plane) {
         double dist = BEAM_PLANE_D[plane];
-        double t = (std::fabs(photon.dz) > 1.e-10) ? dist / photon.dz : 0.0;
+        double t = (std::fabs(photon.dy) > 1.e-10) ? dist / photon.dy : 0.0;
         double weight = photon.weights.empty() ? 0.0 : photon.weights.front();
         std::fprintf(fp, "%d,%.6f,%.6f,%.6f\n",
                      plane,
-                     photon.x_exit + t*photon.dx,
-                     photon.y_exit + t*photon.dy,
+                     photon.x_exit_cm + t*photon.dx,
+                     photon.z_exit_cm + t*photon.dz,
                      weight);
     }
 }
 
-void save_trace_beam_profile(const PC::Description& description, double energy_keV) {
+void save_trace_beam_profile(const PolyCap& optic, double energy_keV) {
     char fname[256];
     std::snprintf(fname, sizeof(fname), "test-data/out/beam_trace_E%.1f.csv", energy_keV);
     FILE* fp = std::fopen(fname, "w");
@@ -194,18 +186,18 @@ void save_trace_beam_profile(const PC::Description& description, double energy_k
     std::fprintf(fp, "plane_idx,x_cm,z_cm,weight\n");
 
     for (int i = 0; i < N_BEAM_TRACE; ++i) {
-        PC::RayTraceResult traced = PC::trace(make_trace_ray(energy_keV, i), description);
+        PolyCapTraceResult traced = optic.trace(make_trace_ray(energy_keV, i));
         if (!traced.transmitted) {
             continue;
         }
-        write_trace_planes(fp, traced.ray, traced.ray.getProb());
+        write_trace_planes(fp, traced.ray, traced.primaryWeight());
     }
 
     std::fclose(fp);
     std::printf("  trace     -> %s\n", fname);
 }
 
-void save_sim_beam_profile(const PC::Description& description, double energy_keV) {
+void save_sim_beam_profile(const PolyCap& optic, double energy_keV) {
     char fname[256];
     std::snprintf(fname, sizeof(fname), "test-data/out/beam_sim_E%.1f.csv", energy_keV);
     FILE* fp = std::fopen(fname, "w");
@@ -215,17 +207,17 @@ void save_sim_beam_profile(const PC::Description& description, double energy_keV
     }
     std::fprintf(fp, "plane_idx,x_cm,z_cm,weight\n");
 
-    PC::SourceParams params = make_source_params(energy_keV);
-    PC::SimResult result = PC::simulate(params, description, N_BEAM_SIM, 67890ULL);
-    for (const PC::TransmittedPhoton& photon : result.photons) {
+    PolyCapSource source = make_source(energy_keV);
+    PolyCapSimulationResult result = optic.simulate(source, {energy_keV}, N_BEAM_SIM, 67890ULL);
+    for (const PolyCapExitPhoton& photon : result.photons) {
         write_sim_planes(fp, photon);
     }
 
     std::fclose(fp);
     std::printf("  simulate  -> %s  (%lld exits / %lld launched)\n",
                 fname,
-                (long long)result.n_transmitted,
-                (long long)result.n_launched);
+                (long long)result.transmitted_count,
+                (long long)result.launched_count);
 }
 
 }  // namespace
@@ -233,13 +225,13 @@ void save_sim_beam_profile(const PC::Description& description, double energy_keV
 int main() {
     std::filesystem::create_directories("test-data/out");
 
-    PC::Description description = build_description();
+    PolyCap optic = build_optic();
 
     std::printf("pc-236  L=%.2f cm  rExt=(%.4f->%.4f)cm  rho=%.2f g/cc\n",
                 PC_LENGTH, PC_REXT_IN, PC_REXT_OUT, PC_DENSITY);
     std::printf("Source: point at %.0f cm, cone half-angle=%.2e rad (->entrance r=%.4f cm)\n",
                 SRC_DIST, SRC_CONE_ANGLE, PC_REXT_IN);
-    std::printf("Open area fraction: %.4f\n", description.open_area);
+    std::printf("Open area fraction: %.4f\n", optic.openArea());
     std::printf("Trace photons = %d, simulate transmitted target = %d\n\n",
                 N_TRACE_PHOTONS, N_SIM_PHOTONS);
 
@@ -254,8 +246,8 @@ int main() {
         double sim_eff = 0.0;
         double sim_ms = 0.0;
 
-        run_trace_benchmark(description, e, trace_eff, trace_ms);
-        run_simulate_benchmark(description, e, sim_eff, sim_ms);
+        run_trace_benchmark(optic, e, trace_eff, trace_ms);
+        run_simulate_benchmark(optic, e, sim_eff, sim_ms);
 
         std::printf("%-12.1f  %-14.6f  %-14.6f  %-12.1f  %-12.1f  %.2fx\n",
                     e,
@@ -271,8 +263,8 @@ int main() {
     for (int ei = 0; ei < N_ENERGIES; ++ei) {
         double e = ENERGIES[ei];
         std::printf("%.1f keV\n", e);
-        save_trace_beam_profile(description, e);
-        save_sim_beam_profile(description, e);
+        save_trace_beam_profile(optic, e);
+        save_sim_beam_profile(optic, e);
     }
 
     return 0;

@@ -15,6 +15,8 @@
 #include <algorithm>
 #include <stdexcept>
 
+#include "Platform.hpp"
+#include "Material.hpp"
 #include "ChemElement.hpp"
 #include "Ray.hpp"
 #include "../api/XRayLibAPI.hpp"
@@ -30,7 +32,7 @@
 #  undef R0
 #endif
 
-namespace PC {
+namespace polycap_detail {
 
 // ─────────────────────────── Physical constants (cgs / keV) ─────────────────
 static constexpr double HC      = 1.23984193e-7;       // keV·cm
@@ -225,44 +227,6 @@ private:
         }
         return elements_;
     }
-};
-
-// ──────────────────────────── Source parameters ───────────────────────────────
-struct SourceParams {
-    double d_source   = 500.;   // source-to-optic distance [cm]
-    double src_x      = 0.01;   // source half-width x [cm]
-    double src_y      = 0.01;   // source half-width y [cm]
-    double src_sigx   = -1.;    // angular spread x; <0 = uniform over PC entrance
-    double src_sigy   = -1.;    // angular spread y; <0 = uniform over PC entrance
-    double src_shiftx = 0.;     // source centre offset x [cm]
-    double src_shifty = 0.;     // source centre offset y [cm]
-    double hor_pol    = 0.9;    // horizontal polarisation fraction [-1, 1]
-    std::vector<double> energies;  // photon energies [keV]
-};
-
-// ────────────────────────── Simulation output types ──────────────────────────
-struct TransmittedPhoton {
-    double x_exit, y_exit, z_exit;      // propagated to exit plane [cm]
-    double dx, dy, dz;                   // exit direction (unit vector)
-    std::vector<double> weights;         // per-energy weights
-    int64_t n_refl  = 0;
-    double  d_travel = 0.;
-};
-
-struct SimResult {
-    std::vector<TransmittedPhoton> photons;
-    std::vector<double> efficiencies;   // per energy = sum_weight / n_transmitted
-    std::vector<double> energies;       // copy of source energies [keV]
-    int64_t n_transmitted = 0;
-    int64_t n_launched    = 0;          // total photons launched (all attempts)
-};
-
-struct RayTraceResult {
-    Ray ray;
-    std::vector<double> weights;
-    int64_t n_refl = 0;
-    double d_travel = 0.;
-    bool transmitted = false;
 };
 
 // ═══════════════════════════ Internal implementation ═════════════════════════
@@ -758,192 +722,646 @@ inline bool project_to_exit(const PhotonState& ph, const Description& desc, Vec3
     return within_hex_boundary(prof.ext[prof.nmax], exit_pt);
 }
 
-// ── Generate a source photon (polycap_source_get_photon) ─────────────────────
-template<class RNG>
-inline PhotonState generate_photon(const SourceParams& sp,
-                                    const Description& desc, RNG& rng) {
-    std::uniform_real_distribution<double> uni(0., 1.);
-
-    // ── Source position (elliptical beam profile) ─────────────────────────────
-    double r   = uni(rng);
-    double phi = std::atan(sp.src_y/sp.src_x * std::tan(2.*M_PI*r/4.));
-    r = uni(rng);
-    if (r >= 0.25 && r < 0.50) phi = M_PI - phi;
-    if (r >= 0.50 && r < 0.75) phi = M_PI + phi;
-    if (r >= 0.75)              phi = -phi;
-
-    double max_rad = sp.src_x*sp.src_y /
-                     std::sqrt((sp.src_y*std::cos(phi))*(sp.src_y*std::cos(phi)) +
-                                (sp.src_x*std::sin(phi))*(sp.src_x*std::sin(phi)));
-    r = uni(rng);
-    Vec3 src_pos = { std::sqrt(r)*max_rad*std::cos(phi) + sp.src_shiftx,
-                     std::sqrt(r)*max_rad*std::sin(phi) + sp.src_shifty,
-                     0. };
-
-    // ── Entrance coordinates and direction ────────────────────────────────────
-    Vec3 start_coords, start_dir;
-    if (sp.src_sigx < 0. || sp.src_sigy < 0.) {
-        // Uniform sampling over PC entrance window
-        double ext0 = desc.profile.ext[0];
-        double n_shells = std::round(std::sqrt(12.*desc.n_cap - 3.)/6. - 0.5);
-        if (n_shells == 0.) {
-            // Monocapillary: uniform in square, accept circle
-            do {
-                r = uni(rng); start_coords.x = (2.*r-1.) * desc.profile.cap[0];
-                r = uni(rng); start_coords.y = (2.*r-1.) * desc.profile.cap[0];
-            } while (start_coords.x*start_coords.x + start_coords.y*start_coords.y
-                     > desc.profile.cap[0]*desc.profile.cap[0]);
-        } else {
-            // Polycapillary: accept–reject within hexagonal boundary
-            do {
-                r = uni(rng); start_coords.x = (2.*r-1.) * ext0;
-                r = uni(rng); start_coords.y = (2.*r-1.) * ext0;
-            } while (!within_hex_boundary(ext0, start_coords));
-        }
-        start_coords.z = 0.;
-        start_dir = { start_coords.x - src_pos.x,
-                      start_coords.y - src_pos.y,
-                      sp.d_source };
-    } else {
-        // Non-uniform: direction sampled within ±sigx/sigy cone
-        r = uni(rng); start_dir.x = sp.src_sigx * (1. - 2.*std::fabs(r));
-        r = uni(rng); start_dir.y = sp.src_sigy * (1. - 2.*std::fabs(r));
-        start_dir.z = 1.;
-        start_coords.x = src_pos.x + start_dir.x * sp.d_source / start_dir.z;
-        start_coords.y = src_pos.y + start_dir.y * sp.d_source / start_dir.z;
-        start_coords.z = 0.;
-    }
-    start_dir.normalize();
-
-    // ── Electric vector (Gram–Schmidt orthogonalisation to direction) ─────────
-    double frac_hor = (1. + sp.hor_pol) / 2.;
-    r = uni(rng);
-    Vec3 elecv = (std::fabs(r) <= frac_hor)
-               ? Vec3{1., 0., 0.}   // horizontal
-               : Vec3{0., 1., 0.};  // vertical
-
-    // Remove component along direction: e_perp = (e - dot(e,d)*d) / |e - dot(e,d)*d|
-    double cosalpha = elecv.dot(start_dir);
-    double alpha    = std::acos(cosalpha);
-    double c_ae     = 1. / std::sin(alpha);
-    double c_be     = -c_ae * cosalpha;
-    elecv = elecv*c_ae + start_dir*c_be;
-    elecv.normalize();
-
-    PhotonState ph;
-    ph.start_coords   = start_coords;
-    ph.exit_coords    = start_coords;
-    ph.start_dir      = start_dir;
-    ph.exit_dir       = start_dir;
-    ph.start_elecv    = elecv;
-    ph.exit_elecv     = elecv;
-    ph.src_start_coords = src_pos;
-    ph.energies       = sp.energies;
-    return ph;
-}
-
 }  // namespace detail
+}  // namespace polycap_detail
 
+// ── PolyCapProfile ───────────────────────────────────────────────────────────
+// New facade around the translated internal profile so callers can move to the
+// package-style object model without exposing the translated runtime API.
 
-// ═══════════════════════════════ Public API ═══════════════════════════════════
+class PolyCapProfile {
+    polycap_detail::Profile native_profile_;
 
-/// Simulate n_photons transmitted photons through the polycapillary.
-/// Loops until exactly n_photons reach the exit window.
-/// \param seed  RNG seed; 0 = use std::random_device
-inline SimResult simulate(const SourceParams& sp, const Description& desc,
-                           int n_photons, uint64_t seed = 0) {
-    if (seed == 0) {
-        std::random_device rd;
-        seed = ((uint64_t)rd() << 32) | rd();
+public:
+    PolyCapProfile() = default;
+    explicit PolyCapProfile(const polycap_detail::Profile& nativeProfile)
+        : native_profile_(nativeProfile) {}
+
+    static PolyCapProfile conical(double lengthCm,
+                                  double extUpstreamCm,
+                                  double extDownstreamCm,
+                                  double capUpstreamCm,
+                                  double capDownstreamCm) {
+        return PolyCapProfile(polycap_detail::Profile::conical(lengthCm,
+                                                   extUpstreamCm,
+                                                   extDownstreamCm,
+                                                   capUpstreamCm,
+                                                   capDownstreamCm));
     }
-    std::mt19937_64 rng(seed);
 
-    const Profile& prof = desc.profile;
-    double z_exit = prof.z[prof.nmax];
-    double n_shells = std::round(std::sqrt(12.*desc.n_cap - 3.)/6. - 0.5);
+    static PolyCapProfile ellipsoidal(double lengthCm,
+                                      double extUpstreamCm,
+                                      double extDownstreamCm,
+                                      double capUpstreamCm,
+                                      double capDownstreamCm,
+                                      double focalDistanceInCm,
+                                      double focalDistanceOutCm) {
+        return PolyCapProfile(polycap_detail::Profile::ellipsoidal(lengthCm,
+                                                       extUpstreamCm,
+                                                       extDownstreamCm,
+                                                       capUpstreamCm,
+                                                       capDownstreamCm,
+                                                       focalDistanceInCm,
+                                                       focalDistanceOutCm));
+    }
 
-    SimResult result;
-    result.energies = sp.energies;
-    int ne = (int)sp.energies.size();
-    result.efficiencies.assign(ne, 0.);
+    static PolyCapProfile paraboloidal(double lengthCm,
+                                       double extUpstreamCm,
+                                       double extDownstreamCm,
+                                       double capUpstreamCm,
+                                       double capDownstreamCm,
+                                       double focalDistanceInCm,
+                                       double focalDistanceOutCm) {
+        return PolyCapProfile(polycap_detail::Profile::paraboloidal(lengthCm,
+                                                        extUpstreamCm,
+                                                        extDownstreamCm,
+                                                        capUpstreamCm,
+                                                        capDownstreamCm,
+                                                        focalDistanceInCm,
+                                                        focalDistanceOutCm));
+    }
 
-    std::vector<double> sum_weights(ne, 0.);
+    KOKKOS_INLINE_FUNCTION const polycap_detail::Profile& native() const {
+        return native_profile_;
+    }
 
-    while (result.n_transmitted < n_photons) {
-        detail::PhotonState ph = detail::generate_photon(sp, desc, rng);
-        int iesc = detail::launch_photon(ph, desc);
-        result.n_launched++;
+    KOKKOS_INLINE_FUNCTION double lengthCm() const {
+        return native_profile_.z.empty() ? 0. : native_profile_.z.back();
+    }
 
-        // Retry photons that are absorbed or hit the wall at entrance
-        if (iesc == 0 || iesc == 2 || iesc == -2 || iesc == -1) continue;
+    KOKKOS_INLINE_FUNCTION double entranceExtRadiusCm() const {
+        return native_profile_.ext.empty() ? 0. : native_profile_.ext.front();
+    }
 
-        // iesc == 1: photon reached end; check if within exit window
-        Vec3 exit_pt;
-        if (!detail::project_to_exit(ph, desc, exit_pt)) {
-            continue;  // degenerate: skip
+    KOKKOS_INLINE_FUNCTION double exitExtRadiusCm() const {
+        return native_profile_.ext.empty() ? 0. : native_profile_.ext.back();
+    }
+
+    KOKKOS_INLINE_FUNCTION double entranceCapRadiusCm() const {
+        return native_profile_.cap.empty() ? 0. : native_profile_.cap.front();
+    }
+
+    KOKKOS_INLINE_FUNCTION double exitCapRadiusCm() const {
+        return native_profile_.cap.empty() ? 0. : native_profile_.cap.back();
+    }
+};
+
+// ── PolyCapWall ──────────────────────────────────────────────────────────────
+// Fixed-capacity validation matches the rest of core, while the translated
+// still owns the actual tracing data for now.
+
+class PolyCapWall {
+    std::vector<int> atomic_numbers_;
+    std::vector<double> weight_fractions_;
+    double density_g_per_cm3_ = 0.;
+    double roughness_angstrom_ = 0.;
+
+public:
+    PolyCapWall() = default;
+
+    PolyCapWall(std::vector<int> atomicNumbers,
+                std::vector<double> weightFractions,
+                double densityGPerCm3,
+                double roughnessAngstrom)
+        : atomic_numbers_(std::move(atomicNumbers))
+        , weight_fractions_(normalizeWeights(std::move(weightFractions)))
+        , density_g_per_cm3_(densityGPerCm3)
+        , roughness_angstrom_(roughnessAngstrom) {
+        validate();
+    }
+
+    const std::vector<int>& atomicNumbers() const {
+        return atomic_numbers_;
+    }
+
+    const std::vector<double>& weightFractions() const {
+        return weight_fractions_;
+    }
+
+    KOKKOS_INLINE_FUNCTION double densityGPerCm3() const {
+        return density_g_per_cm3_;
+    }
+
+    KOKKOS_INLINE_FUNCTION double roughnessAngstrom() const {
+        return roughness_angstrom_;
+    }
+
+private:
+    void validate() const {
+        if (atomic_numbers_.size() != weight_fractions_.size()) {
+            throw std::invalid_argument("PolyCap wall needs one weight per element");
+        }
+        if (atomic_numbers_.size() > static_cast<std::size_t>(MAX_ELEMENTS)) {
+            throw std::invalid_argument("PolyCap wall exceeds MAX_ELEMENTS");
+        }
+    }
+
+    static std::vector<double> normalizeWeights(std::vector<double> weightFractions) {
+        double sum = 0.;
+        for (double weight : weightFractions) {
+            sum += weight;
+        }
+        if (sum <= 0.) {
+            throw std::invalid_argument("PolyCap wall weights must sum to a positive value");
+        }
+        for (double& weight : weightFractions) {
+            weight /= sum;
+        }
+        return weightFractions;
+    }
+};
+
+// ── PolyCapSource ────────────────────────────────────────────────────────────
+// Source geometry separated from the energy list so the public API can move to
+// per-energy orchestration while the translated runtime stays internal.
+
+class PolyCapSource {
+    double source_distance_cm_ = 500.;
+    double source_half_width_x_cm_ = 0.01;
+    double source_half_width_y_cm_ = 0.01;
+    double angular_spread_x_ = -1.;
+    double angular_spread_y_ = -1.;
+    double source_shift_x_cm_ = 0.;
+    double source_shift_y_cm_ = 0.;
+    double horizontal_polarization_ = 0.9;
+
+public:
+    KOKKOS_INLINE_FUNCTION PolyCapSource() = default;
+
+    KOKKOS_INLINE_FUNCTION void setSourceDistanceCm(double sourceDistanceCm) {
+        source_distance_cm_ = sourceDistanceCm;
+    }
+
+    KOKKOS_INLINE_FUNCTION void setSourceHalfSizeCm(double halfWidthXCm, double halfWidthYCm) {
+        source_half_width_x_cm_ = halfWidthXCm;
+        source_half_width_y_cm_ = halfWidthYCm;
+    }
+
+    KOKKOS_INLINE_FUNCTION void setAngularSpread(double spreadX, double spreadY) {
+        angular_spread_x_ = spreadX;
+        angular_spread_y_ = spreadY;
+    }
+
+    KOKKOS_INLINE_FUNCTION void setSourceShiftCm(double shiftXCm, double shiftYCm) {
+        source_shift_x_cm_ = shiftXCm;
+        source_shift_y_cm_ = shiftYCm;
+    }
+
+    KOKKOS_INLINE_FUNCTION void setHorizontalPolarization(double horizontalPolarization) {
+        horizontal_polarization_ = horizontalPolarization;
+    }
+
+    KOKKOS_INLINE_FUNCTION double sourceDistanceCm() const {
+        return source_distance_cm_;
+    }
+
+    KOKKOS_INLINE_FUNCTION double sourceHalfWidthXCm() const {
+        return source_half_width_x_cm_;
+    }
+
+    KOKKOS_INLINE_FUNCTION double sourceHalfWidthYCm() const {
+        return source_half_width_y_cm_;
+    }
+
+    KOKKOS_INLINE_FUNCTION double angularSpreadX() const {
+        return angular_spread_x_;
+    }
+
+    KOKKOS_INLINE_FUNCTION double angularSpreadY() const {
+        return angular_spread_y_;
+    }
+
+    KOKKOS_INLINE_FUNCTION double sourceShiftXCm() const {
+        return source_shift_x_cm_;
+    }
+
+    KOKKOS_INLINE_FUNCTION double sourceShiftYCm() const {
+        return source_shift_y_cm_;
+    }
+
+    KOKKOS_INLINE_FUNCTION double horizontalPolarization() const {
+        return horizontal_polarization_;
+    }
+};
+
+// ── Facade results ───────────────────────────────────────────────────────────
+
+struct PolyCapTraceResult {
+    Ray ray;
+    std::vector<double> weights;
+    int64_t reflections = 0;
+    double travel_distance_cm = 0.;
+    bool transmitted = false;
+
+    double primaryWeight() const {
+        return weights.empty() ? ray.getProb() : weights.front();
+    }
+};
+
+struct PolyCapExitPhoton {
+    double x_exit_cm = 0.;
+    double y_exit_cm = 0.;
+    double z_exit_cm = 0.;
+    double dx = 0.;
+    double dy = 0.;
+    double dz = 0.;
+    std::vector<double> weights;
+    int64_t reflections = 0;
+    double travel_distance_cm = 0.;
+};
+
+struct PolyCapEnergySummary {
+    double energy_keV = 0.;
+    double efficiency = 0.;
+};
+
+struct PolyCapBatchTraceResult {
+    std::vector<PolyCapTraceResult> rays;
+    int64_t transmitted_count = 0;
+};
+
+struct PolyCapSimulationResult {
+    std::vector<PolyCapExitPhoton> photons;
+    std::vector<PolyCapEnergySummary> energies;
+    int64_t launched_count = 0;
+    int64_t transmitted_count = 0;
+};
+
+// ── PolyCap ──────────────────────────────────────────────────────────────────
+// Facade that matches the rest of core more closely while owning the translated
+// tracing runtime as an internal implementation detail.
+
+class PolyCap {
+    PolyCapProfile profile_;
+    PolyCapWall wall_;
+    int64_t capillary_count_ = 0;
+    polycap_detail::Description description_;
+    double open_area_ = 0.;
+
+public:
+    PolyCap() = default;
+
+    PolyCap(PolyCapProfile profile, PolyCapWall wall, int64_t capillaryCount)
+        : profile_(std::move(profile))
+        , wall_(std::move(wall))
+        , capillary_count_(capillaryCount)
+        , description_(profile_.native(),
+                       wall_.roughnessAngstrom(),
+                       capillary_count_,
+                       wall_.atomicNumbers(),
+                       wall_.weightFractions(),
+                       wall_.densityGPerCm3())
+        , open_area_(description_.open_area) {}
+
+    const PolyCapProfile& profile() const {
+        return profile_;
+    }
+
+    const PolyCapWall& wall() const {
+        return wall_;
+    }
+
+    KOKKOS_INLINE_FUNCTION int64_t capillaryCount() const {
+        return capillary_count_;
+    }
+
+    double openArea() const {
+        return open_area_;
+    }
+
+    PolyCapTraceResult trace(const Ray& ray) const {
+        PolyCapTraceResult result;
+        result.ray = ray;
+        result.ray.setIAFlag(false);
+        result.ray.setProb(0.f);
+
+        polycap_detail::detail::PhotonState photon = polycap_detail::detail::photon_from_ray(ray);
+        int status = polycap_detail::detail::launch_photon(photon, description_);
+        if (status != 1) {
+            return result;
         }
 
-        // Record transmitted photon
-        TransmittedPhoton tp;
-        tp.x_exit  = exit_pt.x;
-        tp.y_exit  = exit_pt.y;
-        tp.z_exit  = exit_pt.z;
-        tp.dx      = ph.exit_dir.x;
-        tp.dy      = ph.exit_dir.y;
-        tp.dz      = ph.exit_dir.z;
-        tp.weights = ph.weight;
-        tp.n_refl  = ph.i_refl;
-        // total d_travel includes last free-flight to exit plane
-        double dx_exit = exit_pt.x - ph.exit_coords.x;
-        double dy_exit = exit_pt.y - ph.exit_coords.y;
-        double dz_exit = exit_pt.z - ph.exit_coords.z;
-        tp.d_travel = ph.d_travel +
-                      std::sqrt(dx_exit*dx_exit + dy_exit*dy_exit + dz_exit*dz_exit);
-        result.photons.push_back(tp);
+        polycap_detail::Vec3 exit_point;
+        if (!polycap_detail::detail::project_to_exit(photon, description_, exit_point)) {
+            return result;
+        }
 
-        for (int e = 0; e < ne; ++e) sum_weights[e] += ph.weight[e];
-        result.n_transmitted++;
-    }
+        result.weights = photon.weight;
+        double input_weight = ray.getProb();
+        for (double& weight : result.weights) {
+            weight *= input_weight;
+        }
 
-    // Efficiency = total transmitted weight / total launched photons (like polycap library)
-    for (int e = 0; e < ne; ++e)
-        result.efficiencies[e] = sum_weights[e] / (double)result.n_launched;
-
-    return result;
-}
-
-inline RayTraceResult trace(const Ray& input, const Description& desc) {
-    RayTraceResult result;
-    result.ray = input;
-    result.ray.setIAFlag(false);
-    result.ray.setProb(0.f);
-
-    detail::PhotonState ph = detail::photon_from_ray(input);
-    int iesc = detail::launch_photon(ph, desc);
-    if (iesc != 1) {
+        result.reflections = photon.i_refl;
+        result.travel_distance_cm = photon.d_travel + (exit_point - photon.exit_coords).norm();
+        result.transmitted = true;
+        result.ray = polycap_detail::detail::ray_from_photon(
+            ray,
+            photon,
+            exit_point,
+            result.weights.empty() ? 0. : result.weights.front());
         return result;
     }
 
-    Vec3 exit_pt;
-    if (!detail::project_to_exit(ph, desc, exit_pt)) {
+    PolyCapBatchTraceResult traceBatch(const std::vector<Ray>& rays) const {
+        PolyCapBatchTraceResult batch;
+        batch.rays.resize(rays.size());
+
+        if (rays.empty()) {
+            return batch;
+        }
+
+#if defined(VOXTRACE_HOST_ONLY) || defined(VOXTRACE_METAL) || defined(__METAL_VERSION__)
+        for (std::size_t i = 0; i < rays.size(); ++i) {
+            batch.rays[i] = trace(rays[i]);
+            batch.transmitted_count += batch.rays[i].transmitted ? 1 : 0;
+        }
+#else
+        const int ray_count = static_cast<int>(rays.size());
+        int64_t transmitted_count = 0;
+        Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace> policy(0, ray_count);
+
+        Kokkos::parallel_reduce(
+            "polycap_trace_batch",
+            policy,
+            [this, &rays, &batch](int index, int64_t& local_transmitted) {
+                PolyCapTraceResult traced = trace(rays[index]);
+                if (traced.transmitted) {
+                    ++local_transmitted;
+                }
+                batch.rays[index] = std::move(traced);
+            },
+            transmitted_count);
+
+        Kokkos::fence();
+        batch.transmitted_count = transmitted_count;
+#endif
+
+        return batch;
+    }
+
+    PolyCapSimulationResult simulate(const PolyCapSource& source,
+                                     const std::vector<double>& energiesKeV,
+                                     int transmittedPhotons,
+                                     uint64_t seed = 0) const {
+        if (energiesKeV.empty() || transmittedPhotons <= 0) {
+            return PolyCapSimulationResult();
+        }
+
+        if (energiesKeV.size() == 1) {
+            return simulateSingleEnergyBatch(source, energiesKeV.front(), transmittedPhotons, seed);
+        }
+
+        return simulateMultiEnergy(source, energiesKeV, transmittedPhotons, seed);
+    }
+
+private:
+    static uint64_t resolveSeed(uint64_t seed) {
+        if (seed != 0) {
+            return seed;
+        }
+
+        std::random_device rd;
+        return (static_cast<uint64_t>(rd()) << 32) | static_cast<uint64_t>(rd());
+    }
+
+    template<class RNG>
+    polycap_detail::detail::PhotonState generateLaunchPhoton(const PolyCapSource& source,
+                                                             const std::vector<double>& energiesKeV,
+                                                             RNG& rng) const {
+        std::uniform_real_distribution<double> unit(0., 1.);
+
+        double r = unit(rng);
+        double phi = std::atan(source.sourceHalfWidthYCm() / source.sourceHalfWidthXCm() *
+                               std::tan(2. * M_PI * r / 4.));
+        r = unit(rng);
+        if (r >= 0.25 && r < 0.50) phi = M_PI - phi;
+        if (r >= 0.50 && r < 0.75) phi = M_PI + phi;
+        if (r >= 0.75) phi = -phi;
+
+        double max_radius = source.sourceHalfWidthXCm() * source.sourceHalfWidthYCm() /
+                            std::sqrt(
+                                std::pow(source.sourceHalfWidthYCm() * std::cos(phi), 2) +
+                                std::pow(source.sourceHalfWidthXCm() * std::sin(phi), 2));
+        r = unit(rng);
+        polycap_detail::Vec3 source_position = {
+            std::sqrt(r) * max_radius * std::cos(phi) + source.sourceShiftXCm(),
+            std::sqrt(r) * max_radius * std::sin(phi) + source.sourceShiftYCm(),
+            0.
+        };
+
+        polycap_detail::Vec3 start_coords;
+        polycap_detail::Vec3 start_dir;
+        if (source.angularSpreadX() < 0. || source.angularSpreadY() < 0.) {
+            double entrance_radius = description_.profile.ext[0];
+            double n_shells = std::round(std::sqrt(12. * description_.n_cap - 3.) / 6. - 0.5);
+            if (n_shells == 0.) {
+                do {
+                    r = unit(rng);
+                    start_coords.x = (2. * r - 1.) * description_.profile.cap[0];
+                    r = unit(rng);
+                    start_coords.y = (2. * r - 1.) * description_.profile.cap[0];
+                } while (start_coords.x * start_coords.x + start_coords.y * start_coords.y >
+                         description_.profile.cap[0] * description_.profile.cap[0]);
+            } else {
+                do {
+                    r = unit(rng);
+                    start_coords.x = (2. * r - 1.) * entrance_radius;
+                    r = unit(rng);
+                    start_coords.y = (2. * r - 1.) * entrance_radius;
+                } while (!polycap_detail::detail::within_hex_boundary(entrance_radius, start_coords));
+            }
+
+            start_coords.z = 0.;
+            start_dir = {
+                start_coords.x - source_position.x,
+                start_coords.y - source_position.y,
+                source.sourceDistanceCm()
+            };
+        } else {
+            r = unit(rng);
+            start_dir.x = source.angularSpreadX() * (1. - 2. * std::fabs(r));
+            r = unit(rng);
+            start_dir.y = source.angularSpreadY() * (1. - 2. * std::fabs(r));
+            start_dir.z = 1.;
+            start_coords.x = source_position.x + start_dir.x * source.sourceDistanceCm() / start_dir.z;
+            start_coords.y = source_position.y + start_dir.y * source.sourceDistanceCm() / start_dir.z;
+            start_coords.z = 0.;
+        }
+        start_dir.normalize();
+
+        double horizontal_fraction = (1. + source.horizontalPolarization()) / 2.;
+        polycap_detail::Vec3 electric_vector = (unit(rng) <= horizontal_fraction)
+                                            ? polycap_detail::Vec3{1., 0., 0.}
+                                            : polycap_detail::Vec3{0., 1., 0.};
+        electric_vector = polycap_detail::detail::orthogonalize(start_dir, electric_vector);
+
+        polycap_detail::detail::PhotonState photon;
+        photon.start_coords = start_coords;
+        photon.exit_coords = start_coords;
+        photon.start_dir = start_dir;
+        photon.exit_dir = start_dir;
+        photon.start_elecv = electric_vector;
+        photon.exit_elecv = electric_vector;
+        photon.src_start_coords = source_position;
+        photon.energies = energiesKeV;
+        return photon;
+    }
+
+    Ray buildLaunchRay(const polycap_detail::detail::PhotonState& photon, int rayIndex) const {
+        polycap_detail::Vec3 repo_start = polycap_detail::detail::pc_to_repo(photon.start_coords);
+        polycap_detail::Vec3 repo_dir = polycap_detail::detail::pc_to_repo(photon.start_dir);
+        repo_dir.normalize();
+        polycap_detail::Vec3 repo_s = polycap_detail::detail::orthogonalize(
+            repo_dir,
+            polycap_detail::detail::pc_to_repo(photon.start_elecv));
+        polycap_detail::Vec3 repo_p = repo_dir.cross(repo_s);
+        if (repo_p.norm2() < 1.e-12) {
+            repo_p = polycap_detail::detail::orthogonal_basis(repo_dir);
+        } else {
+            repo_p.normalize();
+        }
+
+        Ray ray;
+        ray.setStartCoordinates(static_cast<float>(repo_start.x),
+                                static_cast<float>(repo_start.y),
+                                static_cast<float>(repo_start.z));
+        ray.setEndCoordinates(static_cast<float>(repo_dir.x),
+                              static_cast<float>(repo_dir.y),
+                              static_cast<float>(repo_dir.z));
+        ray.setSPol(static_cast<float>(repo_s.x),
+                    static_cast<float>(repo_s.y),
+                    static_cast<float>(repo_s.z));
+        ray.setPPol(static_cast<float>(repo_p.x),
+                    static_cast<float>(repo_p.y),
+                    static_cast<float>(repo_p.z));
+        ray.setEnergyKeV(photon.energies.empty() ? 0.f : static_cast<float>(photon.energies.front()));
+        ray.setProb(1.f);
+        ray.setIAFlag(false);
+        ray.setIANum(rayIndex);
+        ray.setOOBFlag(false);
+        ray.setTIn(0.f);
+        return ray;
+    }
+
+    static PolyCapExitPhoton buildExitPhoton(const PolyCapTraceResult& traced) {
+        PolyCapExitPhoton photon;
+        photon.x_exit_cm = traced.ray.getStartX();
+        photon.y_exit_cm = traced.ray.getStartY();
+        photon.z_exit_cm = traced.ray.getStartZ();
+        photon.dx = traced.ray.getDirX();
+        photon.dy = traced.ray.getDirY();
+        photon.dz = traced.ray.getDirZ();
+        photon.weights = traced.weights;
+        photon.reflections = traced.reflections;
+        photon.travel_distance_cm = traced.travel_distance_cm;
+        return photon;
+    }
+
+    static PolyCapExitPhoton buildExitPhoton(const polycap_detail::detail::PhotonState& photonState,
+                                             const polycap_detail::Vec3& exitPoint) {
+        PolyCapExitPhoton photon;
+        polycap_detail::Vec3 repo_exit = polycap_detail::detail::pc_to_repo(exitPoint);
+        polycap_detail::Vec3 repo_dir = polycap_detail::detail::pc_to_repo(photonState.exit_dir);
+        repo_dir.normalize();
+        photon.x_exit_cm = repo_exit.x;
+        photon.y_exit_cm = repo_exit.y;
+        photon.z_exit_cm = repo_exit.z;
+        photon.dx = repo_dir.x;
+        photon.dy = repo_dir.y;
+        photon.dz = repo_dir.z;
+        photon.weights = photonState.weight;
+        photon.reflections = photonState.i_refl;
+        photon.travel_distance_cm = photonState.d_travel + (exitPoint - photonState.exit_coords).norm();
+        return photon;
+    }
+
+    PolyCapSimulationResult simulateSingleEnergyBatch(const PolyCapSource& source,
+                                                      double energyKeV,
+                                                      int transmittedPhotons,
+                                                      uint64_t seed) const {
+        PolyCapSimulationResult result;
+        PolyCapEnergySummary summary;
+        summary.energy_keV = energyKeV;
+
+        std::mt19937_64 rng(resolveSeed(seed));
+        double sum_weights = 0.;
+        int launched_index = 0;
+
+        while (result.transmitted_count < transmittedPhotons) {
+            int batch_size = transmittedPhotons - static_cast<int>(result.transmitted_count);
+            std::vector<Ray> launch_rays;
+            launch_rays.reserve(static_cast<std::size_t>(batch_size));
+
+            for (int i = 0; i < batch_size; ++i) {
+                polycap_detail::detail::PhotonState launch_photon =
+                    generateLaunchPhoton(source, {energyKeV}, rng);
+                launch_rays.push_back(buildLaunchRay(launch_photon, launched_index + i));
+            }
+
+            launched_index += batch_size;
+            result.launched_count += batch_size;
+
+            PolyCapBatchTraceResult traced_batch = traceBatch(launch_rays);
+            for (const PolyCapTraceResult& traced : traced_batch.rays) {
+                if (!traced.transmitted) {
+                    continue;
+                }
+
+                result.photons.push_back(buildExitPhoton(traced));
+                result.transmitted_count += 1;
+                sum_weights += traced.primaryWeight();
+            }
+        }
+
+        summary.efficiency = (result.launched_count > 0)
+                           ? sum_weights / static_cast<double>(result.launched_count)
+                           : 0.;
+        result.energies.push_back(summary);
         return result;
     }
 
-    result.weights = ph.weight;
-    double input_weight = input.getProb();
-    for (double& weight : result.weights) {
-        weight *= input_weight;
+    PolyCapSimulationResult simulateMultiEnergy(const PolyCapSource& source,
+                                                const std::vector<double>& energiesKeV,
+                                                int transmittedPhotons,
+                                                uint64_t seed) const {
+        PolyCapSimulationResult result;
+        std::mt19937_64 rng(resolveSeed(seed));
+        std::vector<double> sum_weights(energiesKeV.size(), 0.);
+
+        result.energies.resize(energiesKeV.size());
+        for (std::size_t i = 0; i < energiesKeV.size(); ++i) {
+            result.energies[i].energy_keV = energiesKeV[i];
+        }
+
+        while (result.transmitted_count < transmittedPhotons) {
+            polycap_detail::detail::PhotonState photon =
+                generateLaunchPhoton(source, energiesKeV, rng);
+            int status = polycap_detail::detail::launch_photon(photon, description_);
+            result.launched_count += 1;
+
+            if (status == 0 || status == 2 || status == -2 || status == -1) {
+                continue;
+            }
+
+            polycap_detail::Vec3 exit_point;
+            if (!polycap_detail::detail::project_to_exit(photon, description_, exit_point)) {
+                continue;
+            }
+
+            result.photons.push_back(buildExitPhoton(photon, exit_point));
+            result.transmitted_count += 1;
+            for (std::size_t i = 0; i < energiesKeV.size(); ++i) {
+                sum_weights[i] += photon.weight[i];
+            }
+        }
+
+        for (std::size_t i = 0; i < energiesKeV.size(); ++i) {
+            result.energies[i].efficiency = (result.launched_count > 0)
+                                          ? sum_weights[i] / static_cast<double>(result.launched_count)
+                                          : 0.;
+        }
+
+        return result;
     }
-
-    result.n_refl = ph.i_refl;
-    result.d_travel = ph.d_travel + (exit_pt - ph.exit_coords).norm();
-    result.transmitted = true;
-    result.ray = detail::ray_from_photon(
-        input,
-        ph,
-        exit_pt,
-        result.weights.empty() ? 0. : result.weights.front());
-    return result;
-}
-
-}  // namespace PC
+};

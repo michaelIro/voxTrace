@@ -133,7 +133,7 @@ int main() {
 
     // ── PolyCap ray tracing test ─────────────────────────────────────────────
     PolycapFixture fixture = readPolycapFixture("test-data/api/polycap/pc-236-descr.txt");
-    PC::Profile profile = PC::Profile::ellipsoidal(
+    PolyCapProfile profile = PolyCapProfile::ellipsoidal(
         fixture.length,
         fixture.rExtUpstream,
         fixture.rExtDownstream,
@@ -141,24 +141,23 @@ int main() {
         fixture.rCapDownstream,
         fixture.focalDistanceIn,
         fixture.focalDistanceOut);
-    PC::Description description(
-        profile,
-        fixture.roughness,
-        static_cast<int64_t>(fixture.numCapillaries),
+    PolyCapWall wall(
         fixture.atomicNumbers,
         fixture.weightPercentages,
-        fixture.density);
+        fixture.density,
+        fixture.roughness);
+    PolyCap optic(profile, wall, static_cast<int64_t>(fixture.numCapillaries));
 
     std::vector<float> energies_keV = {8.0f, 12.0f, 17.4f};
     int transmitted = 0;
     for (int i = 0; i < (int)energies_keV.size(); ++i) {
         Ray ray = makeCenteredRay(energies_keV[i], i);
-        PC::RayTraceResult traced = PC::trace(ray, description);
+        PolyCapTraceResult traced = optic.trace(ray);
         transmitted += traced.transmitted ? 1 : 0;
         std::cout << "PolyCap trace E=" << energies_keV[i] << " keV"
                   << " transmitted=" << traced.transmitted
                   << " prob=" << traced.ray.getProb()
-                  << " reflections=" << traced.n_refl << "\n";
+              << " reflections=" << traced.reflections << "\n";
     }
 
     if (transmitted == 0) {

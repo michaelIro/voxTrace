@@ -135,7 +135,7 @@ test: $(BUILD)/Test
 
 test2: $(BUILD)/Test2
 
-polycap-test: $(BUILD)/PolyCapTraceTest
+polycap-test: $(BUILD)/PolyCapBatchTest
 
 # ── Core object ───────────────────────────────────────────────────────────────
 $(CORE_BLD)/Tracer.o: $(SRC)/core/Tracer.cpp $(SRC)/core/Tracer.hpp | $(CORE_BLD)
@@ -195,17 +195,17 @@ $(BUILD)/Test: $(TESTS_BLD)/Test.o \
 	    -larmadillo -lgsl -lgslcblas \
 	    $(XRAY_LF)
 
-# ── PolyCapTraceTest binary ───────────────────────────────────────────────────
-$(TESTS_BLD)/PolyCapTraceTest.o: $(SRC)/tests/PolyCapTraceTest.cpp | $(TESTS_BLD)
-	$(HOST_COMPILER) $(INCLUDES) --std=c++20 -DVOXTRACE_HOST_ONLY -c $< -o $@
+# ── PolyCap batch validation binary ──────────────────────────────────────────
+$(TESTS_BLD)/PolyCapBatchTest.o: $(SRC)/tests/PolyCapBatchTest.cpp | $(TESTS_BLD)
+	$(CXX) $(INCLUDES) $(CXXFLAGS) -c -o $@ $<
 
-$(BUILD)/PolyCapTraceTest: $(TESTS_BLD)/PolyCapTraceTest.o \
+$(BUILD)/PolyCapBatchTest: $(TESTS_BLD)/PolyCapBatchTest.o \
     $(API_LIB)/libXRayLibAPI.a
-	$(HOST_COMPILER) --std=c++20 -o $@ \
-	    $(TESTS_BLD)/PolyCapTraceTest.o \
+	$(CXX) $(CXXFLAGS) -o $@ \
+	    $(TESTS_BLD)/PolyCapBatchTest.o \
 	    $(API_LIB)/libXRayLibAPI.a \
-	    -L$(ARMA_LIB) -larmadillo \
-	    $(XRAY_LF)
+	    $(XRAY_LF) \
+	    $(KOKKOS_LIBS) $(LDFLAGS)
 
 $(TESTS_BLD)/Test2.o: $(SRC)/tests/Test-2.cpp | $(TESTS_BLD)
 	$(HOST_COMPILER) $(INCLUDES) --std=c++20 -DVOXTRACE_HOST_ONLY -c $< -o $@
