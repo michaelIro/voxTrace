@@ -53,6 +53,7 @@ class XRayLibAPI{
 
         static double DCS_Rayl(int z, double energy, double theta);
         static double DCS_Compt(int z, double energy, double theta);
+        static double Fi(int z, double energy);
         
         // Fluorescence- / Auger- Yield
         static double FluorY(int z, int shell);

@@ -68,6 +68,10 @@ double XRayLibAPI::DCS_Compt(int z, double energy, double theta){
     return XRayLib::DCS_Compt(z, energy, theta, NULL);
 }
 
+double XRayLibAPI::Fi(int z, double energy){
+    return XRayLib::Fi(z, energy, NULL);
+}
+
 void XRayLibAPI::test(){
     double a = XRayLib::CS_Photo_Partial(29,K_SHELL,17.4,NULL);
 }

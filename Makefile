@@ -166,7 +166,7 @@ $(METAL_LIB): $(METAL_AIR)
 	xcrun -sdk macosx metallib $< -o $@
 
 $(METAL_OBJ): $(SRC)/metal/MetalTracer.mm $(METAL_LIB) | $(METAL_BLD)
-	$(HOST_COMPILER) --std=c++17 $(METAL_FLAGS) -I$(SRC) -fobjc-arc -c $< -o $@
+	$(HOST_COMPILER) --std=c++17 $(METAL_FLAGS) $(INCLUDES) -fobjc-arc -c $< -o $@
 endif
 
 # ── Main binary ───────────────────────────────────────────────────────────────
@@ -204,6 +204,25 @@ $(BUILD)/PolyCapBatchTest: $(TESTS_BLD)/PolyCapBatchTest.o \
 	$(CXX) $(CXXFLAGS) -o $@ \
 	    $(TESTS_BLD)/PolyCapBatchTest.o \
 	    $(API_LIB)/libXRayLibAPI.a \
+<<<<<<< HEAD
+=======
+	    -L$(ARMA_LIB) -larmadillo \
+	    $(XRAY_LF)
+
+# ── Test2: polycap benchmark (voxTrace Kokkos vs polycap library) ─────────────
+POLYCAP_CF   := $(shell pkg-config --cflags polycap 2>/dev/null)
+POLYCAP_LF   := $(shell pkg-config --libs   polycap 2>/dev/null || echo -lpolycap)
+POLYCAP_RPATH := -Wl,-rpath,$(shell pkg-config --variable=libdir polycap 2>/dev/null || echo /opt/homebrew/lib)
+
+$(TESTS_BLD)/Test2.o: $(SRC)/tests/Test-2.cpp | $(TESTS_BLD)
+	$(CXX) $(INCLUDES) $(POLYCAP_CF) $(CXXFLAGS) -c -o $@ $<
+
+$(BUILD)/Test2: $(TESTS_BLD)/Test2.o \
+    $(API_LIB)/libXRayLibAPI.a
+	$(CXX) $(CXXFLAGS) -o $@ $< \
+        $(API_LIB)/libXRayLibAPI.a \
+	    $(POLYCAP_LF) $(POLYCAP_RPATH) \
+>>>>>>> cdcd280 (123)
 	    $(XRAY_LF) \
 	    $(KOKKOS_LIBS) $(LDFLAGS)
 

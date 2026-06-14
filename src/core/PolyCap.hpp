@@ -1,4 +1,5 @@
 #pragma once
+<<<<<<< HEAD
 // PolyCap.hpp — Header-only C++ polycapillary X-ray optic ray-tracer
 // Translated from polycap-1.2 (https://github.com/PieterTack/polycap)
 // Requires: xraylib (https://github.com/tschoonj/xraylib)
@@ -1364,4 +1365,208 @@ private:
 
         return result;
     }
+=======
+
+#include <algorithm>
+#include <cmath>
+#include <vector>
+
+#include "PolyCap_old.hpp"
+#include "Ray.hpp"
+
+class PolyCap {
+public:
+    enum ProfileShape {
+        CONICAL,
+        PARABOLOIDAL,
+        ELLIPSOIDAL
+    };
+
+    PolyCap() = default;
+
+    PolyCap(float posZ, float length,
+            float rExtIn, float rExtOut,
+            float rCapIn, float rCapOut,
+            float focalIn, float focalOut,
+            ProfileShape profile,
+            int nElements, const int* atomicNumbers, const float* weightFracs,
+            float density, float roughness, int nCapillaries)
+        : pos_z_(posZ),
+          length_(length),
+          r_ext_in_(rExtIn),
+          r_ext_out_(rExtOut),
+          r_cap_in_(rCapIn),
+          r_cap_out_(rCapOut),
+          focal_in_(focalIn),
+          focal_out_(focalOut),
+          profile_(profile),
+          n_capillaries_(nCapillaries),
+          impl_(buildImpl(posZ, length, rExtIn, rExtOut, rCapIn, rCapOut,
+                          focalIn, focalOut, profile,
+                          nElements, atomicNumbers, weightFracs,
+                          density, roughness, nCapillaries)) {}
+
+    bool isEntering(const Ray& ray) const {
+        if (std::abs(ray.getDirZ()) < 1e-9f) {
+            return false;
+        }
+
+        const float t = (pos_z_ - ray.getStartZ()) / ray.getDirZ();
+        if (t < 0.0f) {
+            return false;
+        }
+
+        const float x = ray.getStartX() + t * ray.getDirX();
+        const float y = ray.getStartY() + t * ray.getDirY();
+        return x * x + y * y <= r_ext_in_ * r_ext_in_;
+    }
+
+    void trace(Ray& ray) const {
+        if (!isEntering(ray)) {
+            ray.setIAFlag(false);
+            return;
+        }
+
+        const float energy = ray.getEnergyKeV();
+        if (energy <= 0.0f) {
+            ray.setIAFlag(false);
+            return;
+        }
+
+        const float t_enter = (pos_z_ - ray.getStartZ()) / ray.getDirZ();
+        const float x_enter = ray.getStartX() + t_enter * ray.getDirX();
+        const float y_enter = ray.getStartY() + t_enter * ray.getDirY();
+
+        polycap::Vec3 start = {x_enter, y_enter, pos_z_};
+        polycap::Vec3 dir = {ray.getDirX(), ray.getDirY(), ray.getDirZ()};
+        polycap::Vec3 elec = {ray.getSPolX(), ray.getSPolY(), ray.getSPolZ()};
+
+        if (elec.norm2() < 1e-12) {
+            elec = {1.0, 0.0, 0.0};
+        }
+
+        const auto traced = impl_.traceRay(start, dir, elec, {static_cast<double>(energy)});
+
+        if (traced.status != polycap::TraceResult::TRANSMITTED || traced.weights.empty()) {
+            ray.setIAFlag(false);
+            ray.setProb(0.0f);
+            return;
+        }
+
+        const float w = static_cast<float>(std::clamp(traced.weights[0], 0.0, 1.0));
+        ray.setProb(ray.getProb() * w);
+
+        ray.setStartCoordinates(static_cast<float>(traced.exit_coords.x),
+                                static_cast<float>(traced.exit_coords.y),
+                                static_cast<float>(traced.exit_coords.z));
+
+        ray.setEndCoordinates(static_cast<float>(traced.exit_direction.x),
+                              static_cast<float>(traced.exit_direction.y),
+                              static_cast<float>(traced.exit_direction.z));
+
+        ray.setSPol(static_cast<float>(traced.exit_electric.x),
+                    static_cast<float>(traced.exit_electric.y),
+                    static_cast<float>(traced.exit_electric.z));
+
+        const polycap::Vec3 d = traced.exit_direction;
+        const polycap::Vec3 s = traced.exit_electric;
+        polycap::Vec3 p = d.cross(s);
+        if (p.norm2() > 1e-12) {
+            p.normalize();
+            ray.setPPol(static_cast<float>(p.x),
+                        static_cast<float>(p.y),
+                        static_cast<float>(p.z));
+        }
+
+        ray.setIAFlag(true);
+        ray.setIANum(ray.getIANum() + static_cast<int>(traced.n_reflections));
+    }
+
+    void print() const {
+#ifndef __METAL_VERSION__
+        const char* profile_name = "CONICAL";
+        if (profile_ == PARABOLOIDAL) {
+            profile_name = "PARABOLOIDAL";
+        } else if (profile_ == ELLIPSOIDAL) {
+            profile_name = "ELLIPSOIDAL";
+        }
+
+        printf("PolyCap: profile=%s L=%.3fcm rExt=(%.6f->%.6f)cm rCap=(%.7f->%.7f)cm f=(%.3f,%.3f)cm nCap=%d\n",
+               profile_name,
+               length_, r_ext_in_, r_ext_out_, r_cap_in_, r_cap_out_,
+               focal_in_, focal_out_, n_capillaries_);
+#endif
+    }
+
+private:
+    static polycap::ProfileType toOldProfile(ProfileShape shape) {
+        if (shape == PARABOLOIDAL) {
+            return polycap::ProfileType::PARABOLOIDAL;
+        }
+        if (shape == ELLIPSOIDAL) {
+            return polycap::ProfileType::ELLIPSOIDAL;
+        }
+        return polycap::ProfileType::CONICAL;
+    }
+
+    static polycap::PolyCap buildImpl(float posZ, float length,
+                                      float rExtIn, float rExtOut,
+                                      float rCapIn, float rCapOut,
+                                      float focalIn, float focalOut,
+                                      ProfileShape profile,
+                                      int nElements, const int* atomicNumbers,
+                                      const float* weightFracs,
+                                      float density, float roughness,
+                                      int nCapillaries) {
+        std::vector<int> z;
+        std::vector<double> w;
+        z.reserve(std::max(0, nElements));
+        w.reserve(std::max(0, nElements));
+
+        for (int i = 0; i < nElements; ++i) {
+            z.push_back(atomicNumbers[i]);
+            w.push_back(static_cast<double>(weightFracs[i]));
+        }
+
+        polycap::Profile prof(toOldProfile(profile),
+                              static_cast<double>(length),
+                              static_cast<double>(rExtIn),
+                              static_cast<double>(rExtOut),
+                              static_cast<double>(rCapIn),
+                              static_cast<double>(rCapOut),
+                              static_cast<double>(focalIn),
+                              static_cast<double>(focalOut));
+
+        polycap::Description desc(std::move(prof),
+                                  static_cast<double>(roughness),
+                                  static_cast<int64_t>(nCapillaries),
+                                  std::move(z),
+                                  std::move(w),
+                                  static_cast<double>(density));
+
+        (void)posZ;
+        return polycap::PolyCap(std::move(desc));
+    }
+
+    float pos_z_ = 0.0f;
+    float length_ = 0.0f;
+    float r_ext_in_ = 0.0f;
+    float r_ext_out_ = 0.0f;
+    float r_cap_in_ = 0.0f;
+    float r_cap_out_ = 0.0f;
+    float focal_in_ = 0.0f;
+    float focal_out_ = 0.0f;
+    ProfileShape profile_ = CONICAL;
+    int n_capillaries_ = 0;
+
+    polycap::PolyCap impl_ = polycap::PolyCap(
+        polycap::Description(
+            polycap::Profile(polycap::ProfileType::CONICAL,
+                             1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0),
+            0.0,
+            1,
+            {14},
+            {1.0},
+            2.0));
+>>>>>>> cdcd280 (123)
 };

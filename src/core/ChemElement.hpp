@@ -1,7 +1,7 @@
 #pragma once
 #include "Platform.hpp"
 
-#if !defined(__METAL_VERSION__) && !defined(VOXTRACE_METAL)
+#if !defined(__METAL_VERSION__)
     #include <cmath>
     #include <cstdio>
     #include "../api/XRayLibAPI.hpp"
@@ -39,7 +39,7 @@ class ChemElement {
     float rad_rate       [line_entries];
     float fluor_yield    [shell_entries];
 
-#if !defined(__METAL_VERSION__) && !defined(VOXTRACE_METAL)
+#if !defined(__METAL_VERSION__)
     inline void discretize() {
         a_   = XRayLibAPI::A(z_);
         rho_ = XRayLibAPI::Rho(z_);
@@ -86,7 +86,7 @@ public:
 
     KOKKOS_INLINE_FUNCTION ChemElement() {}
 
-#if !defined(__METAL_VERSION__) && !defined(VOXTRACE_METAL)
+#if !defined(__METAL_VERSION__)
     inline ChemElement(int z) : z_(z) { discretize(); }
 #endif
 
