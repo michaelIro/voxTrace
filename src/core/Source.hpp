@@ -1,13 +1,21 @@
 #pragma once
+/**
+ * @file Source.hpp
+ * @brief Gaussian capillary X-ray source — creates the primary @ref Ray.
+ */
 #include "Platform.hpp"
 #include "RNG.hpp"
 #include "Ray.hpp"
 
-// ── Source ────────────────────────────────────────────────────────────────────
-// Gaussian capillary X-ray source. generate() replicates the original
-// generateRayGPU logic (spatial sigma = r_out/3, direction sigma = r_f/3)
-// using a portable RNG instead of curand.
-
+/**
+ * @brief Gaussian model of the primary-optic exit beam; the start of every trace.
+ *
+ * Rather than read large beam files, the primary beam is generated on the fly
+ * (and on the GPU) as a two-dimensional normal distribution in both position
+ * and divergence — the approximation validated in the reference paper. `generate()`
+ * draws one @ref Ray per call using the portable @ref RNG (replacing the original
+ * CUDA `generateRayGPU` + curand): spatial sigma = r_out/3, divergence sigma = r_f/3.
+ */
 class Source {
     float energyKeV_;    // photon energy
     float sourceRadius_; // r_out: spatial Gaussian sigma * 3

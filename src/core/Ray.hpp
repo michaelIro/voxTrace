@@ -1,4 +1,8 @@
 #pragma once
+/**
+ * @file Ray.hpp
+ * @brief The Ray — an X-ray photon and the unit of parallelism in voxTrace.
+ */
 #include "Platform.hpp"
 #include "RNG.hpp"
 
@@ -7,11 +11,20 @@
     #include <iostream>
 #endif
 
-// ── Ray ───────────────────────────────────────────────────────────────────────
-// X-ray photon with full polarization state.
-// Memory: ~133 bytes per instance (same layout as original RayGPU).
-// Compiles unchanged for Kokkos (CUDA/HIP/OpenMP) and Metal MSL.
-
+/**
+ * @brief X-ray photon with full polarization state; the trace's parallelization anchor.
+ *
+ * One @ref Ray is traced per thread, and every operator class (@ref Source,
+ * @ref Voxel, @ref Material, @ref ChemElement, @ref PolyCap, @ref Tracer)
+ * mutates a `Ray&` in place as the photon advances. The struct is trivially
+ * copyable into device memory: fixed layout (~133 bytes), value semantics, no
+ * pointers — so it compiles unchanged for Kokkos (CUDA/HIP/OpenMP) and Metal MSL.
+ *
+ * State carried per photon: start position, unit direction, s/p polarization
+ * vectors and phases, wave number (energy), survival probability/weight,
+ * interaction count, and the flags/indices used by the voxel walk
+ * (`nextVoxel`, `tIn`, `oobFlag`, ...).
+ */
 class Ray {
     float x0_, y0_, z0_;          // position
     float dirX_, dirY_, dirZ_;    // direction (unit vector)
@@ -105,6 +118,8 @@ public:
 
     // ── Physics ───────────────────────────────────────────────────────────────
 
+    /// Rotate the propagation direction by azimuth @p phi and polar angle @p theta
+    /// (used to apply a sampled scattering/emission angle after an interaction).
     KOKKOS_INLINE_FUNCTION void rotate(float phi, float theta) {
         float cp = cosf(phi), sp = sinf(phi), ct = cosf(theta), st = sinf(theta);
         float dx = ct*cp*dirX_ - sp*dirY_ + st*cp*dirZ_;
@@ -113,6 +128,9 @@ public:
         dirX_=dx; dirY_=dy; dirZ_=dz;
     }
 
+    /// Map the ray from the primary-optic frame into the sample frame: translate
+    /// by the focal point (@p x0, @p y0, @p z0), back off the focal distance @p d,
+    /// and rotate by the optic-to-surface angle @p alpha (degrees) about X.
     KOKKOS_INLINE_FUNCTION void primaryTransform(float x0, float y0, float z0, float d, float alpha) {
         float a = alpha / 180.0f * VT_PI;
         float ca = cosf(a), sa = sinf(a);
@@ -126,6 +144,10 @@ public:
         setEndCoordinates(ndx, ndy, ndz);
     }
 
+    /// Map a post-sample ray into the secondary-optic frame and test acceptance:
+    /// rotate by the surface-to-optic angle @p beta (degrees), project to the
+    /// secondary entrance window at distance @p d, and set the interaction flag
+    /// only if the ray lands within the input-window radius @p rin.
     KOKKOS_INLINE_FUNCTION void secondaryTransform(float x0, float y0, float z0, float d, float beta, float rin) {
         float b = beta / 180.0f * VT_PI;
         float cb = cosf(b), sb = sinf(b);

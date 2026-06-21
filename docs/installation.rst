@@ -20,11 +20,21 @@ This installation assumes a fresh install of Ubuntu 20.04 or Ubuntu 22.04. with 
 * Run the SampleTracer with run ./build/src/SampleTracer ./test-data/simulation/nist-1107
 * Run the CapillaryTracer with run ./build/src/CapillaryTracer ./test-data/simulation/nist-1107
 
-Modify the Capillaries.txt, Sample.txt, Simulation.txt and Polycapillary.txt to your needs. 
-You can use the Jupyter-UI to create your own Materials.txt. 
-For further assistance please write to michael.iro@tuwien.ac.at   
+Modify the Capillaries.txt, Sample.txt, Simulation.txt and Polycapillary.txt to your needs.
+You can use the Jupyter-UI to create your own Materials.txt.
+For further assistance please write to michael.iro@tuwien.ac.at
 
-A short statement by the author, concerning licencing: 
+Building the documentation
+--------------------------
+This site is generated from the in-source Doxygen comments and the ``.rst``
+pages in ``docs/`` by Doxygen + Sphinx/Breathe. To build it locally:
+
+* Install ``doxygen`` (e.g. ``apt install doxygen`` / ``brew install doxygen``).
+* Install the Python dependencies: ``pip install -r docs/requirements.txt``
+  (ideally inside a virtual environment).
+* Run ``make docs`` — the HTML site is written to ``build/doc/html/index.html``.
+
+A short statement by the author, concerning licencing:
 -------------------------------------------------------
 This codes is supposed to be free to use, without any warranty from my side. 
 I therefore chose the `MIT Licence`_. Nevertheless, before 

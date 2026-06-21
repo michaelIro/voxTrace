@@ -220,6 +220,23 @@ $(BUILD)/TestMuXRF: $(TESTS_BLD)/TestMuXRF.o
 .PHONY: testmuxrf
 testmuxrf: $(BUILD)/TestMuXRF
 
+# ── Documentation ─────────────────────────────────────────────────────────────
+# Doxygen extracts the in-source API docs to XML; Sphinx + Breathe render the
+# RST guide in docs/ into an HTML site that embeds them.
+# Prereqs: doxygen, plus the Python deps in docs/requirements.txt
+#          (pip install -r docs/requirements.txt — e.g. inside .venv).
+DOXYGEN     ?= doxygen
+SPHINXBUILD ?= sphinx-build
+
+.PHONY: docs docs-clean
+docs:
+	$(DOXYGEN) docs/Doxyfile
+	$(SPHINXBUILD) -b html docs build/doc/html
+	@echo "Docs built → build/doc/html/index.html"
+
+docs-clean:
+	rm -rf build/doc
+
 # ── Build directory creation ──────────────────────────────────────────────────
 $(CORE_BLD) $(API_OBJ) $(API_LIB) $(IO_BLD) $(BUILD) $(TESTS_BLD):
 	mkdir -p $@

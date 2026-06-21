@@ -1,4 +1,18 @@
 #pragma once
+/**
+ * @file Platform.hpp
+ * @brief Backend compatibility shim — the single point where the accelerator is abstracted.
+ *
+ * Included by every shared physics header. It defines the portable annotation
+ * macros (`KOKKOS_INLINE_FUNCTION`, `VT_SCONSTEXPR`, `VT_DEVICE_METH`, ...) so
+ * the same source is valid in three regimes, selected by predefined macros:
+ *   - `__METAL_VERSION__`            → Apple Metal Shading Language (no Kokkos).
+ *   - `VOXTRACE_HOST_ONLY`/`_METAL`  → plain host build, no Kokkos headers.
+ *   - otherwise                      → full Kokkos build (CUDA/HIP/OpenMP/Serial).
+ *
+ * See the "Accelerators & performance portability" documentation page for the
+ * build-time details.
+ */
 
 // ── Backend compatibility shim ────────────────────────────────────────────────
 // This header is included by every shared physics header.

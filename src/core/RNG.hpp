@@ -1,9 +1,19 @@
 #pragma once
+/**
+ * @file RNG.hpp
+ * @brief Portable per-thread pseudo-random number generator.
+ */
 #include "Platform.hpp"
 
-// ── Portable xorshift64* RNG ──────────────────────────────────────────────────
-// Works in C++, Kokkos device code (CUDA/HIP/OpenMP/SYCL), and Metal MSL.
-
+/**
+ * @brief Portable xorshift64* RNG — one lightweight stream per ray/thread.
+ *
+ * A self-contained 64-bit generator (8 bytes of state) seeded per thread, so it
+ * works identically in host C++, Kokkos device code (CUDA/HIP/OpenMP/SYCL) and
+ * Metal MSL — replacing curand from the original CUDA code. Provides uniform
+ * (`frand`) and standard-normal (`normal`, Box–Muller) draws used throughout the
+ * source and interaction sampling.
+ */
 struct RNG {
     uint64_t state_;
 

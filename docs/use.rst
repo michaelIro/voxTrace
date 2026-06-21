@@ -31,7 +31,7 @@ Primary Capillary Geometry
 - Energy of the X-rays: 17.4 keV 
 
 Primary Capillary Transformation Parameters (Position)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 - X-Position of the Primary Capillary focal point: 150.0 μm
 - Y-Position of the Primary Capillary focal point: 150.0 μm
 - Z-Position of the Primary Capillary focal point: 0.0 μm
@@ -39,8 +39,8 @@ Primary Capillary Transformation Parameters (Position)
 - Angle between primary polycapillary optical axis and sample surface: 45.0°
 
 Secondary Capillary Transformation Parameters (Position)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-- X-Position of the Secondary Capillary focal point: 150.0 μm  
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- X-Position of the Secondary Capillary focal point: 150.0 μm
 - Y-Position of the Secondary Capillary focal point: 150.0 μm
 - Z-Position of the Secondary Capillary focal point: 0.0 μm 
 - Distance from the sample to the Secondary Capillary input window: 4900.0 μm

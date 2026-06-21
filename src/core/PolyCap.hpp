@@ -1,4 +1,8 @@
 #pragma once
+/**
+ * @file PolyCap.hpp
+ * @brief Polycapillary X-ray optic — a standalone, Ray-anchored beam element.
+ */
 #include "Platform.hpp"
 #include "Ray.hpp"
 
@@ -8,30 +12,35 @@
 #   include "../api/XRayLibAPI.hpp"
 #endif
 
-// ── PolyCap ───────────────────────────────────────────────────────────
-// Polycapillary X-ray optic — standalone native core class in the Ray/Voxel/
-// Material design pattern. Ray is the parallelization anchor: trace(ray) advances
-// ONE photon through the optic in place. Self-contained: xraylib is used host-side
-// at construction only (like ChemElement::discretize()), never at runtime.
-//
-// On return:
-//   ray.getIAFlag() == true  → transmitted; ray holds exit position/direction and
-//                              ray.getProb() the transmission weight.
-//   ray.getIAFlag() == false → absorbed or escaped.
-//
-// Optic axis is the ray's +z; the photon enters at z = posZ and exits at
-// z = posZ + length. Geometry/physics mirror the original polycap-1.2 library
-// (https://github.com/PieterTack/polycap), so the transmitted-weight output
-// matches it to ~1%.
-//
-// Precision note: an off-axis capillary axis sits ~0.1–0.3 cm off the optic axis
-// while the photon rides ~1 µm from it and the grazing angle is ~mrad. Forming
-// (photon − axis) is a catastrophic cancellation that float cannot hold (it costs
-// a few % of the grazing angle and compounds over the dozens of reflections),
-// so the per-photon trace state is kept in double — exactly as the reference
-// library keeps its photon in double. Storage (tables, geometry) stays float;
-// only the transient trace locals are double, matching the reference output.
-
+/**
+ * @brief Polycapillary X-ray optic; `trace(Ray&)` pushes one photon through it.
+ *
+ * A standalone native core class in the @ref Ray / @ref Voxel / @ref Material
+ * design pattern. The @ref Ray is the parallelization anchor: `trace(ray)`
+ * advances ONE photon through the optic in place (entrance test → capillary
+ * selection → repeated wall reflections with complex Fresnel + Debye–Waller →
+ * exit projection). Self-contained: xraylib is used host-side at construction
+ * only (like @ref ChemElement "ChemElement::discretize()"), never at runtime.
+ *
+ * On return:
+ *   - `ray.getIAFlag() == true`  → transmitted; the ray holds the exit
+ *     position/direction and `ray.getProb()` the transmission weight.
+ *   - `ray.getIAFlag() == false` → absorbed or escaped.
+ *
+ * The optic axis is the ray's +z; the photon enters at `z = posZ` and exits at
+ * `z = posZ + length`. Geometry/physics mirror the original
+ * [polycap-1.2 library](https://github.com/PieterTack/polycap), so the
+ * transmitted-weight output matches it to ~1%.
+ *
+ * @note Precision: an off-axis capillary axis sits ~0.1–0.3 cm off the optic
+ * axis while the photon rides ~1 µm from it and the grazing angle is ~mrad.
+ * Forming `(photon − axis)` is a catastrophic cancellation that `float` cannot
+ * hold (a few % of the grazing angle, compounding over dozens of reflections),
+ * so the per-photon trace state is kept in `double` — as the reference library
+ * does. Storage (tables, geometry) stays `float`; only the transient trace
+ * locals are `double`. This is why, unlike the rest of the core, `PolyCap` does
+ * not compile in a Metal shader (MSL has no `double`).
+ */
 class PolyCap {
 public:
     enum Profile { CONICAL, PARABOLOIDAL, ELLIPSOIDAL };

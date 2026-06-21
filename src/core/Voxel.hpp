@@ -1,4 +1,8 @@
 #pragma once
+/**
+ * @file Voxel.hpp
+ * @brief Axis-aligned sample cell with ray–box intersection and neighbour indices.
+ */
 #include "Platform.hpp"
 #include "Ray.hpp"
 
@@ -6,11 +10,16 @@
     #include <cfloat>
 #endif
 
-// ── Voxel ─────────────────────────────────────────────────────────────────────
-// Axis-aligned box with ray-box intersection and integer neighbor indices.
-// nn_[27] stores voxel indices for all 26 neighbors + self (index 13).
-// A value of -1 means out-of-bounds.
-
+/**
+ * @brief Axis-aligned box cell of the sample grid: ray–box intersection + neighbour links.
+ *
+ * `intersect(Ray&)` is the geometric step of the voxel walk: it computes the
+ * path length of the ray through this cell and, as a side effect, sets the
+ * ray's exit face so the dispatch loop can hop to the next voxel. The 27-entry
+ * neighbour table `nn_` stores the flat indices of all 26 neighbours plus self
+ * (index 13); `-1` marks an out-of-bounds neighbour. Each voxel also stores the
+ * index of its @ref Material.
+ */
 class Voxel {
     float x0_, y0_, z0_;   // min corner
     float x1_, y1_, z1_;   // extents (size, not max corner — same as original)
@@ -42,8 +51,9 @@ public:
     KOKKOS_INLINE_FUNCTION float getY1() const VT_DEVICE_METH { return y0_ + y1_; }
     KOKKOS_INLINE_FUNCTION float getZ1() const VT_DEVICE_METH { return z0_ + z1_; }
 
-    // ── Ray-box slab intersection ─────────────────────────────────────────────
-    // Modifies ray.nextVoxel and ray.tIn in place. Returns path length through voxel.
+    /// Ray–box slab intersection. Sets `ray.nextVoxel` (the exit face → neighbour
+    /// index) and `ray.tIn` (entry distance) in place, and returns the path
+    /// length of the ray through this voxel (used for the attenuation draw).
     KOKKOS_INLINE_FUNCTION float intersect(VT_THREAD Ray& ray) const VT_DEVICE_METH {
         float t0x, t1x, t0y, t1y, t0z, t1z;
         bool  xDir = true, yDir = true, zDir = true;

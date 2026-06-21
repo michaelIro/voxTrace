@@ -1,20 +1,28 @@
 #pragma once
+/**
+ * @file Spectrum.hpp
+ * @brief Detector energy histogram and regions of interest.
+ */
 
 #ifndef __METAL_VERSION__
     #include <cmath>
     #include <new>
 #endif
 
-// ── ROI ───────────────────────────────────────────────────────────────────────
+/// Region of interest: a channel range [chMin, chMax] with a fitting weight.
 struct ROI {
     int   chMin;
     int   chMax;
     float weight;
 };
 
-// ── Spectrum ──────────────────────────────────────────────────────────────────
-// Energy histogram. Host-only; manages its own heap-allocated counts array.
-
+/**
+ * @brief Energy histogram of detected photons (the simulated detector spectrum).
+ *
+ * Host-only output container: photons are binned into channels by a linear
+ * energy calibration (`offset`, `gain`). Unlike the device-side core it owns a
+ * heap-allocated counts array, since it is only accumulated/serialised on the host.
+ */
 class Spectrum {
     float* counts_;
     int    nChannels_;

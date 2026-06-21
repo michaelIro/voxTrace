@@ -1,4 +1,8 @@
 #pragma once
+/**
+ * @file ChemElement.hpp
+ * @brief Per-element X-ray interaction database (cross sections, scattering, lines).
+ */
 #include "Platform.hpp"
 
 #if !defined(__METAL_VERSION__)
@@ -7,11 +11,20 @@
     #include "../api/XRayLibAPI.hpp"
 #endif
 
-// ── ChemElement ───────────────────────────────────────────────────────────────
-// Per-element X-ray physics database with precomputed interpolation grids.
-// All accessor methods compile for Kokkos (CUDA/HIP/OpenMP) and Metal MSL.
-// Fixed-size arrays are mandatory — MSL cannot use dynamic allocation.
-
+/**
+ * @brief Per-element X-ray physics database with precomputed interpolation grids.
+ *
+ * The leaf of the interaction-physics chain. The host-only constructor calls
+ * xraylib once (`discretize()`) to fill fixed-size tables — total/partial cross
+ * sections, differential scattering distributions, fluorescence yields, line
+ * energies — on energy and angle grids. Device code then only @e reads and
+ * interpolates these tables, so the trace has no runtime xraylib dependency and
+ * compiles for Kokkos (CUDA/HIP/OpenMP) and Metal MSL. The sampling helpers
+ * (`getInteractionType`, `getExcitedShell`, `getThetaRayl`, ...) turn a uniform
+ * random number into a concrete X-ray/matter event.
+ *
+ * @note Fixed-size arrays are mandatory — MSL has no dynamic allocation.
+ */
 class ChemElement {
     int   z_;
     float a_;
@@ -116,6 +129,9 @@ public:
 
     // ── Sampling decisions ────────────────────────────────────────────────────
 
+    /// Pick the interaction type at energy @p e from a uniform draw @p r, by
+    /// cumulative cross-section probability: 0 = photoelectric, 1 = Rayleigh,
+    /// 2 = Compton.
     KOKKOS_INLINE_FUNCTION int getInteractionType(float e, float r) const VT_DEVICE_METH {
         if (r <= CS_Phot_Prob(e))                          return 0;
         if (r <= CS_Phot_Prob(e) + CS_Rayl_Prob(e))       return 1;

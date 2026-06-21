@@ -1,12 +1,20 @@
 #pragma once
+/**
+ * @file Sample.hpp
+ * @brief The voxel-grid descriptor: maps a position to a voxel index.
+ */
 #include "Platform.hpp"
 #include "Ray.hpp"
 
-// ── Sample ────────────────────────────────────────────────────────────────────
-// 3D voxel grid descriptor. Stores only grid parameters (no pointers).
-// Voxel lookup is pure arithmetic — compatible with Kokkos and Metal MSL.
-// The actual Voxel/Material arrays live in the Tracer dispatch layer.
-
+/**
+ * @brief 3D voxel-grid descriptor — the entry point of the sample walk.
+ *
+ * Stores only the grid geometry (origin, voxel extents, counts); the actual
+ * @ref Voxel and @ref Material arrays live in the @ref Tracer dispatch layer.
+ * Voxel lookup (`getVoxelIdx`) and ray entry (`findStartVoxelIdx`) are pure
+ * arithmetic with no pointers, so the descriptor copies trivially to the device
+ * and is valid for both Kokkos and Metal MSL.
+ */
 class Sample {
     float x_, y_, z_;          // grid origin
     float xLV_, yLV_, zLV_;    // voxel extents

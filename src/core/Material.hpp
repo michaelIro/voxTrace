@@ -1,11 +1,21 @@
 #pragma once
+/**
+ * @file Material.hpp
+ * @brief Composite voxel material — a weighted mixture of @ref ChemElement.
+ */
 #include "Platform.hpp"
 #include "ChemElement.hpp"
 
-// ── Material ──────────────────────────────────────────────────────────────────
-// Composite voxel material. Stores weight fractions for up to MAX_ELEMENTS
-// elements. Element data lives in a shared ChemElement array passed at call
-// sites — avoiding pointer members so the struct is MSL-compatible.
+/**
+ * @brief Composite material filling a voxel: weight fractions over up to MAX_ELEMENTS elements.
+ *
+ * Sits between @ref Voxel and @ref ChemElement in the delegation chain. Holds
+ * only the per-element weight fractions and the bulk density; the actual element
+ * physics lives in a shared `ChemElement` array passed at the call site
+ * (`const ChemElement* elems`) rather than via owned pointers, keeping the
+ * struct trivially copyable to the device. `getInteractingElementIdx()` picks
+ * which element a photon interacts with, weighted by partial cross section.
+ */
 
 #ifdef __METAL_VERSION__
     constant constexpr int MAX_ELEMENTS = 8;
@@ -46,7 +56,9 @@ public:
         return CS_Tot(e, elems) * rho_;
     }
 
-    // Returns index of the interacting element in the shared elements array
+    /// Select which element a photon of energy @p e interacts with, from a
+    /// uniform draw @p r weighted by each element's contribution to the total
+    /// cross section. Returns the index into the shared @p elems array.
     KOKKOS_INLINE_FUNCTION int getInteractingElementIdx(float e, float r,
                                                          const VT_DEVICE ChemElement* elems) const VT_DEVICE_METH {
         float muTot = CS_Tot(e, elems);
