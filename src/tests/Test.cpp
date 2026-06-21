@@ -92,10 +92,11 @@ PolycapFixture readPolycapFixture(const std::string& path) {
 
 Ray makeCenteredRay(float energy_keV, int index) {
     Ray ray;
-    ray.setStartCoordinates(0.f, -100.f, 0.f);
-    ray.setEndCoordinates(0.f, 1.f, 0.f);
+    // PolyCap's optic axis is the ray's +z; aim a centred ray straight down it.
+    ray.setStartCoordinates(0.f, 0.f, -100.f);
+    ray.setEndCoordinates(0.f, 0.f, 1.f);
     ray.setSPol(1.f, 0.f, 0.f);
-    ray.setPPol(0.f, 0.f, 1.f);
+    ray.setPPol(0.f, 1.f, 0.f);
     ray.setEnergyKeV(energy_keV);
     ray.setProb(1.f);
     ray.setIAFlag(false);
@@ -131,31 +132,29 @@ int main() {
 
     // ── PolyCap ray tracing test ─────────────────────────────────────────────
     PolycapFixture fixture = readPolycapFixture("test-data/api/polycap/pc-236-descr.txt");
-    PolyCapProfile profile = PolyCapProfile::ellipsoidal(
-        fixture.length,
-        fixture.rExtUpstream,
-        fixture.rExtDownstream,
-        fixture.rCapUpstream,
-        fixture.rCapDownstream,
-        fixture.focalDistanceIn,
-        fixture.focalDistanceOut);
-    PolyCapWall wall(
-        fixture.atomicNumbers,
-        fixture.weightPercentages,
-        fixture.density,
-        fixture.roughness);
-    PolyCap optic(profile, wall, static_cast<int64_t>(fixture.numCapillaries));
+    std::vector<int>   iz(fixture.atomicNumbers.begin(), fixture.atomicNumbers.end());
+    std::vector<float> wt(fixture.weightPercentages.begin(), fixture.weightPercentages.end());
+    PolyCap optic(0.f,
+                  (float)fixture.length,
+                  (float)fixture.rExtUpstream,   (float)fixture.rExtDownstream,
+                  (float)fixture.rCapUpstream,   (float)fixture.rCapDownstream,
+                  (float)fixture.focalDistanceIn,(float)fixture.focalDistanceOut,
+                  PolyCap::ELLIPSOIDAL,
+                  (int)iz.size(), iz.data(), wt.data(),
+                  (float)fixture.density, (float)fixture.roughness,
+                  (int)fixture.numCapillaries);
 
     std::vector<float> energies_keV = {8.0f, 12.0f, 17.4f};
     int transmitted = 0;
     for (int i = 0; i < (int)energies_keV.size(); ++i) {
         Ray ray = makeCenteredRay(energies_keV[i], i);
-        PolyCapTraceResult traced = optic.trace(ray);
-        transmitted += traced.transmitted ? 1 : 0;
+        optic.trace(ray);
+        bool ok = ray.getIAFlag();
+        transmitted += ok ? 1 : 0;
         std::cout << "PolyCap trace E=" << energies_keV[i] << " keV"
-                  << " transmitted=" << traced.transmitted
-                  << " prob=" << traced.ray.getProb()
-              << " reflections=" << traced.reflections << "\n";
+                  << " transmitted=" << ok
+                  << " prob=" << ray.getProb()
+                  << " reflections=" << ray.getIANum() << "\n";
     }
 
     if (transmitted == 0) {

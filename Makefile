@@ -131,15 +131,13 @@ LDFLAGS  := -L$(KOKKOS_LIB) $(OMP_LFLAGS)
 # ── Core objects (only Tracer.cpp needs compilation; physics is header-only) ───
 CORE_OBJS := $(CORE_BLD)/Tracer.o
 
-.PHONY: all clean test test2 polycap-test
+.PHONY: all clean test test2
 
 all: $(BUILD)/Test
 
 test: $(BUILD)/Test
 
 test2: $(BUILD)/Test2
-
-polycap-test: $(BUILD)/PolyCapBatchTest
 
 # ── Core object ───────────────────────────────────────────────────────────────
 $(CORE_BLD)/Tracer.o: $(SRC)/core/Tracer.cpp $(SRC)/core/Tracer.hpp | $(CORE_BLD)
@@ -199,42 +197,16 @@ $(BUILD)/Test: $(TESTS_BLD)/Test.o \
 	    -larmadillo -lgsl -lgslcblas \
 	    $(XRAY_LF)
 
-# ── PolyCap batch validation binary ──────────────────────────────────────────
-$(TESTS_BLD)/PolyCapBatchTest.o: $(SRC)/tests/PolyCapBatchTest.cpp | $(TESTS_BLD)
-	$(CXX) $(INCLUDES) $(CXXFLAGS) -c -o $@ $<
-
-$(BUILD)/PolyCapBatchTest: $(TESTS_BLD)/PolyCapBatchTest.o \
-    $(API_LIB)/libXRayLibAPI.a
-	$(CXX) $(CXXFLAGS) -o $@ \
-	    $(TESTS_BLD)/PolyCapBatchTest.o \
-	    $(API_LIB)/libXRayLibAPI.a \
-	    -L$(ARMA_LIB) -larmadillo \
-	    $(XRAY_LF)
-
-# ── Test2: polycap benchmark (voxTrace Kokkos vs polycap library) ─────────────
+# ── Test2: PolyCap validation (original polycap C library vs PolyCap.hpp) ─────
 $(TESTS_BLD)/Test2.o: $(SRC)/tests/Test-2.cpp | $(TESTS_BLD)
-	$(HOST_COMPILER) $(INCLUDES) --std=c++20 -DVOXTRACE_HOST_ONLY -c $< -o $@
+	$(HOST_COMPILER) $(INCLUDES) $(POLYCAP_CF) --std=c++20 -DVOXTRACE_HOST_ONLY -c $< -o $@
 
 $(BUILD)/Test2: $(TESTS_BLD)/Test2.o \
     $(API_LIB)/libXRayLibAPI.a
 	$(HOST_COMPILER) --std=c++20 -o $@ \
 	    $(TESTS_BLD)/Test2.o \
 	    $(API_LIB)/libXRayLibAPI.a \
-	    $(XRAY_LF)
-
-# ── Test3: 3-way comparison (polycap C library vs PolyCap_new vs PolyCap.hpp) ─
-$(TESTS_BLD)/Test3.o: $(SRC)/tests/Test-3way.cpp | $(TESTS_BLD)
-	$(HOST_COMPILER) $(INCLUDES) $(POLYCAP_CF) --std=c++20 -DVOXTRACE_HOST_ONLY -c $< -o $@
-
-$(BUILD)/Test3: $(TESTS_BLD)/Test3.o \
-    $(API_LIB)/libXRayLibAPI.a
-	$(HOST_COMPILER) --std=c++20 -o $@ \
-	    $(TESTS_BLD)/Test3.o \
-	    $(API_LIB)/libXRayLibAPI.a \
 	    $(XRAY_LF) $(POLYCAP_LF)
-
-.PHONY: test3
-test3: $(BUILD)/Test3
 
 # ── TestMuXRF: full µXRF depth-scan simulation ───────────────────────────────
 $(TESTS_BLD)/TestMuXRF.o: $(SRC)/tests/Test-muXRF.cpp | $(TESTS_BLD)
