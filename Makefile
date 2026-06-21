@@ -91,9 +91,13 @@ PKGCFG   := $(shell command -v pkg-config 2>/dev/null)
 ifneq ($(PKGCFG),)
     XRAY_CF := $(shell pkg-config --cflags libxrl 2>/dev/null)
     XRAY_LF := $(shell pkg-config --libs   libxrl 2>/dev/null)
+    POLYCAP_CF := $(shell pkg-config --cflags polycap 2>/dev/null)
+    POLYCAP_LF := $(shell pkg-config --libs   polycap 2>/dev/null)
 else
     XRAY_CF :=
     XRAY_LF := -lxrl
+    POLYCAP_CF :=
+    POLYCAP_LF := -lpolycap
 endif
 
 INCLUDES  := -I$(KOKKOS_INC) \
@@ -217,6 +221,20 @@ $(BUILD)/Test2: $(TESTS_BLD)/Test2.o \
 	    $(TESTS_BLD)/Test2.o \
 	    $(API_LIB)/libXRayLibAPI.a \
 	    $(XRAY_LF)
+
+# ── Test3: 3-way comparison (polycap C library vs PolyCap_new vs PolyCap.hpp) ─
+$(TESTS_BLD)/Test3.o: $(SRC)/tests/Test-3way.cpp | $(TESTS_BLD)
+	$(HOST_COMPILER) $(INCLUDES) $(POLYCAP_CF) --std=c++20 -DVOXTRACE_HOST_ONLY -c $< -o $@
+
+$(BUILD)/Test3: $(TESTS_BLD)/Test3.o \
+    $(API_LIB)/libXRayLibAPI.a
+	$(HOST_COMPILER) --std=c++20 -o $@ \
+	    $(TESTS_BLD)/Test3.o \
+	    $(API_LIB)/libXRayLibAPI.a \
+	    $(XRAY_LF) $(POLYCAP_LF)
+
+.PHONY: test3
+test3: $(BUILD)/Test3
 
 # ── TestMuXRF: full µXRF depth-scan simulation ───────────────────────────────
 $(TESTS_BLD)/TestMuXRF.o: $(SRC)/tests/Test-muXRF.cpp | $(TESTS_BLD)

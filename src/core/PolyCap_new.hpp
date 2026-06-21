@@ -114,6 +114,13 @@ private:
             && fabsf(PC_COSPI6*x - 0.5f*y)    <= d;
     }
 
+    // Is point (x, y) inside the optic's outer envelope at the given ext radius?
+    // Dispatches to circular (monocapillary) or hexagonal (polycapillary) bound.
+    KOKKOS_INLINE_FUNCTION bool withinOptic(float ext, float x, float y) const VT_DEVICE_METH {
+        if (n_shells_ == 0.f) return x*x + y*y <= ext*ext;
+        return withinHex(ext, x, y);
+    }
+
     // Hex axial indices (q, r) via cube-coordinate rounding
     KOKKOS_INLINE_FUNCTION static void capillaryIndex(float ext, float n_shells,
                                                         float x, float y,
@@ -283,6 +290,15 @@ private:
     // Returns false if ray is absorbed (prob fell below threshold).
     // ═════════════════════════════════════════════════════════════════════════
 
+    // Returns false (no state change) if the hit normal points away from the
+    // photon's direction of travel — mirrors polycap's capil_trace_one rejection
+    // (cosalfa < 0 or angle > 90°), which keeps scanning forward segments
+    // instead of reflecting off a geometrically invalid hit.
+    KOKKOS_INLINE_FUNCTION static bool validHitNormal(float dx, float dy, float dz,
+                                                        float nx, float ny, float nz) {
+        return (nx*dx + ny*dy + nz*dz) >= 0.f;
+    }
+
     KOKKOS_INLINE_FUNCTION bool reflect(Ray& ray,
                                          float hx, float hy, float hz,
                                          float nx, float ny, float nz) const VT_DEVICE_METH {
@@ -291,8 +307,8 @@ private:
         float dx = ray.getDirX(), dy = ray.getDirY(), dz = ray.getDirZ();
 
         // cos_alfa = cos(angle between dir and normal) = sin(grazing angle θ_g)
+        // Caller (trace()) already rejected hits where this would be negative.
         float cos_alfa = nx*dx + ny*dy + nz*dz;
-        if (cos_alfa < 0.f) { nx=-nx; ny=-ny; nz=-nz; cos_alfa=-cos_alfa; }  // flip toward photon
 
         // Physics helpers
         float energy = ray.getEnergyKeV();
@@ -518,22 +534,45 @@ public:
                 float z1 = pos_z_ + (float)(i + 1) * dz_seg;
 
                 float hx, hy, hz, nx, ny, nz;
-                if (!wallHit(axisX(q, r_idx, z0), axisY(r_idx, z0), z0,
-                             axisX(q, r_idx, z1), axisY(r_idx, z1), z1,
-                             capRadius(z0), capRadius(z1),
-                             ray.getStartX(), ray.getStartY(), ray.getStartZ(),
-                             ray.getDirX(),   ray.getDirY(),   ray.getDirZ(),
-                             hx, hy, hz, nx, ny, nz))
-                    continue;
+                bool hit = wallHit(axisX(q, r_idx, z0), axisY(r_idx, z0), z0,
+                                   axisX(q, r_idx, z1), axisY(r_idx, z1), z1,
+                                   capRadius(z0), capRadius(z1),
+                                   ray.getStartX(), ray.getStartY(), ray.getStartZ(),
+                                   ray.getDirX(),   ray.getDirY(),   ray.getDirZ(),
+                                   hx, hy, hz, nx, ny, nz);
 
-                if (!reflect(ray, hx, hy, hz, nx, ny, nz)) return;  // absorbed
+                // Reject geometrically invalid hits (normal pointing away from
+                // the photon) — keep scanning forward instead of reflecting.
+                if (hit && !validHitNormal(ray.getDirX(), ray.getDirY(), ray.getDirZ(), nx, ny, nz))
+                    hit = false;
 
-                // Advance seg to the segment containing the new hit position
-                int new_seg = (int)((hz - pos_z_) / dz_seg);
-                seg = (new_seg > seg) ? new_seg : seg;
-                if (seg >= PC_NSTEPS) seg = PC_NSTEPS - 1;
-                found = true;
-                break;
+                if (hit) {
+                    // Verify the hit point is still within the optic's outer
+                    // envelope (capillary axis may curve outside the macroscopic
+                    // optic boundary near focus/divergence).
+                    float frac     = (z1 > z0) ? (hz - z0) / (z1 - z0) : 0.f;
+                    float ext_here = extRadius(z0) + frac * (extRadius(z1) - extRadius(z0));
+                    if (!withinOptic(ext_here, hx, hy)) { ray.setIAFlag(false); return; }
+
+                    if (!reflect(ray, hx, hy, hz, nx, ny, nz)) return;  // absorbed
+
+                    // Advance past the segment where the hit occurred (mirrors
+                    // polycap's ix = i + 1) — resuming the scan at segment i
+                    // itself would re-test the just-reflected ray against the
+                    // wall it just bounced off, which can spuriously terminate
+                    // the trace early and undercount reflections.
+                    seg = i + 1;
+                    if (seg >= PC_NSTEPS) seg = PC_NSTEPS - 1;
+                    found = true;
+                    break;
+                }
+
+                // No (valid) hit in this segment: check the photon hasn't
+                // already escaped the optic laterally at z0.
+                float dz0 = (z0 - ray.getStartZ()) / ray.getDirZ();
+                float px0 = ray.getStartX() + dz0 * ray.getDirX();
+                float py0 = ray.getStartY() + dz0 * ray.getDirY();
+                if (!withinOptic(extRadius(z0), px0, py0)) { ray.setIAFlag(false); return; }
             }
             if (!found) break;  // no further wall hit — photon exits capillary
         }
