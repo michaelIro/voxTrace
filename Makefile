@@ -208,6 +208,20 @@ $(BUILD)/Test2: $(TESTS_BLD)/Test2.o \
 	    $(API_LIB)/libXRayLibAPI.a \
 	    $(XRAY_LF) $(POLYCAP_LF)
 
+# ── Test3: confocal µXRF (source → primary → brass → secondary → spectrum) ────
+$(TESTS_BLD)/Test3.o: $(SRC)/tests/Test-3.cpp | $(TESTS_BLD)
+	$(HOST_COMPILER) $(INCLUDES) --std=c++20 -DVOXTRACE_HOST_ONLY -c $< -o $@
+
+$(BUILD)/Test3: $(TESTS_BLD)/Test3.o \
+    $(API_LIB)/libXRayLibAPI.a
+	$(HOST_COMPILER) --std=c++20 -o $@ \
+	    $(TESTS_BLD)/Test3.o \
+	    $(API_LIB)/libXRayLibAPI.a \
+	    $(XRAY_LF)
+
+.PHONY: test3
+test3: $(BUILD)/Test3
+
 # ── TestMuXRF: full µXRF depth-scan simulation ───────────────────────────────
 $(TESTS_BLD)/TestMuXRF.o: $(SRC)/tests/Test-muXRF.cpp | $(TESTS_BLD)
 	$(CXX) $(INCLUDES) $(CXXFLAGS) -c -o $@ $<
