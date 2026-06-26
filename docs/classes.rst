@@ -12,7 +12,19 @@ Core — the ray and its operators
 .. doxygenclass:: Ray
    :members:
 
+.. doxygenclass:: SourceBase
+   :members:
+
 .. doxygenclass:: Source
+   :members:
+
+.. doxygenclass:: XRayTube
+   :members:
+
+.. doxygenclass:: Synchrotron
+   :members:
+
+.. doxygenclass:: LiquidMetalJet
    :members:
 
 .. doxygenclass:: Sample

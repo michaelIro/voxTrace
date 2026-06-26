@@ -1,16 +1,18 @@
-// Test-3: confocal micro-XRF of NIST-1107 brass — full chain
+// Test-3: confocal micro-XRF depth scan of NIST-1107 brass — full chain
 //
-//   source → primary polycap → sample → secondary polycap → detector spectrum
+//   source → primary polycap → SAMPLE (voxel grid) → secondary polycap → spectrum
 //
-// Two PC-236 polycapillary optics (the secondary is the primary reversed) are
-// placed 90° apart, each 45° to the sample surface, focusing to a common
-// confocal volume just beneath the surface. A monochromatic primary beam is
-// focused into the brass; fluorescence/scatter is emitted from the interaction
-// point toward the secondary, which only transmits photons originating in its
-// focus — so the recorded spectrum samples the confocal volume.
+// The sample is modelled with the voxTrace package data model: a Sample (voxel
+// grid) of Voxels, each referencing a Material made of ChemElements. The primary
+// beam is focused into the brass by a PC-236 polycap; the interaction point and
+// all self-absorption are found by walking the voxel grid (Voxel::intersect +
+// getNN, Material/ChemElement physics). Fluorescence/scatter is collected by a
+// second PC-236 (the primary reversed) whose focus coincides with the primary's
+// — so only the confocal volume is seen. The confocal point is stepped through
+// the surface to produce a full depth scan.
 //
 // Build: make test3      Run: ./build/src/Test3 [n_primary] [seed]
-// Plot:  python3 src/tests/plot_spectrum.py
+// Plot:  python3 src/tests/plot_depthscan.py
 
 #include <cstdio>
 #include <cmath>
@@ -24,6 +26,8 @@
 #include "PolyCap.hpp"
 #include "ChemElement.hpp"
 #include "Material.hpp"
+#include "Voxel.hpp"
+#include "Sample.hpp"
 
 // ── PC-236 optic (Polycapillary.txt), cm ─────────────────────────────────────
 static constexpr double OPT_LEN     = 4.03;
@@ -39,18 +43,26 @@ static constexpr double OPT_RHO     = 2.23;
 static constexpr double OPT_ROUGH   = 5.0;
 static constexpr int    OPT_NCAP    = 240000;
 
-// ── NIST-1107 brass sample ────────────────────────────────────────────────────
-static constexpr int   BR_N        = 6;
-static constexpr int   BR_Z[6]     = {26, 28, 29, 30, 50, 82};               // Fe Ni Cu Zn Sn Pb
-static constexpr float BR_W[6]     = {0.0004f, 0.001f, 0.6119f, 0.3741f, 0.0107f, 0.0019f};
+// ── NIST-1107 brass sample (Materials.txt) ────────────────────────────────────
+static constexpr int   BR_N    = 6;
+static constexpr int   BR_Z[6] = {26, 28, 29, 30, 50, 82};                       // Fe Ni Cu Zn Sn Pb
+static constexpr float BR_W[6] = {0.0004f, 0.001f, 0.6119f, 0.3741f, 0.0107f, 0.0019f};
 
-// ── confocal geometry (sample frame, cm; surface = plane z=0, bulk z<0) ───────
-static constexpr double COS45        = 0.70710678;
-static constexpr double CONF_DEPTH   = 0.0015;    // confocal point 15 µm below surface
-static constexpr double SAMPLE_THICK = 0.015;     // 150 µm
-static constexpr double SAMPLE_HALF  = 0.015;     // 150 µm half-width in x,y
-static constexpr double PRIM_ENERGY  = 17.4;      // keV (Capillaries.txt)
-static constexpr double SRC_RADIUS   = 0.37;      // collimated source radius (Source.txt)
+// ── sample voxel grid (Sample.txt: 300×300×150 µm, 5 µm voxels), cm ───────────
+static constexpr double VOX        = 0.0005;      // 5 µm
+static constexpr double SAMPLE_XY  = 0.030;       // 300 µm
+static constexpr double SAMPLE_Z   = 0.015;       // 150 µm
+// surface = plane z = 0; the bulk fills z ∈ [0, SAMPLE_Z] (+z = into the sample).
+
+// ── confocal geometry & beam ──────────────────────────────────────────────────
+static constexpr double COS45       = 0.70710678;
+static constexpr double PRIM_ENERGY = 17.4;       // keV (Capillaries.txt)
+static constexpr double SRC_RADIUS  = 0.37;       // collimated source radius (Source.txt)
+
+// ── depth scan (Simulation.txt: 11 points over ±50 µm) ────────────────────────
+static constexpr int    N_DEPTH = 11;
+static constexpr double D_MIN   = -50e-4;         // −50 µm (confocal above surface)
+static constexpr double D_STEP  =  10e-4;         //  10 µm step
 
 namespace {
 
@@ -64,7 +76,7 @@ double dot(Vec3 a, Vec3 b) { return a.x*b.x + a.y*b.y + a.z*b.z; }
 Vec3   cross(Vec3 a, Vec3 b) { return {a.y*b.z-a.z*b.y, a.z*b.x-a.x*b.z, a.x*b.y-a.y*b.x}; }
 Vec3   norm(Vec3 a) { double n = std::sqrt(dot(a,a)); return {a.x/n, a.y/n, a.z/n}; }
 
-// Maps between the sample frame and one optic's frame (optic axis = +z). The
+// Maps between the sample frame and one optic's frame (optic axis = +z); the
 // optic-frame plane z = zFoc maps to the confocal point C in the sample frame.
 struct OpticFrame {
     Vec3 C, axis, u, v;
@@ -97,147 +109,231 @@ Ray makeRay(Vec3 p, Vec3 d, double energy_keV) {
     return ray;
 }
 
+// ── the sample data model: Sample grid + Voxel/Material/ChemElement arrays ────
+struct Grid {
+    Sample sample;
+    const Voxel*       voxels;
+    const Material*    mats;
+    const ChemElement* elems;
+};
+
+// Walk the ray from a sample-surface entry point through the voxel grid and
+// sample the first interaction (optical depth ~ −ln U). Returns true and sets
+// the interaction point @p P and its material index, or false if it escaped.
+bool sampleInteraction(const Grid& g, Vec3 entry, Vec3 dir, float E,
+                       double xi, Vec3& P, int& matIdx) {
+    Ray r = makeRay(entry, dir, E);
+    int vox = g.sample.getVoxelIdx((float)entry.x, (float)entry.y, (float)entry.z);
+    double tau = -std::log(xi), acc = 0;
+    while (vox >= 0) {
+        const Voxel& v = g.voxels[vox];
+        double len = v.intersect(r);                                   // path through voxel [cm]
+        double mu  = g.mats[v.getMaterialIdx()].CS_Tot_Lin(E, g.elems); // 1/cm
+        if (acc + mu*len >= tau) {
+            double l = r.getTIn() + (tau - acc) / mu;                  // dist from entry
+            P = entry + dir * l;
+            matIdx = v.getMaterialIdx();
+            return true;
+        }
+        acc += mu * len;
+        vox = v.getNN(r.getNextVoxel());
+    }
+    return false;                                                       // passed through
+}
+
+// Total optical depth from @p P along @p dir to the edge of the sample (the
+// emitted photon's self-absorption on the way out), walking the voxel grid.
+double opticalDepthOut(const Grid& g, Vec3 P, Vec3 dir, float E) {
+    Ray r = makeRay(P, dir, E);
+    int vox = g.sample.getVoxelIdx((float)P.x, (float)P.y, (float)P.z);
+    double total = 0;
+    while (vox >= 0) {
+        const Voxel& v = g.voxels[vox];
+        double len = v.intersect(r);
+        total += g.mats[v.getMaterialIdx()].CS_Tot_Lin(E, g.elems) * len;
+        vox = v.getNN(r.getNextVoxel());
+    }
+    return total;
+}
+
+struct ExitRay { Vec3 pos, dir; double w; };     // primary-optic exit ray (optic frame)
+
 }  // namespace
 
 int main(int argc, char* argv[]) {
-    int      n_primary = (argc > 1) ? std::atoi(argv[1]) : 2000000;
+    int      n_primary = (argc > 1) ? std::atoi(argv[1]) : 1000000;
     uint64_t seed      = (argc > 2) ? (uint64_t)std::atoll(argv[2]) : 1ULL;
-
     std::filesystem::create_directories("test-data/out");
 
     // ── optics: primary (large→small, focuses at exit), secondary = reversed ──
     int   optZ[2] = {OPT_Z[0], OPT_Z[1]};
     float optW[2] = {OPT_W[0], OPT_W[1]};
     PolyCap primary(0.f, OPT_LEN, R_EXT_BIG, R_EXT_SMALL, R_CAP_BIG, R_CAP_SMALL,
-                    FOCAL_INF, FOCAL, PolyCap::ELLIPSOIDAL,
-                    2, optZ, optW, OPT_RHO, OPT_ROUGH, OPT_NCAP);
+                    FOCAL_INF, FOCAL, PolyCap::ELLIPSOIDAL, 2, optZ, optW, OPT_RHO, OPT_ROUGH, OPT_NCAP);
     PolyCap secondary(0.f, OPT_LEN, R_EXT_SMALL, R_EXT_BIG, R_CAP_SMALL, R_CAP_BIG,
-                      FOCAL, FOCAL_INF, PolyCap::ELLIPSOIDAL,
-                      2, optZ, optW, OPT_RHO, OPT_ROUGH, OPT_NCAP);
+                      FOCAL, FOCAL_INF, PolyCap::ELLIPSOIDAL, 2, optZ, optW, OPT_RHO, OPT_ROUGH, OPT_NCAP);
 
-    // ── brass material ────────────────────────────────────────────────────────
+    // ── sample: voxel grid of brass (one Material shared by every Voxel) ──────
     std::vector<ChemElement> elems;
     for (int i = 0; i < BR_N; ++i) elems.emplace_back(BR_Z[i]);
     float brW[6]; for (int i = 0; i < BR_N; ++i) brW[i] = BR_W[i];
-    Material brass(BR_N, brW, elems.data());
+    std::vector<Material> mats{ Material(BR_N, brW, elems.data()) };
 
-    // ── confocal placement: V-shape in the x-z plane, apex (focus) at C ───────
-    Vec3 C        = {0, 0, -CONF_DEPTH};
-    Vec3 d_prim   = norm({ COS45, 0, -COS45});   // primary beam: down-right into sample
-    Vec3 d_sec    = norm({ COS45, 0,  COS45});   // detection:    up-right out of sample
-    OpticFrame primFrame(C, d_prim,  OPT_LEN + FOCAL);  // C = exit-side focal point
-    OpticFrame secFrame (C, d_sec,  -FOCAL);            // C = entrance-side focal point
-    Vec3 secWinCtr = C + d_sec*FOCAL;                   // secondary entrance window centre
-
-    // ── spectrum histogram ────────────────────────────────────────────────────
-    constexpr int    NBIN = 1000;
-    constexpr double EBIN = 0.02;                       // keV/bin, 0..20 keV
-    std::vector<double> spec(NBIN, 0.0);
-    auto addCount = [&](double e, double w) {
-        int b = (int)(e / EBIN);
-        if (b >= 0 && b < NBIN) spec[b] += w;
-    };
+    const int xN = (int)std::lround(SAMPLE_XY / VOX);
+    const int yN = xN, zN = (int)std::lround(SAMPLE_Z / VOX);
+    const double x0 = -SAMPLE_XY/2, y0 = -SAMPLE_XY/2, z0 = 0.0;          // surface at z=0
+    std::vector<Voxel> voxels((size_t)xN*yN*zN);
+    for (int i = 0; i < xN; ++i)
+    for (int j = 0; j < yN; ++j)
+    for (int k = 0; k < zN; ++k)
+        voxels[(size_t)i*yN*zN + j*zN + k] =
+            Voxel((float)(x0+i*VOX), (float)(y0+j*VOX), (float)(z0+k*VOX),
+                  (float)VOX, (float)VOX, (float)VOX, 0);                  // all → material 0 (brass)
+    for (int i = 0; i < xN; ++i)
+    for (int j = 0; j < yN; ++j)
+    for (int k = 0; k < zN; ++k) {
+        int nn[27], c = 0;                                                // 27-neighbour table
+        for (int l = -1; l < 2; ++l) for (int m = -1; m < 2; ++m) for (int n = -1; n < 2; ++n) {
+            int ni=i+n, nj=j+m, nk=k+l;
+            nn[c++] = (ni<0||ni>=xN||nj<0||nj>=yN||nk<0||nk>=zN) ? -1 : ni*yN*zN + nj*zN + nk;
+        }
+        voxels[(size_t)i*yN*zN + j*zN + k].setNN(nn);
+    }
+    Grid grid{ Sample((float)x0,(float)y0,(float)z0, (float)SAMPLE_XY,(float)SAMPLE_XY,(float)SAMPLE_Z,
+                      (float)VOX,(float)VOX,(float)VOX, xN,yN,zN),
+               voxels.data(), mats.data(), elems.data() };
 
     std::mt19937_64 rng(seed);
     std::uniform_real_distribution<double> U(0.0, 1.0);
-    int64_t transmitted_primary = 0, detected = 0;
 
+    // ── trace the primary beam through the primary optic ONCE; the focused beam
+    //    is depth-independent, so the stored exit rays are reused at every depth ─
+    std::vector<ExitRay> beam;
     for (int n = 0; n < n_primary; ++n) {
-        // (1) primary input: collimated beam (Source.txt divergence = 0) over the
-        //     entrance aperture — the parallel illumination a focusing optic expects.
         double rr = std::sqrt(U(rng)) * std::min(R_EXT_BIG, SRC_RADIUS), ra = 2*M_PI*U(rng);
-        Vec3 ent = {rr*std::cos(ra), rr*std::sin(ra), 0};
-        Ray pray = makeRay(ent, {0, 0, 1}, PRIM_ENERGY);
-
-        // (2) primary polycap
-        primary.trace(pray);
-        if (!pray.getIAFlag()) continue;
-        ++transmitted_primary;
-        double wPrim = pray.getProb();
-
-        // (3) into the sample frame; propagate to the surface, then to interaction depth
-        Vec3 ps, ds;
-        primFrame.toSample({pray.getStartX(), pray.getStartY(), pray.getStartZ()},
-                           {pray.getDirX(),   pray.getDirY(),   pray.getDirZ()}, ps, ds);
-        if (ds.z >= 0) continue;
-        Vec3 entry = ps + ds * ((0 - ps.z) / ds.z);
-        if (std::fabs(entry.x) > SAMPLE_HALF || std::fabs(entry.y) > SAMPLE_HALF) continue;
-
-        double muIn = brass.CS_Tot_Lin((float)PRIM_ENERGY, elems.data());   // 1/cm
-        double s    = -std::log(U(rng)) / muIn;
-        Vec3   P    = entry + ds * s;
-        if (P.z > 0 || P.z < -SAMPLE_THICK ||
-            std::fabs(P.x) > SAMPLE_HALF || std::fabs(P.y) > SAMPLE_HALF) continue;  // passed through
-
-        // (4) aim the emitted photon at the secondary entrance window (importance sampling)
-        double ar = std::sqrt(U(rng)) * R_EXT_SMALL, aa = 2*M_PI*U(rng);
-        Vec3   aim = secWinCtr + secFrame.u*(ar*std::cos(aa)) + secFrame.v*(ar*std::sin(aa));
-        Vec3   eDir = aim - P;
-        double r2   = dot(eDir, eDir);
-        eDir = norm(eDir);
-        if (eDir.z <= 0) continue;                       // must travel up toward the surface
-
-        // (5) the interaction: which element, which channel, emitted energy
-        int   ei   = brass.getInteractingElementIdx((float)PRIM_ENERGY, (float)U(rng), elems.data());
-        const ChemElement& el = elems[ei];
-        int   type = el.getInteractionType((float)PRIM_ENERGY, (float)U(rng));
-        double Ef;
-        if (type == 0) {                                 // photoelectric → fluorescence
-            int shell = el.getExcitedShell((float)PRIM_ENERGY, (float)U(rng));
-            if (U(rng) >= el.Fluor_Y(shell)) continue;   // Auger: absorbed, no photon
-            Ef = el.Line_Energy(el.getTransition(shell, (float)U(rng)));
-        } else if (type == 1) {                          // Rayleigh (elastic)
-            Ef = PRIM_ENERGY;
-        } else {                                         // Compton (angle fixed by geometry)
-            double theta = std::acos(std::fmax(-1.0, std::fmin(1.0, dot(ds, eDir))));
-            Ef = el.getComptEnergy((float)PRIM_ENERGY, (float)theta);
-        }
-        if (Ef < 0.8) continue;
-
-        // (6) emission weight: isotropic source sampled toward the window disk,
-        //     × self-absorption of the emitted photon on its way out of the sample
-        double cosD   = std::fabs(dot(eDir, d_sec));
-        double wEmit  = (M_PI * R_EXT_SMALL * R_EXT_SMALL * cosD) / (4.0 * M_PI * r2);
-        double Lout   = (0 - P.z) / eDir.z;                                  // path to surface
-        double wSelf  = std::exp(-brass.CS_Tot_Lin((float)Ef, elems.data()) * Lout);
-
-        // (7) secondary polycap — only confocal-volume photons survive
-        Vec3 po, doo;
-        secFrame.toOptic(P, eDir, po, doo);
-        Ray sray = makeRay(po, doo, Ef);
-        secondary.trace(sray);
-        if (!sray.getIAFlag()) continue;
-
-        addCount(Ef, wPrim * wEmit * wSelf * sray.getProb());
-        ++detected;
+        Ray p = makeRay({rr*std::cos(ra), rr*std::sin(ra), 0}, {0,0,1}, PRIM_ENERGY);
+        primary.trace(p);
+        if (p.getIAFlag())
+            beam.push_back({{p.getStartX(), p.getStartY(), p.getStartZ()},
+                            {p.getDirX(),   p.getDirY(),   p.getDirZ()}, p.getProb()});
     }
+    std::printf("NIST-1107 brass confocal depth scan\n");
+    std::printf("  primary photons     = %d   transmitted = %zu (%.2f%%)\n\n",
+                n_primary, beam.size(), 100.0*beam.size()/n_primary);
 
-    // ── output ────────────────────────────────────────────────────────────────
-    std::ofstream f("test-data/out/confocal_spectrum.csv");
-    f << "energy_keV,weight\n";
-    for (int b = 0; b < NBIN; ++b) f << (b + 0.5) * EBIN << "," << spec[b] << "\n";
-
-    std::printf("NIST-1107 brass confocal point  (depth %.0f µm below surface)\n",
-                CONF_DEPTH * 1e4);
-    std::printf("  primary photons      = %d\n", n_primary);
-    std::printf("  primary transmitted  = %lld\n", (long long)transmitted_primary);
-    std::printf("  detected (confocal)  = %lld\n\n", (long long)detected);
-
+    // ── characteristic lines to track vs depth ────────────────────────────────
     struct Line { const char* name; double e; };
     const Line lines[] = {
-        {"Sn-La", 3.44}, {"Fe-Ka", 6.40}, {"Ni-Ka", 7.48}, {"Cu-Ka", 8.05},
-        {"Zn-Ka", 8.64}, {"Cu-Kb", 8.91}, {"Zn-Kb", 9.57}, {"Pb-La", 10.55},
-        {"Pb-Lb", 12.61}, {"Compton", 16.8}, {"Elastic", 17.4},
+        {"Fe-Ka",6.40},{"Ni-Ka",7.48},{"Cu-Ka",8.05},{"Zn-Ka",8.64},
+        {"Cu-Kb",8.91},{"Zn-Kb",9.57},{"Pb-La",10.55},{"Elastic",17.4},
     };
-    std::printf("  %-9s %-8s %s\n", "line", "E[keV]", "rel. intensity");
-    for (const Line& L : lines) {
-        double sum = 0;
-        for (int b = 0; b < NBIN; ++b) {
-            double e = (b + 0.5) * EBIN;
-            if (std::fabs(e - L.e) < 0.12) sum += spec[b];
+    const int NL = sizeof(lines)/sizeof(lines[0]);
+
+    constexpr int    NBIN = 1000;
+    constexpr double EBIN = 0.02;                                          // keV/bin
+    std::vector<std::vector<double>> spectra(N_DEPTH, std::vector<double>(NBIN, 0.0));
+    std::vector<std::vector<double>> lineI(N_DEPTH, std::vector<double>(NL, 0.0));
+    std::vector<int64_t> detected(N_DEPTH, 0);
+
+    Vec3 d_prim = norm({ COS45, 0,  COS45});   // primary beam: down-right into sample (+z)
+    Vec3 d_sec  = norm({ COS45, 0, -COS45});   // detection:    up-right out of sample (−z)
+
+    std::printf("  %-7s %-10s %-11s %-11s %-11s\n", "depth", "detected", "Cu-Ka", "Zn-Ka", "Pb-La");
+    for (int di = 0; di < N_DEPTH; ++di) {
+        double depth = D_MIN + di*D_STEP;                                 // confocal depth below surface
+        Vec3   C = {0, 0, depth};
+        OpticFrame primFrame(C, d_prim,  OPT_LEN + FOCAL);
+        OpticFrame secFrame (C, d_sec,  -FOCAL);
+        Vec3 secWinCtr = C + d_sec * FOCAL;                               // secondary entrance centre
+
+        for (const ExitRay& er : beam) {
+            // (1) primary exit ray → sample frame → surface entry
+            Vec3 ps, ds;
+            primFrame.toSample(er.pos, er.dir, ps, ds);
+            if (ds.z <= 0) continue;
+            double t = (0 - ps.z) / ds.z;
+            if (t < 0) continue;
+            Vec3 entry = ps + ds * t;
+            if (std::fabs(entry.x) >= SAMPLE_XY/2 || std::fabs(entry.y) >= SAMPLE_XY/2) continue;
+
+            // (2) walk the voxel grid to the first interaction point
+            Vec3 P; int matIdx;
+            if (!sampleInteraction(grid, entry, ds, (float)PRIM_ENERGY, U(rng), P, matIdx)) continue;
+            const Material& mat = grid.mats[matIdx];
+
+            // (3) aim the emitted photon at the secondary window (importance sampling)
+            double ar = std::sqrt(U(rng)) * R_EXT_SMALL, aa = 2*M_PI*U(rng);
+            Vec3   aim  = secWinCtr + secFrame.u*(ar*std::cos(aa)) + secFrame.v*(ar*std::sin(aa));
+            Vec3   eDir = aim - P;
+            double r2   = dot(eDir, eDir);
+            eDir = norm(eDir);
+            if (eDir.z >= 0) continue;                                    // must travel out (−z)
+
+            // (4) the interaction: element, channel, emitted energy
+            int ei   = mat.getInteractingElementIdx((float)PRIM_ENERGY, (float)U(rng), grid.elems);
+            const ChemElement& el = grid.elems[ei];
+            int type = el.getInteractionType((float)PRIM_ENERGY, (float)U(rng));
+            double Ef;
+            if (type == 0) {                                              // photoelectric → fluorescence
+                int shell = el.getExcitedShell((float)PRIM_ENERGY, (float)U(rng));
+                if (U(rng) >= el.Fluor_Y(shell)) continue;                // Auger
+                Ef = el.Line_Energy(el.getTransition(shell, (float)U(rng)));
+            } else if (type == 1) {                                       // Rayleigh
+                Ef = PRIM_ENERGY;
+            } else {                                                      // Compton (angle = geometry)
+                double th = std::acos(std::fmax(-1.0, std::fmin(1.0, dot(ds, eDir))));
+                Ef = el.getComptEnergy((float)PRIM_ENERGY, (float)th);
+            }
+            if (Ef < 0.8) continue;
+
+            // (5) emission weight + self-absorption out of the sample (voxel walk)
+            double wEmit = (M_PI * R_EXT_SMALL * R_EXT_SMALL * std::fabs(dot(eDir, d_sec))) / (4.0*M_PI*r2);
+            double wSelf = std::exp(-opticalDepthOut(grid, P, eDir, (float)Ef));
+
+            // (6) secondary polycap — only confocal-volume photons survive
+            Vec3 po, doo;
+            secFrame.toOptic(P, eDir, po, doo);
+            Ray sray = makeRay(po, doo, Ef);
+            secondary.trace(sray);
+            if (!sray.getIAFlag()) continue;
+
+            double w = er.w * wEmit * wSelf * sray.getProb();
+            int b = (int)(Ef / EBIN);
+            if (b >= 0 && b < NBIN) spectra[di][b] += w;
+            for (int L = 0; L < NL; ++L) if (std::fabs(Ef - lines[L].e) < 0.12) lineI[di][L] += w;
+            ++detected[di];
         }
-        std::printf("  %-9s %-8.2f %.4e\n", L.name, L.e, sum);
+
+        double cu = 0, zn = 0, pb = 0;
+        for (int L = 0; L < NL; ++L) {
+            if (std::string(lines[L].name) == "Cu-Ka") cu = lineI[di][L];
+            if (std::string(lines[L].name) == "Zn-Ka") zn = lineI[di][L];
+            if (std::string(lines[L].name) == "Pb-La") pb = lineI[di][L];
+        }
+        std::printf("  %+5.0fµm %-10lld %.4e  %.4e  %.4e\n",
+                    depth*1e4, (long long)detected[di], cu, zn, pb);
     }
-    std::printf("\nSpectrum → test-data/out/confocal_spectrum.csv\n");
+
+    // ── output: depth profile + per-depth spectra ─────────────────────────────
+    std::ofstream fp("test-data/out/confocal_depthscan.csv");
+    fp << "depth_um,detected";
+    for (int L = 0; L < NL; ++L) fp << "," << lines[L].name;
+    fp << "\n";
+    for (int di = 0; di < N_DEPTH; ++di) {
+        fp << (D_MIN + di*D_STEP)*1e4 << "," << detected[di];
+        for (int L = 0; L < NL; ++L) fp << "," << lineI[di][L];
+        fp << "\n";
+    }
+    std::ofstream fs("test-data/out/confocal_spectra.csv");
+    fs << "energy_keV";
+    for (int di = 0; di < N_DEPTH; ++di) fs << ",d" << (int)std::lround((D_MIN+di*D_STEP)*1e4);
+    fs << "\n";
+    for (int b = 0; b < NBIN; ++b) {
+        fs << (b + 0.5)*EBIN;
+        for (int di = 0; di < N_DEPTH; ++di) fs << "," << spectra[di][b];
+        fs << "\n";
+    }
+    std::printf("\nDepth profile → test-data/out/confocal_depthscan.csv\n");
+    std::printf("Spectra      → test-data/out/confocal_spectra.csv\n");
     return 0;
 }

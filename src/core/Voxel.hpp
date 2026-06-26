@@ -78,10 +78,11 @@ public:
 
         float t0_max, t1_min;
 
-        // If ray starts inside the voxel, entry distance = 0
-        if (ray.getStartX() >= x0_ && ray.getStartX() <= x1_ &&
-            ray.getStartY() >= y0_ && ray.getStartY() <= y1_ &&
-            ray.getStartZ() >= z0_ && ray.getStartZ() <= z1_) {
+        // If ray starts inside the voxel, entry distance = 0. (x1_/y1_/z1_ are
+        // voxel extents, so the max corner is getX1()/getY1()/getZ1().)
+        if (ray.getStartX() >= x0_ && ray.getStartX() <= getX1() &&
+            ray.getStartY() >= y0_ && ray.getStartY() <= getY1() &&
+            ray.getStartZ() >= z0_ && ray.getStartZ() <= getZ1()) {
             t0_max = 0.0f;
         } else {
             t0_max = fmaxf(fmaxf(t0x, t0y), t0z);

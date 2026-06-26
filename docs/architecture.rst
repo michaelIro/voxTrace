@@ -21,7 +21,9 @@ mutate it in place:
 
 .. code-block:: text
 
-    Source      -> creates a Ray (position, direction, energy, polarisation)
+    Source*     -> creates a Ray (position, direction, energy, polarisation)
+                   *SourceBase hierarchy: Source (mono) / XRayTube /
+                    Synchrotron / LiquidMetalJet
     PolyCap     -> trace(Ray&)          : push the ray through the optic
     Sample      -> findStartVoxelIdx    : locate the entry voxel
     Voxel       -> intersect(Ray&)      : path length + next-voxel index
@@ -42,9 +44,13 @@ Design rules (why the classes look the way they do)
 
 These constraints come from the GPU/MSL targets and are applied uniformly:
 
-* **Value types, no inheritance, no virtual calls.** Polymorphism on the GPU is
+* **Value types, no virtual calls.** Runtime polymorphism on the GPU is
   expensive and Metal forbids it. Behaviour is selected by data (e.g.
-  :cpp:func:`ChemElement::getInteractionType`) rather than by vtables.
+  :cpp:func:`ChemElement::getInteractionType`) rather than by vtables. Where a
+  real class hierarchy is useful — the source models — it is expressed with the
+  *static* Curiously-Recurring-Template-Pattern (:cpp:class:`SourceBase`), so the
+  dispatch is resolved at compile time, there is no vtable, and the types stay
+  trivially copyable into device memory.
 * **Fixed-size arrays, no dynamic allocation in device code.** Metal has no
   heap. Per-element tables such as ``ChemElement::dcs_rayl[100][628]`` are
   fixed-extent members; the trace never calls ``new``.
