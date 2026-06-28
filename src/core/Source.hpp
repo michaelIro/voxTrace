@@ -8,7 +8,7 @@
 /**
  * @brief Ideal monochromatic point/spot source (the original geometric model).
  *
- * The simplest concrete @ref SourceBase: every photon leaves with the same
+ * The simplest concrete @ref SourceBase — every photon leaves with the same
  * energy. This is the primary-optic exit-beam model validated in the reference
  * paper and the baseline that the polychromatic sources (@ref XRayTube,
  * @ref Synchrotron, @ref LiquidMetalJet) extend by overriding `sampleEnergy`.

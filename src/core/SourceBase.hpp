@@ -49,7 +49,7 @@ public:
         divergence_   = r_f;
     }
 
-    /// Draw one primary @ref Ray: Gaussian spot + divergence (here), and the
+    /// Draw one primary @ref Ray — Gaussian spot + divergence (here), and the
     /// energy delegated to the concrete source's `sampleEnergy` — identical
     /// physics to the original `generateRayGPU`.
     KOKKOS_INLINE_FUNCTION Ray generate(int index, VT_THREAD RNG& rng) const VT_CONST_METH {

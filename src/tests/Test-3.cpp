@@ -1,6 +1,7 @@
 // Test-3: confocal micro-XRF depth scan of NIST-1107 brass — full chain
 //
-//   source → primary polycap → SAMPLE (voxel grid) → secondary polycap → spectrum
+//   source → primary polycap → SAMPLE (voxel grid) → secondary polycap →
+//   Si(Li) detector → spectrum
 //
 // The sample is modelled with the voxTrace package data model: a Sample (voxel
 // grid) of Voxels, each referencing a Material made of ChemElements. The primary
@@ -8,12 +9,15 @@
 // all self-absorption are found by walking the voxel grid (Voxel::intersect +
 // getNN, Material/ChemElement physics). Fluorescence/scatter is collected by a
 // second PC-236 (the primary reversed) whose focus coincides with the primary's
-// — so only the confocal volume is seen. The confocal point is stepped through
-// the surface to produce a full depth scan.
+// — so only the confocal volume is seen. Each collected photon is finally run
+// through a Si(Li) Detector (efficiency, Si escape peaks, Compton continuum,
+// finite resolution) so the recorded spectrum looks like a real EDXRF spectrum.
+// The confocal point is stepped through the surface to produce a full depth scan.
 //
 // Build: make test3      Run: ./build/src/Test3 [n_primary] [seed]
 // Plot:  python3 src/tests/plot_depthscan.py
 
+#include <algorithm>
 #include <cstdio>
 #include <cmath>
 #include <cstdint>
@@ -28,6 +32,7 @@
 #include "Material.hpp"
 #include "Voxel.hpp"
 #include "Sample.hpp"
+#include "Detector.hpp"
 
 // ── PC-236 optic (Polycapillary.txt), cm ─────────────────────────────────────
 static constexpr double OPT_LEN     = 4.03;
@@ -203,6 +208,13 @@ int main(int argc, char* argv[]) {
                       (float)VOX,(float)VOX,(float)VOX, xN,yN,zN),
                voxels.data(), mats.data(), elems.data() };
 
+    // ── Si(Li) detector: a Si crystal + Be window, reusing ChemElement physics ─
+    std::vector<ChemElement> detElems{ ChemElement(14), ChemElement(4) };   // Si, Be
+    Detector detector = Detector::make(/*siIdx*/0, /*beIdx*/1, /*thickness*/0.30f,
+                                       /*beWin*/0.0025f, /*deadLayer*/1e-4f,
+                                       /*fano*/0.114f, /*noiseFWHM*/0.080f);
+    RNG detRng(seed ^ 0x9E3779B97F4A7C15ULL);
+
     std::mt19937_64 rng(seed);
     std::uniform_real_distribution<double> U(0.0, 1.0);
 
@@ -297,11 +309,24 @@ int main(int argc, char* argv[]) {
             secondary.trace(sray);
             if (!sray.getIAFlag()) continue;
 
-            double w = er.w * wEmit * wSelf * sray.getProb();
-            int b = (int)(Ef / EBIN);
-            if (b >= 0 && b < NBIN) spectra[di][b] += w;
-            for (int L = 0; L < NL; ++L) if (std::fabs(Ef - lines[L].e) < 0.12) lineI[di][L] += w;
-            ++detected[di];
+            // (7) Si(Li) detector response: efficiency, Si escape, Compton, resolution
+            float wDet;
+            float Emeas = detector.detect((float)Ef, detRng, detElems.data(), wDet);
+            if (wDet <= 0.f) continue;
+
+            double w = er.w * wEmit * wSelf * sray.getProb() * wDet;
+            int b = (int)(Emeas / EBIN);
+            if (b >= 0 && b < NBIN) { spectra[di][b] += w; ++detected[di]; }
+        }
+
+        // line intensities = measured spectrum integrated over each photopeak (±2.5σ)
+        for (int L = 0; L < NL; ++L) {
+            double half = std::fmax(0.10, 2.5 * detector.resolutionSigma((float)lines[L].e));
+            int b0 = std::max(0,        (int)((lines[L].e - half) / EBIN));
+            int b1 = std::min(NBIN - 1, (int)((lines[L].e + half) / EBIN));
+            double s = 0.0;
+            for (int b = b0; b <= b1; ++b) s += spectra[di][b];
+            lineI[di][L] = s;
         }
 
         double cu = 0, zn = 0, pb = 0;

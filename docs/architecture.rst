@@ -30,6 +30,8 @@ mutate it in place:
     Material    -> getInteractingElementIdx
     ChemElement -> getInteractionType / getThetaCompt / ...  : the physics
                    that changes the ray's energy and direction
+    Detector    -> detect(E, ...)       : Si(Li) response — efficiency,
+                   escape peaks, Compton continuum, finite resolution
 
 The delegation chain mirrors the physical hierarchy: a ray hits the **sample**,
 the sample finds which **voxel**, the voxel knows its **material**, the material

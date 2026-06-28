@@ -42,6 +42,9 @@ Core — the ray and its operators
 .. doxygenclass:: PolyCap
    :members:
 
+.. doxygenclass:: Detector
+   :members:
+
 .. doxygenclass:: Tracer
    :members:
 
