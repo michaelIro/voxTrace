@@ -168,6 +168,14 @@ struct ExitRay { Vec3 pos, dir; double w; };     // primary-optic exit ray (opti
 int main(int argc, char* argv[]) {
     int      n_primary = (argc > 1) ? std::atoi(argv[1]) : 1000000;
     uint64_t seed      = (argc > 2) ? (uint64_t)std::atoll(argv[2]) : 1ULL;
+    // Primary-beam polarization: 0 = linear in the plane of the two optics
+    // (horizontal synchrotron — scatter suppressed at the 90° detector),
+    // 1 = linear perpendicular to it, 2 = unpolarized (no azimuthal modulation).
+    int      pol_mode  = (argc > 3) ? std::atoi(argv[3]) : 0;
+    // source E-field in the primary-optic frame (optic axis = +z; u maps into the
+    // optic plane, v out of it): in-plane → u (1,0,0), perpendicular → v (0,1,0).
+    Vec3 srcPol = (pol_mode == 1) ? Vec3{0, 1, 0} : Vec3{1, 0, 0};
+    const char* pol_name[] = {"in-plane (suppressed)", "perpendicular (enhanced)", "unpolarized"};
     std::filesystem::create_directories("test-data/out");
 
     // ── optics: primary (large→small, focuses at exit), secondary = reversed ──
@@ -230,8 +238,9 @@ int main(int argc, char* argv[]) {
                             {p.getDirX(),   p.getDirY(),   p.getDirZ()}, p.getProb()});
     }
     std::printf("NIST-1107 brass confocal depth scan\n");
-    std::printf("  primary photons     = %d   transmitted = %zu (%.2f%%)\n\n",
+    std::printf("  primary photons     = %d   transmitted = %zu (%.2f%%)\n",
                 n_primary, beam.size(), 100.0*beam.size()/n_primary);
+    std::printf("  primary polarization = %s\n\n", pol_name[pol_mode < 3 ? pol_mode : 0]);
 
     // ── characteristic lines to track vs depth ────────────────────────────────
     struct Line { const char* name; double e; };
@@ -257,6 +266,9 @@ int main(int argc, char* argv[]) {
         OpticFrame primFrame(C, d_prim,  OPT_LEN + FOCAL);
         OpticFrame secFrame (C, d_sec,  -FOCAL);
         Vec3 secWinCtr = C + d_sec * FOCAL;                               // secondary entrance centre
+        // primary E-field in the sample frame (polycap leaves the polarization
+        // plane essentially unchanged at mrad grazing, so use the source vector)
+        Vec3 Epol = primFrame.u*srcPol.x + primFrame.v*srcPol.y + primFrame.axis*srcPol.z;
 
         for (const ExitRay& er : beam) {
             // (1) primary exit ray → sample frame → surface entry
@@ -281,25 +293,39 @@ int main(int argc, char* argv[]) {
             eDir = norm(eDir);
             if (eDir.z >= 0) continue;                                    // must travel out (−z)
 
-            // (4) the interaction: element, channel, emitted energy
+            // (4) the interaction: element, channel, emitted energy. Scatter
+            //     (Rayleigh/Compton) carries a polarization-dependent azimuthal
+            //     weight; fluorescence is isotropic and unpolarized.
             int ei   = mat.getInteractingElementIdx((float)PRIM_ENERGY, (float)U(rng), grid.elems);
             const ChemElement& el = grid.elems[ei];
             int type = el.getInteractionType((float)PRIM_ENERGY, (float)U(rng));
-            double Ef;
+            double cth = std::fmax(-1.0, std::fmin(1.0, dot(ds, eDir)));   // cos(scatter angle)
+            double th  = std::acos(cth);
+            double Ef, wPol = 1.0;
             if (type == 0) {                                              // photoelectric → fluorescence
                 int shell = el.getExcitedShell((float)PRIM_ENERGY, (float)U(rng));
                 if (U(rng) >= el.Fluor_Y(shell)) continue;                // Auger
                 Ef = el.Line_Energy(el.getTransition(shell, (float)U(rng)));
-            } else if (type == 1) {                                       // Rayleigh
-                Ef = PRIM_ENERGY;
-            } else {                                                      // Compton (angle = geometry)
-                double th = std::acos(std::fmax(-1.0, std::fmin(1.0, dot(ds, eDir))));
-                Ef = el.getComptEnergy((float)PRIM_ENERGY, (float)th);
+            } else {                                                      // scatter
+                Ef = (type == 1) ? PRIM_ENERGY
+                                 : el.getComptEnergy((float)PRIM_ENERGY, (float)th);
+                if (pol_mode != 2) {
+                    // azimuth of the scattered photon about the incident axis,
+                    // measured from the (transverse) incident E-field
+                    Vec3   sperp = eDir - ds*cth;
+                    Vec3   eperp = Epol - ds*dot(Epol, ds);
+                    double sl = std::sqrt(dot(sperp,sperp)), el2 = std::sqrt(dot(eperp,eperp));
+                    double cphi = (sl > 1e-12 && el2 > 1e-12) ? dot(sperp,eperp)/(sl*el2) : 1.0;
+                    double phi  = std::acos(std::fmax(-1.0, std::fmin(1.0, cphi)));
+                    wPol = (type == 1) ? el.polFactorRayl((float)th, (float)phi)
+                                       : el.polFactorCompt((float)PRIM_ENERGY, (float)th, (float)phi);
+                }
             }
             if (Ef < 0.8) continue;
 
-            // (5) emission weight + self-absorption out of the sample (voxel walk)
-            double wEmit = (M_PI * R_EXT_SMALL * R_EXT_SMALL * std::fabs(dot(eDir, d_sec))) / (4.0*M_PI*r2);
+            // (5) emission weight (× polarization) + self-absorption (voxel walk)
+            double wEmit = wPol * (M_PI * R_EXT_SMALL * R_EXT_SMALL * std::fabs(dot(eDir, d_sec)))
+                         / (4.0*M_PI*r2);
             double wSelf = std::exp(-opticalDepthOut(grid, P, eDir, (float)Ef));
 
             // (6) secondary polycap — only confocal-volume photons survive

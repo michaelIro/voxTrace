@@ -160,6 +160,30 @@ public:
         return e / (1.0f + (e / 510.998928f) * (1.0f - cosf(theta)));
     }
 
+    /// Polarization (azimuthal) modulation of coherent (Rayleigh/Thomson)
+    /// scattering for a linearly polarized photon. @p theta is the polar
+    /// scattering angle, @p phi the azimuth of the scattered photon measured
+    /// from the incident E-field direction. Returned as the ratio of the
+    /// polarized differential cross section to its azimuthal average, so it has
+    /// average 1 over phi: it redistributes intensity in azimuth (suppressing
+    /// scatter in the polarization plane) without changing the theta-integrated
+    /// magnitude already carried by `DCS_Rayl`. g = 2(1 − sin²θ cos²φ)/(1+cos²θ).
+    KOKKOS_INLINE_FUNCTION float polFactorRayl(float theta, float phi) const VT_DEVICE_METH {
+        float st = sinf(theta), ct = cosf(theta), cp = cosf(phi);
+        return 2.0f * (1.0f - st*st*cp*cp) / (1.0f + ct*ct);
+    }
+
+    /// Polarization (azimuthal) modulation of incoherent (Compton/Klein–Nishina)
+    /// scattering, normalized to azimuthal average 1 like @ref polFactorRayl.
+    /// With A = E/E' + E'/E:  g = (A − 2 sin²θ cos²φ)/(A − sin²θ).
+    KOKKOS_INLINE_FUNCTION float polFactorCompt(float e, float theta, float phi) const VT_DEVICE_METH {
+        float ep = getComptEnergy(e, theta);
+        float A  = e/ep + ep/e;
+        float st = sinf(theta), cp = cosf(phi);
+        float s2 = st*st;
+        return (A - 2.0f*s2*cp*cp) / (A - s2);
+    }
+
     KOKKOS_INLINE_FUNCTION int getTransition(int shell, float r) const VT_DEVICE_METH {
         const int shell_lines[shell_entries][2] = {
             {0,28},
