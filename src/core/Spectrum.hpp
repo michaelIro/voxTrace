@@ -4,10 +4,8 @@
  * @brief Detector energy histogram and regions of interest.
  */
 
-#ifndef __METAL_VERSION__
-    #include <cmath>
-    #include <new>
-#endif
+#include <cmath>
+#include <new>
 
 /// Region of interest: a channel range [chMin, chMax] with a fitting weight.
 struct ROI {

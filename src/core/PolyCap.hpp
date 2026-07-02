@@ -6,11 +6,9 @@
 #include "Platform.hpp"
 #include "Ray.hpp"
 
-#ifndef __METAL_VERSION__
-#   include <cmath>
-#   include <cstdio>
-#   include "../api/XRayLibAPI.hpp"
-#endif
+#include <cmath>
+#include <cstdio>
+#include "../api/XRayLibAPI.hpp"
 
 /**
  * @brief Polycapillary X-ray optic; `trace(Ray&)` pushes one photon through it.
@@ -349,9 +347,8 @@ private:
     KOKKOS_INLINE_FUNCTION static double sq(double v) VT_DEVICE_METH { return v*v; }
 
     // ═════════════════════════════════════════════════════════════════════════
-    // Host-only: quadratic least-squares fit y = c0 + c1·x + c2·x² (PARABOLOIDAL)
+    // Quadratic least-squares fit y = c0 + c1·x + c2·x² (PARABOLOIDAL)
     // ═════════════════════════════════════════════════════════════════════════
-#ifndef __METAL_VERSION__
     static void fitQuadratic(const double* px, const double* py, int np, double c[3]) {
         double A[3][3] = {}, rhs[3] = {};
         for (int i = 0; i < np; ++i) {
@@ -379,15 +376,13 @@ private:
             c[row] /= A[row][row];
         }
     }
-#endif
 
 public:
     KOKKOS_INLINE_FUNCTION PolyCap() = default;
 
-    // ── Constructor (host-only) ───────────────────────────────────────────────
+    // ── Constructor ───────────────────────────────────────────────────────────
     // weightFracs may be percentages (≈100) or fractions (≈1); normalised here.
     // Fills delta_[]/beta_[] from xraylib once — no runtime dependency thereafter.
-#ifndef __METAL_VERSION__
     PolyCap(float posZ, float length,
                     float rExtIn,  float rExtOut,
                     float rCapIn,  float rCapOut,
@@ -454,7 +449,6 @@ public:
         delta_[0] = delta_[1];
         beta_ [0] = beta_ [1];
     }
-#endif  // !__METAL_VERSION__
 
     // ── Main trace ────────────────────────────────────────────────────────────
     // Advances ONE photon (the ray) through the optic in place. The Ray (float)
@@ -563,7 +557,6 @@ public:
         ray.setIAFlag(true);
     }
 
-#ifndef __METAL_VERSION__
     void print() const {
         const char* pn = (profile_ == PARABOLOIDAL) ? "PARABOLOIDAL"
                        : (profile_ == ELLIPSOIDAL)  ? "ELLIPSOIDAL" : "CONICAL";
@@ -572,5 +565,4 @@ public:
                pn, length_, r_ext_in_, r_ext_out_, r_cap_in_, r_cap_out_,
                focal_in_, focal_out_, (int)n_shells_);
     }
-#endif
 };

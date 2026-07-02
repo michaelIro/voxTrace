@@ -6,10 +6,8 @@
 #include "Platform.hpp"
 #include "RNG.hpp"
 
-#ifndef __METAL_VERSION__
-    #include <cmath>
-    #include <iostream>
-#endif
+#include <cmath>
+#include <iostream>
 
 /**
  * @brief X-ray photon with full polarization state; the trace's parallelization anchor.
@@ -176,9 +174,7 @@ public:
         }
     }
 
-#ifndef __METAL_VERSION__
     inline void print() const {
         std::cout << "Ray " << q_ << "\t Energy: \t" << getEnergyKeV() << " keV\n";
     }
-#endif
 };

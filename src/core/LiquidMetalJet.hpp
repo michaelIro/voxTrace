@@ -5,9 +5,7 @@
  */
 #include "SourceBase.hpp"
 
-#ifndef __METAL_VERSION__
-    #include <cstdio>
-#endif
+#include <cstdio>
 
 /**
  * @brief Liquid-metal-jet source (e.g. a Ga or In jet anode).
@@ -58,10 +56,8 @@ public:
         return Emin_;
     }
 
-#ifndef __METAL_VERSION__
     inline void print() const {
         printf("LiquidMetalJet: Ka=%.2f Kb=%.2f lineFrac=%.2f kVp=%.1f\n",
                kAlpha_, kBeta_, lineFrac_, kVp_);
     }
-#endif
 };

@@ -5,9 +5,7 @@
  */
 #include "SourceBase.hpp"
 
-#ifndef __METAL_VERSION__
-    #include <cstdio>
-#endif
+#include <cstdio>
 
 /**
  * @brief Monochromatized synchrotron-beamline source.
@@ -38,9 +36,7 @@ public:
         return E0_ + rng.normal() * relBW_ * E0_;
     }
 
-#ifndef __METAL_VERSION__
     inline void print() const {
         printf("Synchrotron: E0=%.3fkeV dE/E=%.1e\n", E0_, relBW_);
     }
-#endif
 };

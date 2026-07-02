@@ -54,35 +54,6 @@ API_LIB   := $(BUILD)/api
 IO_BLD    := $(BUILD)/io
 TESTS_BLD := $(BUILD)/tests
 
-# ── Apple Silicon / Metal (arm64 only) ─────────────────────────────────────────
-UNAME_M := $(shell uname -m)
-
-METAL_COMPILER := $(shell xcrun --find metal 2>/dev/null)
-
-ifeq ($(UNAME_M),arm64)
-ifeq ($(METAL_COMPILER),)
-    # arm64 but Xcode.app not installed — build without Metal
-    METAL_FLAGS :=
-    METAL_LIBS  :=
-    METAL_AIR   :=
-    METAL_LIB   :=
-    METAL_OBJ   :=
-else
-    METAL_BLD   := $(BUILD)/metal
-    METAL_FLAGS := -DVOXTRACE_METAL
-    METAL_LIBS  := -framework Metal -framework Foundation
-    METAL_AIR   := $(METAL_BLD)/Tracer.air
-    METAL_LIB   := $(METAL_BLD)/Tracer.metallib
-    METAL_OBJ   := $(METAL_BLD)/MetalTracer.o
-endif
-else
-    METAL_FLAGS :=
-    METAL_LIBS  :=
-    METAL_AIR   :=
-    METAL_LIB   :=
-    METAL_OBJ   :=
-endif
-
 # ── External dependencies ──────────────────────────────────────────────────────
 HDF5_INC := $(HDF5_INC_)
 HDF5_LIB := $(HDF5_LIB_)
@@ -108,8 +79,7 @@ INCLUDES  := -I$(KOKKOS_INC) \
 LIBRARIES := -L$(ARMA_LIB) -L$(HDF5_LIB) -L$(API_LIB)
 
 LINK_LIBS := -larmadillo -lhdf5 -DARMA_USE_HDF5 -lxrl \
-             $(API_LIB)/libXRayLibAPI.a $(API_LIB)/libOptimizerAPI.a \
-             $(METAL_LIBS)
+             $(API_LIB)/libXRayLibAPI.a $(API_LIB)/libOptimizerAPI.a
 
 # ── OpenMP flags (macOS: Homebrew libomp; Linux: -fopenmp) ────────────────────
 ifeq ($(UNAME_S),Darwin)
@@ -125,7 +95,7 @@ endif
 KOKKOS_LIBS := $(KOKKOS_LIB)/libkokkoscore.a $(KOKKOS_LIB)/libkokkoscontainers.a
 
 # ── Compiler flags ─────────────────────────────────────────────────────────────
-CXXFLAGS := --std=c++20 $(OMP_CFLAGS) $(METAL_FLAGS)
+CXXFLAGS := --std=c++20 $(OMP_CFLAGS)
 LDFLAGS  := -L$(KOKKOS_LIB) $(OMP_LFLAGS)
 
 # ── Core objects (only Tracer.cpp needs compilation; physics is header-only) ───
@@ -156,30 +126,14 @@ $(API_LIB)/lib%.a: $(API_OBJ)/%.o | $(API_LIB)
 
 # ── SimulationParameter (now header-only in core) ──────────────────────────────
 
-# ── Metal (arm64 only) ────────────────────────────────────────────────────────
-ifneq ($(METAL_AIR),)
-$(METAL_BLD):
-	mkdir -p $@
-
-$(METAL_AIR): $(SRC)/metal/Tracer.metal | $(METAL_BLD)
-	xcrun -sdk macosx metal -c $< -o $@ -I$(SRC)
-
-$(METAL_LIB): $(METAL_AIR)
-	xcrun -sdk macosx metallib $< -o $@
-
-$(METAL_OBJ): $(SRC)/metal/MetalTracer.mm $(METAL_LIB) | $(METAL_BLD)
-	$(HOST_COMPILER) --std=c++17 $(METAL_FLAGS) $(INCLUDES) -fobjc-arc -c $< -o $@
-endif
-
-# ── Main binary ───────────────────────────────────────────────────────────────
+# ── Main binary (Kokkos) ───────────────────────────────────────────────────────
 $(TESTS_BLD)/SampleTracer.o: $(SRC)/tests/SampleTracer.cpp | $(TESTS_BLD)
 	$(CXX) $(INCLUDES) $(CXXFLAGS) -c -o $@ $<
 
 $(BUILD)/SampleTracer: $(TESTS_BLD)/SampleTracer.o $(CORE_OBJS) \
-    $(API_LIB)/libXRayLibAPI.a $(API_LIB)/libOptimizerAPI.a \
-    $(METAL_OBJ) $(METAL_LIB)
+    $(API_LIB)/libXRayLibAPI.a $(API_LIB)/libOptimizerAPI.a
 	$(CXX) $(CXXFLAGS) -o $@ \
-	    $(TESTS_BLD)/SampleTracer.o $(CORE_OBJS) $(METAL_OBJ) \
+	    $(TESTS_BLD)/SampleTracer.o $(CORE_OBJS) \
 	    $(LIBRARIES) $(LINK_LIBS) $(KOKKOS_LIBS) $(LDFLAGS)
 
 # ── Test binary ───────────────────────────────────────────────────────────────
@@ -221,6 +175,20 @@ $(BUILD)/Test3: $(TESTS_BLD)/Test3.o \
 
 .PHONY: test3
 test3: $(BUILD)/Test3
+
+# ── Test4: X-ray reflectivity (coherent layered-stack transfer matrix) ────────
+$(TESTS_BLD)/Test4.o: $(SRC)/tests/Test-4.cpp | $(TESTS_BLD)
+	$(HOST_COMPILER) $(INCLUDES) --std=c++20 -DVOXTRACE_HOST_ONLY -c $< -o $@
+
+$(BUILD)/Test4: $(TESTS_BLD)/Test4.o \
+    $(API_LIB)/libXRayLibAPI.a
+	$(HOST_COMPILER) --std=c++20 -o $@ \
+	    $(TESTS_BLD)/Test4.o \
+	    $(API_LIB)/libXRayLibAPI.a \
+	    $(XRAY_LF)
+
+.PHONY: test4
+test4: $(BUILD)/Test4
 
 # ── TestMuXRF: full µXRF depth-scan simulation ───────────────────────────────
 $(TESTS_BLD)/TestMuXRF.o: $(SRC)/tests/Test-muXRF.cpp | $(TESTS_BLD)

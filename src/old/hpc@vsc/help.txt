@@ -1,2 +1,0 @@
-https://slurm.schedmd.com/sbatch.html
-https://wiki.vsc.ac.at/doku.php?id=doku:vsc4_queue

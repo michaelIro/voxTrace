@@ -2,10 +2,10 @@ Code architecture
 =================
 
 voxTrace is a data-oriented Monte-Carlo ray tracer. The whole physics core is
-header-only and is written so that the *same* source compiles for a CPU, an
-NVIDIA/AMD GPU (through `Kokkos`_) and an Apple GPU (through Metal/MSL). This
-page explains the design that makes that possible; for the build-time mechanics
-of each backend see :doc:`accelerators`.
+header-only and is written so that the *same* source compiles for a CPU and for
+an NVIDIA/AMD GPU through `Kokkos`_. This page explains the design that makes
+that possible; for the build-time mechanics of each backend see
+:doc:`accelerators`.
 
 The ray is the unit of parallelism
 ----------------------------------
@@ -44,18 +44,18 @@ loop, which advances the ray to the next voxel and repeats. See
 Design rules (why the classes look the way they do)
 ---------------------------------------------------
 
-These constraints come from the GPU/MSL targets and are applied uniformly:
+These constraints come from the GPU target and are applied uniformly:
 
 * **Value types, no virtual calls.** Runtime polymorphism on the GPU is
-  expensive and Metal forbids it. Behaviour is selected by data (e.g.
+  expensive. Behaviour is selected by data (e.g.
   :cpp:func:`ChemElement::getInteractionType`) rather than by vtables. Where a
   real class hierarchy is useful — the source models — it is expressed with the
   *static* Curiously-Recurring-Template-Pattern (:cpp:class:`SourceBase`), so the
   dispatch is resolved at compile time, there is no vtable, and the types stay
   trivially copyable into device memory.
-* **Fixed-size arrays, no dynamic allocation in device code.** Metal has no
-  heap. Per-element tables such as ``ChemElement::dcs_rayl[100][628]`` are
-  fixed-extent members; the trace never calls ``new``.
+* **Fixed-size arrays, no dynamic allocation in device code.** GPU kernels can
+  not heap-allocate. Per-element tables such as ``ChemElement::dcs_rayl[100][628]``
+  are fixed-extent members; the trace never calls ``new``.
 * **Shared data is passed at the call site, not owned.** Operators receive the
   shared ``ChemElement``/``Material`` arrays as parameters
   (``const ChemElement* elems``) instead of holding pointers, so the structs
@@ -64,10 +64,11 @@ These constraints come from the GPU/MSL targets and are applied uniformly:
   external library (xraylib) runs in a host-only constructor that fills the
   fixed tables — see :cpp:class:`ChemElement` and :cpp:class:`PolyCap`. Device
   code only ever *reads* those tables, so the trace has no runtime dependency.
-* **float by default.** 32-bit is faster and is the only float type Metal
-  supports. The one exception is the transient ``PolyCap`` trace state, which
-  must be ``double`` for off-axis grazing-angle precision (it never touches the
-  GPU storage layout; see the precision note in ``PolyCap.hpp``).
+* **float by default.** 32-bit halves memory traffic and is faster on GPUs, so
+  all stored state is ``float``. The one exception is the transient ``PolyCap``
+  trace state, which must be ``double`` for off-axis grazing-angle precision (it
+  never touches the GPU storage layout; see the precision note in
+  ``PolyCap.hpp``).
 
 The two executables
 -------------------

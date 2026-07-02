@@ -2,35 +2,36 @@ Accelerators & performance portability
 ======================================
 
 voxTrace began as a CUDA-only code and was ported to a *performance-portable*
-model: one header-only core that runs on multi-core CPUs, NVIDIA and AMD GPUs,
-and Apple-silicon GPUs without source changes. This is achieved with two
-ingredients — `Kokkos`_ for CPU/NVIDIA/AMD and a Metal path for Apple — behind a
-single thin abstraction header, ``src/core/Platform.hpp``.
+model: one header-only core that runs on multi-core CPUs and on NVIDIA and AMD
+GPUs without source changes, through `Kokkos`_, behind a single thin abstraction
+header, ``src/core/Platform.hpp``.
 
 The Platform.hpp abstraction
 ----------------------------
 
 Every device-callable function is annotated with portable macros that expand
-differently per target. ``Platform.hpp`` defines them for three regimes:
+differently per target. ``Platform.hpp`` defines them for two regimes:
 
 ============================  ====================================  ==================================
-Macro                          Kokkos (CPU/CUDA/HIP)                 Metal (MSL)
+Macro                          Kokkos (CPU/CUDA/HIP)                 Host-only
 ============================  ====================================  ==================================
 ``KOKKOS_INLINE_FUNCTION``     ``Kokkos``'s host/device inline        ``inline``
-``VT_SCONSTEXPR``              ``static constexpr``                   ``static constant constexpr``
-``VT_DEVICE_METH`` / ...       *(empty)*                              ``device`` address-space qualifier
+``VT_SCONSTEXPR``              ``static constexpr``                   ``static constexpr``
+``VT_DEVICE_METH`` / ...       *(empty)*                              *(empty)*
 ============================  ====================================  ==================================
 
-Selection is by predefined macros:
+Selection is by a predefined macro:
 
-* ``__METAL_VERSION__`` — set by the Metal compiler → MSL path.
-* ``VOXTRACE_HOST_ONLY`` / ``VOXTRACE_METAL`` — plain host build, no Kokkos
-  headers (used by the host-only tests, e.g. ``make test2``).
+* ``VOXTRACE_HOST_ONLY`` — plain host build, no Kokkos headers (used by the
+  standalone tests, e.g. ``make test2`` / ``test3`` / ``test4``).
 * otherwise — full Kokkos build (``#include <Kokkos_Core.hpp>``).
 
-Because the macros are the only backend-specific tokens in the physics code, a
-class like :cpp:class:`Ray` or :cpp:class:`Voxel` is written once and is valid in
-all three regimes.
+The ``VT_*`` macros are no-ops today (they carried address-space qualifiers for
+the retired Metal backend); they are kept as the single place a future backend
+would redefine, so the physics classes stay backend-agnostic. Because these
+macros are the only backend-specific tokens in the physics code, a class like
+:cpp:class:`Ray` or :cpp:class:`Voxel` is written once and is valid in both
+regimes.
 
 Kokkos backends (CPU / NVIDIA / AMD)
 ------------------------------------
@@ -49,23 +50,14 @@ Data lives in ``Kokkos::View`` buffers (rays, voxels, materials, elements) that
 are mirrored host↔device once around the kernel; the trace itself does no host
 communication.
 
-Metal (Apple silicon)
----------------------
-
-On arm64 macOS the Makefile additionally compiles ``src/metal/Tracer.metal`` to
-a ``.metallib`` and links a small Objective-C++ driver
-(``src/metal/MetalTracer.mm``). The MSL kernel ``#include``\s the same core
-headers; the ``__METAL_VERSION__`` branch of ``Platform.hpp`` makes them valid
-MSL. This is why the core is restricted to ``float`` and fixed-size arrays
-(:doc:`architecture`): MSL supports neither ``double`` nor heap allocation.
-
 .. note::
 
-   ``PolyCap`` keeps its transient per-photon trace state in ``double`` for
-   off-axis precision and therefore does **not** compile in a Metal shader as-is.
-   A future all-float reformulation (tracking the photon as an offset from the
-   capillary axis) would restore Metal compatibility — see ``TODO.md`` and the
-   precision note in ``PolyCap.hpp``.
+   An Apple-silicon (Metal/MSL) backend existed early on but was removed: it had
+   drifted out of sync with the core and Metal cannot compile ``double`` (which
+   ``PolyCap`` requires for off-axis grazing-angle precision). GPU support is now
+   Kokkos-only; a Metal path could return either through a Kokkos Metal backend
+   or a fresh MSL kernel, but only after an all-float ``PolyCap`` reformulation
+   (see ``TODO.md``).
 
 Building for each target
 ------------------------
@@ -78,8 +70,6 @@ Building for each target
     # NVIDIA CUDA
     make KOKKOS_INSTALL=$HOME/kokkos-cuda \
          KOKKOS_CXX=$HOME/kokkos/bin/nvcc_wrapper
-
-    # Apple Metal is detected automatically on arm64 when Xcode is present.
 
     # Host-only (no Kokkos) — used by the validation tests
     make test2

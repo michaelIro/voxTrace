@@ -5,11 +5,9 @@
  */
 #include "Platform.hpp"
 
-#if !defined(__METAL_VERSION__)
-    #include <cmath>
-    #include <cstdio>
-    #include "../api/XRayLibAPI.hpp"
-#endif
+#include <cmath>
+#include <cstdio>
+#include "../api/XRayLibAPI.hpp"
 
 /**
  * @brief Per-element X-ray physics database with precomputed interpolation grids.
@@ -52,7 +50,6 @@ class ChemElement {
     float rad_rate       [line_entries];
     float fluor_yield    [shell_entries];
 
-#if !defined(__METAL_VERSION__)
     inline void discretize() {
         a_   = XRayLibAPI::A(z_);
         rho_ = XRayLibAPI::Rho(z_);
@@ -93,15 +90,12 @@ class ChemElement {
             rad_rate[i]      = XRayLibAPI::RadRate(z_, i * -1 - 1);
         }
     }
-#endif
 
 public:
 
     KOKKOS_INLINE_FUNCTION ChemElement() {}
 
-#if !defined(__METAL_VERSION__)
     inline ChemElement(int z) : z_(z) { discretize(); }
-#endif
 
     // ── Basic properties ──────────────────────────────────────────────────────
     KOKKOS_INLINE_FUNCTION float A()   const VT_DEVICE_METH { return a_; }

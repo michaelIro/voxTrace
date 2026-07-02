@@ -5,9 +5,7 @@
  */
 #include "SourceBase.hpp"
 
-#ifndef __METAL_VERSION__
-    #include <cstdio>
-#endif
+#include <cstdio>
 
 /**
  * @brief Sealed/transmission X-ray-tube source.
@@ -76,10 +74,8 @@ public:
         return Emin_;
     }
 
-#ifndef __METAL_VERSION__
     inline void print() const {
         printf("XRayTube: kVp=%.1f Emin=%.1f lineFrac=%.2f nLines=%d\n",
                kVp_, Emin_, lineFrac_, nLines_);
     }
-#endif
 };

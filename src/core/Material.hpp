@@ -17,11 +17,7 @@
  * which element a photon interacts with, weighted by partial cross section.
  */
 
-#ifdef __METAL_VERSION__
-    constant constexpr int MAX_ELEMENTS = 8;
-#else
-    static constexpr int MAX_ELEMENTS = 8;
-#endif
+static constexpr int MAX_ELEMENTS = 8;
 
 class Material {
     int   num_elements_  = 0;
@@ -32,8 +28,7 @@ public:
 
     KOKKOS_INLINE_FUNCTION Material() {}
 
-#ifndef __METAL_VERSION__
-    // Host-side construction: density computed from element densities
+    // Density computed from element densities
     KOKKOS_INLINE_FUNCTION Material(int n, const float* w, const ChemElement* elems)
         : num_elements_(n) {
         for (int i = 0; i < n; ++i) {
@@ -41,7 +36,6 @@ public:
             rho_ += elems[i].Rho() * w[i];
         }
     }
-#endif
 
     KOKKOS_INLINE_FUNCTION float Rho() const VT_DEVICE_METH { return rho_; }
 

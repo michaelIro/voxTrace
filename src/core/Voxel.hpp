@@ -6,9 +6,7 @@
 #include "Platform.hpp"
 #include "Ray.hpp"
 
-#ifndef __METAL_VERSION__
-    #include <cfloat>
-#endif
+#include <cfloat>
 
 /**
  * @brief Axis-aligned box cell of the sample grid: ray–box intersection + neighbour links.

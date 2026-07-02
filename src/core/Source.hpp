@@ -34,10 +34,8 @@ public:
         return energyKeV_;
     }
 
-#ifndef __METAL_VERSION__
     inline void print() const {
         printf("Source(mono): E=%.2fkeV r=%.4fcm div=%.4f f=%.2fcm\n",
                energyKeV_, sourceRadius_, divergence_, focalDist_);
     }
-#endif
 };

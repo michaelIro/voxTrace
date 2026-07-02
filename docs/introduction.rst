@@ -7,10 +7,10 @@ its main purpose, for which it has been tested, is the simulation of
 Energy dispersive Micro X-ray fluorescence spectra in a confocal setup (CMXRF).
 
 The physics core is header-only and *performance portable*: the same source
-compiles for multi-core CPUs, NVIDIA/AMD GPUs (via `Kokkos`_) and Apple-silicon
-GPUs (via Metal). The code originated as a CUDA-only project; the
-:doc:`architecture` and :doc:`accelerators` pages describe the portable design
-that replaced the CUDA-specific layer.
+compiles for multi-core CPUs and NVIDIA/AMD GPUs via `Kokkos`_. The code
+originated as a CUDA-only project; the :doc:`architecture` and
+:doc:`accelerators` pages describe the portable design that replaced the
+CUDA-specific layer.
 
 This works in 4 steps:
 
