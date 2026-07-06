@@ -1,0 +1,18 @@
+# Sample parameters
+# Start Position
+0.0f    # X
+0.0f    # Y
+0.0f    # Z
+
+# Sample Dimensions
+300.0f  # X
+300.0f  # Y
+150.0f  # Z
+
+# Voxel Dimensions
+5.0f    # X
+5.0f    # Y
+5.0f    # Z
+
+# Sample type (0 = homogeneous, 1 = layered, 2 = heterogeneous)
+0       # Type

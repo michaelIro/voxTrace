@@ -1,94 +1,16 @@
 #include <iostream>
 #include <cmath>
-#include <fstream>
-#include <sstream>
 #include <string>
 #include <vector>
 #include "../api/XRayLibAPI.hpp"
 #include "../api/OptimizerAPI.hpp"
-#include "../core/PolyCap.hpp"
-#include "../core/Ray.hpp"
-#include "../core/RNG.hpp"
-#include "../core/Source.hpp"
+#include "PolyCap.hpp"
+#include "Ray.hpp"
+#include "RNG.hpp"
+#include "Source.hpp"
+#include "io/SetupIO.hpp"
 
 namespace {
-
-struct PolycapFixture {
-    double length = 0.;
-    double rExtUpstream = 0.;
-    double rExtDownstream = 0.;
-    double rCapUpstream = 0.;
-    double rCapDownstream = 0.;
-    double focalDistanceIn = 0.;
-    double focalDistanceOut = 0.;
-    std::vector<int> atomicNumbers;
-    std::vector<double> weightPercentages;
-    double density = 0.;
-    double roughness = 0.;
-    double numCapillaries = 0.;
-};
-
-double parseScalar(const std::string& line) {
-    size_t pos = line.find(';');
-    return std::stod(line.substr(0, pos));
-}
-
-std::vector<int> parseIntArray(const std::string& line) {
-    size_t begin = line.find('{');
-    size_t end = line.find('}');
-    std::stringstream stream(line.substr(begin + 1, end - begin - 1));
-    std::vector<int> values;
-    std::string token;
-    while (std::getline(stream, token, ',')) {
-        values.push_back(std::stoi(token));
-    }
-    return values;
-}
-
-std::vector<double> parseDoubleArray(const std::string& line) {
-    size_t begin = line.find('{');
-    size_t end = line.find('}');
-    std::stringstream stream(line.substr(begin + 1, end - begin - 1));
-    std::vector<double> values;
-    std::string token;
-    while (std::getline(stream, token, ',')) {
-        values.push_back(std::stod(token));
-    }
-    return values;
-}
-
-PolycapFixture readPolycapFixture(const std::string& path) {
-    std::ifstream file(path);
-    if (!file.is_open()) {
-        throw std::runtime_error("Could not open polycap fixture: " + path);
-    }
-
-    PolycapFixture fixture;
-    std::string line;
-    int line_num = 0;
-    while (std::getline(file, line)) {
-        ++line_num;
-        if (line.empty() || line_num == 1) {
-            continue;
-        }
-        switch (line_num) {
-            case 2: fixture.length = parseScalar(line); break;
-            case 3: fixture.rExtUpstream = parseScalar(line); break;
-            case 4: fixture.rExtDownstream = parseScalar(line); break;
-            case 5: fixture.rCapUpstream = parseScalar(line); break;
-            case 6: fixture.rCapDownstream = parseScalar(line); break;
-            case 7: fixture.focalDistanceIn = parseScalar(line); break;
-            case 8: fixture.focalDistanceOut = parseScalar(line); break;
-            case 10: fixture.atomicNumbers = parseIntArray(line); break;
-            case 11: fixture.weightPercentages = parseDoubleArray(line); break;
-            case 12: fixture.density = parseScalar(line); break;
-            case 13: fixture.roughness = parseScalar(line); break;
-            case 14: fixture.numCapillaries = parseScalar(line); break;
-            default: break;
-        }
-    }
-    return fixture;
-}
 
 Ray makeCenteredRay(float energy_keV, int index) {
     Ray ray;
@@ -130,19 +52,8 @@ int main() {
         ray.print();
     }
 
-    // ── PolyCap ray tracing test ─────────────────────────────────────────────
-    PolycapFixture fixture = readPolycapFixture("test-data/api/polycap/pc-236-descr.txt");
-    std::vector<int>   iz(fixture.atomicNumbers.begin(), fixture.atomicNumbers.end());
-    std::vector<float> wt(fixture.weightPercentages.begin(), fixture.weightPercentages.end());
-    PolyCap optic(0.f,
-                  (float)fixture.length,
-                  (float)fixture.rExtUpstream,   (float)fixture.rExtDownstream,
-                  (float)fixture.rCapUpstream,   (float)fixture.rCapDownstream,
-                  (float)fixture.focalDistanceIn,(float)fixture.focalDistanceOut,
-                  PolyCap::ELLIPSOIDAL,
-                  (int)iz.size(), iz.data(), wt.data(),
-                  (float)fixture.density, (float)fixture.roughness,
-                  (int)fixture.numCapillaries);
+    // ── PolyCap ray tracing test (descriptor loaded via SetupIO) ─────────────
+    PolyCap optic = vtio::loadPolyCap("test-data/api/polycap/pc-236-descr.txt").build();
 
     std::vector<float> energies_keV = {8.0f, 12.0f, 17.4f};
     int transmitted = 0;

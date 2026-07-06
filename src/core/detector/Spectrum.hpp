@@ -41,6 +41,25 @@ public:
     Spectrum(const Spectrum&)            = delete;
     Spectrum& operator=(const Spectrum&) = delete;
 
+    Spectrum(Spectrum&& o) noexcept
+        : counts_(o.counts_), nChannels_(o.nChannels_),
+          offset_(o.offset_), gain_(o.gain_) {
+        o.counts_    = nullptr;
+        o.nChannels_ = 0;
+    }
+    Spectrum& operator=(Spectrum&& o) noexcept {
+        if (this != &o) {
+            delete[] counts_;
+            counts_    = o.counts_;
+            nChannels_ = o.nChannels_;
+            offset_    = o.offset_;
+            gain_      = o.gain_;
+            o.counts_    = nullptr;
+            o.nChannels_ = 0;
+        }
+        return *this;
+    }
+
     int   nChannels()              const { return nChannels_; }
     float count(int ch)            const { return counts_[ch]; }
     float energy(int ch)           const { return offset_ + gain_ * (float)ch; }
@@ -49,6 +68,7 @@ public:
     void  setCount(int ch, float v)    { counts_[ch] = v; }
     void  addCount(int ch, float v)    { counts_[ch] += v; }
     void  setCalibration(float o, float g) { offset_=o; gain_=g; }
+    void  clear() { for (int ch = 0; ch < nChannels_; ++ch) counts_[ch] = 0.f; }
 
     // Chi-square over all channels: Σ (obs − exp)² / exp
     float chiSquare(const Spectrum& expected) const {

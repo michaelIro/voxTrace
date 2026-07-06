@@ -93,12 +93,6 @@ Test-3. They split into two physics regimes: **coherent wave-optics**
          total-reflection limit (substrate + trace film/particles) is TXRF;
       4. **combined GIXRF+XRR**: fit R(θ) and the element angle-curves jointly
          (reference-free depth profiling) — a `Test-5` once (1)–(3) land.
-- [ ] **XRD**: not feasible without new physics. Needs crystal structure
-      (lattice, atomic positions, structure factors F_hkl) and coherent lattice
-      interference; the current scattering is amorphous atomic form factors
-      (`DCS_Rayl`, no long-range order) so it cannot produce Bragg peaks. Would
-      be a separate module (reciprocal lattice + F_hkl), not an extension of the
-      MC tracer. Defer.
 
 ## Correctness / validation
 - [ ] Wire `make test2` (polycap C library vs `PolyCap`) into CI as a regression gate.

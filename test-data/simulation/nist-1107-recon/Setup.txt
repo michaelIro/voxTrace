@@ -1,0 +1,40 @@
+# Test-5 reconstruction setup  (key = value, '#' comments)
+# Every key here can be overridden on the command line, e.g.:
+#   ./build/src/Test5 test-data/simulation/nist-1107-recon n_primary=2000000 variance_reduction=0
+
+# ── Monte-Carlo statistics ────────────────────────────────────────────────────
+n_primary   = 10000000
+seed        = 1
+
+# ── detector spectrum ─────────────────────────────────────────────────────────
+nbin        = 400
+ebin_keV    = 0.05
+
+# ── synthetic measurement ─────────────────────────────────────────────────────
+expo_per_event = 2.0        # measured counts per detected MC event (Poisson scale)
+min_events  = 10            # events to promote a voxel to a fit parameter
+
+# ── loss:  0 = chi2, 1 = ROI-weighted chi2  (roi = name energy_keV weight) ────
+loss        = 0
+roi         = Cu-Ka  8.05  10
+roi         = Zn-Ka  8.64  10
+roi         = Pb-La 10.55  40
+
+# ── optimizer (ensmallen L-BFGS over per-voxel weights) ───────────────────────
+max_iter    = 300
+lambda      = 0.05          # Tikhonov strength (0 = pure chi2 fit)
+
+# ── physics switches:  1 = on, 0 = off ────────────────────────────────────────
+polarization       = 1      # scatter polarization weights (source E-field in optic plane)
+variance_reduction = 1      # 1 = importance-sampled emission (aimed, weighted)
+                            # 0 = brute force: isotropic emission, Bernoulli survival,
+                            #     unit-weight counts (needs ~500x more primaries)
+
+# ── diagnostics ───────────────────────────────────────────────────────────────
+debug       = 0             # 0 off, 1 detected events, 2 + ray stages, 3 + voxel walk
+debug_ray   = -1            # follow a single beam-ray index (-1 = all)
+profile     = 1             # print phase timings / counters / resources at exit
+
+# ── ground-truth phantom (z0_um z1_um weight; w = 1 elsewhere, later lines win)
+truth       =  0 10 0.60    # depleted (corroded/porous) surface layer
+truth       = 20 30 1.30    # enriched buried band

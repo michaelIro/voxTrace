@@ -71,9 +71,15 @@ else
     POLYCAP_LF := -lpolycap
 endif
 
+# Core is organised by instrument stage (x-ray-source → optical-elements →
+# sample → detector); the stage dirs are all on the include path so headers
+# keep flat #include "..." names.
+CORE_DIRS := $(SRC)/core $(SRC)/core/x-ray-source $(SRC)/core/optical-elements \
+             $(SRC)/core/sample $(SRC)/core/detector
+
 INCLUDES  := -I$(KOKKOS_INC) \
              -I$(ARMA_INC) -I$(HDF5_INC) \
-             -I$(SRC) -I$(SRC)/core \
+             -I$(SRC) $(addprefix -I,$(CORE_DIRS)) \
              $(XRAY_CF)
 
 LIBRARIES := -L$(ARMA_LIB) -L$(HDF5_LIB) -L$(API_LIB)
@@ -125,16 +131,6 @@ $(API_LIB)/lib%.a: $(API_OBJ)/%.o | $(API_LIB)
 	ar rcs $@ $<
 
 # ── SimulationParameter (now header-only in core) ──────────────────────────────
-
-# ── Main binary (Kokkos) ───────────────────────────────────────────────────────
-$(TESTS_BLD)/SampleTracer.o: $(SRC)/tests/SampleTracer.cpp | $(TESTS_BLD)
-	$(CXX) $(INCLUDES) $(CXXFLAGS) -c -o $@ $<
-
-$(BUILD)/SampleTracer: $(TESTS_BLD)/SampleTracer.o $(CORE_OBJS) \
-    $(API_LIB)/libXRayLibAPI.a $(API_LIB)/libOptimizerAPI.a
-	$(CXX) $(CXXFLAGS) -o $@ \
-	    $(TESTS_BLD)/SampleTracer.o $(CORE_OBJS) \
-	    $(LIBRARIES) $(LINK_LIBS) $(KOKKOS_LIBS) $(LDFLAGS)
 
 # ── Test binary ───────────────────────────────────────────────────────────────
 $(TESTS_BLD)/Test.o: $(SRC)/tests/Test.cpp | $(TESTS_BLD)
@@ -190,17 +186,43 @@ $(BUILD)/Test4: $(TESTS_BLD)/Test4.o \
 .PHONY: test4
 test4: $(BUILD)/Test4
 
-# ── TestMuXRF: full µXRF depth-scan simulation ───────────────────────────────
-$(TESTS_BLD)/TestMuXRF.o: $(SRC)/tests/Test-muXRF.cpp | $(TESTS_BLD)
-	$(CXX) $(INCLUDES) $(CXXFLAGS) -c -o $@ $<
+# ── Test5: confocal µXRF voxel-weight reconstruction (trace → spectrum →
+# χ²/weighted-χ² loss vs measured spectrum → ensmallen L-BFGS). -O2 because a
+# Monte-Carlo trace plus an optimisation loop runs on top of it. ──────────────
+$(TESTS_BLD)/Test5.o: $(SRC)/tests/Test-5.cpp | $(TESTS_BLD)
+	$(HOST_COMPILER) $(INCLUDES) --std=c++20 -O2 -DVOXTRACE_HOST_ONLY -c $< -o $@
 
-$(BUILD)/TestMuXRF: $(TESTS_BLD)/TestMuXRF.o
-	$(CXX) $(CXXFLAGS) -o $@ $< \
-	    $(XRAY_LF) \
-	    $(KOKKOS_LIBS) $(LDFLAGS)
+$(BUILD)/Test5: $(TESTS_BLD)/Test5.o \
+    $(API_LIB)/libXRayLibAPI.a $(API_LIB)/libOptimizerAPI.a
+	$(HOST_COMPILER) --std=c++20 -o $@ \
+	    $(TESTS_BLD)/Test5.o \
+	    $(API_LIB)/libOptimizerAPI.a \
+	    $(API_LIB)/libXRayLibAPI.a \
+	    -L$(ARMA_LIB) -L$(GSL_LIB) \
+	    -larmadillo -lgsl -lgslcblas \
+	    $(XRAY_LF)
 
-.PHONY: testmuxrf
-testmuxrf: $(BUILD)/TestMuXRF
+.PHONY: test5
+test5: $(BUILD)/Test5
+
+# ── Test5k: the same source built WITH Kokkos (OpenMP backend). The beam trace
+# and the confocal scan then run as Kokkos::parallel_for; per-ray RNG streams
+# keep the results identical to the serial build at any thread count. ─────────
+$(TESTS_BLD)/Test5k.o: $(SRC)/tests/Test-5.cpp | $(TESTS_BLD)
+	$(CXX) $(INCLUDES) $(CXXFLAGS) -O2 -c $< -o $@
+
+$(BUILD)/Test5k: $(TESTS_BLD)/Test5k.o \
+    $(API_LIB)/libXRayLibAPI.a $(API_LIB)/libOptimizerAPI.a
+	$(CXX) $(CXXFLAGS) -O2 -o $@ \
+	    $(TESTS_BLD)/Test5k.o \
+	    $(API_LIB)/libOptimizerAPI.a \
+	    $(API_LIB)/libXRayLibAPI.a \
+	    -L$(ARMA_LIB) -L$(GSL_LIB) \
+	    -larmadillo -lgsl -lgslcblas \
+	    $(XRAY_LF) $(KOKKOS_LIBS) $(LDFLAGS)
+
+.PHONY: test5-kokkos
+test5-kokkos: $(BUILD)/Test5k
 
 # ── Documentation ─────────────────────────────────────────────────────────────
 # Doxygen extracts the in-source API docs to XML; Sphinx + Breathe render the
