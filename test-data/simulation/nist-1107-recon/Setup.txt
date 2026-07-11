@@ -2,6 +2,17 @@
 # Every key here can be overridden on the command line, e.g.:
 #   ./build/src/Test5 test-data/simulation/nist-1107-recon n_primary=2000000 variance_reduction=0
 
+# ── mounted stages & task ─────────────────────────────────────────────────────
+# source[,primary][,sample][,secondary][,detector]; no sample → beam
+# characterisation; sample+detector → spectra; fit=1 → optimize voxel weights.
+# Without "secondary", photons are collected by a bare detector aperture.
+chain       = source,primary,sample,secondary,detector
+fit         = 1
+det_distance_cm = 1.0       # bare-aperture geometry (chains without secondary)
+det_radius_cm   = 0.3
+# measured  = Measured.csv  # load real spectra (energy_keV + one column per
+                            # scan position); omit → synthetic phantom below
+
 # ── Monte-Carlo statistics ────────────────────────────────────────────────────
 n_primary   = 10000000
 seed        = 1

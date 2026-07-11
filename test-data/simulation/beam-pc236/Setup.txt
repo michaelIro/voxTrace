@@ -1,0 +1,10 @@
+# PC-236 beam characterisation  (key = value, '#' comments)
+# Only the source and the primary optic are mounted → voxTrace reports the
+# beam after the optic: transmission, divergence, focal-spot profile.
+#   ./build/src/voxTrace test-data/simulation/beam-pc236
+
+chain       = source,primary
+n_primary   = 2000000
+seed        = 1
+profile     = 1
+debug       = 0

@@ -109,7 +109,7 @@ CORE_OBJS := $(CORE_BLD)/Tracer.o
 
 .PHONY: all clean test test2
 
-all: $(BUILD)/Test
+all: $(BUILD)/Test $(BUILD)/voxTrace
 
 test: $(BUILD)/Test
 
@@ -223,6 +223,38 @@ $(BUILD)/Test5k: $(TESTS_BLD)/Test5k.o \
 
 .PHONY: test5-kokkos
 test5-kokkos: $(BUILD)/Test5k
+
+# ── voxTrace: the configurable beamline app (chain/task chosen in Setup.txt).
+# Same dispatch as Test5: host-only serial build + Kokkos build (voxTraceK). ──
+$(TESTS_BLD)/voxTrace.o: $(SRC)/apps/voxTrace.cpp | $(TESTS_BLD)
+	$(HOST_COMPILER) $(INCLUDES) --std=c++20 -O2 -DVOXTRACE_HOST_ONLY -c $< -o $@
+
+$(BUILD)/voxTrace: $(TESTS_BLD)/voxTrace.o \
+    $(API_LIB)/libXRayLibAPI.a $(API_LIB)/libOptimizerAPI.a
+	$(HOST_COMPILER) --std=c++20 -o $@ \
+	    $(TESTS_BLD)/voxTrace.o \
+	    $(API_LIB)/libOptimizerAPI.a \
+	    $(API_LIB)/libXRayLibAPI.a \
+	    -L$(ARMA_LIB) -L$(GSL_LIB) \
+	    -larmadillo -lgsl -lgslcblas \
+	    $(XRAY_LF)
+
+$(TESTS_BLD)/voxTraceK.o: $(SRC)/apps/voxTrace.cpp | $(TESTS_BLD)
+	$(CXX) $(INCLUDES) $(CXXFLAGS) -O2 -c $< -o $@
+
+$(BUILD)/voxTraceK: $(TESTS_BLD)/voxTraceK.o \
+    $(API_LIB)/libXRayLibAPI.a $(API_LIB)/libOptimizerAPI.a
+	$(CXX) $(CXXFLAGS) -O2 -o $@ \
+	    $(TESTS_BLD)/voxTraceK.o \
+	    $(API_LIB)/libOptimizerAPI.a \
+	    $(API_LIB)/libXRayLibAPI.a \
+	    -L$(ARMA_LIB) -L$(GSL_LIB) \
+	    -larmadillo -lgsl -lgslcblas \
+	    $(XRAY_LF) $(KOKKOS_LIBS) $(LDFLAGS)
+
+.PHONY: voxtrace voxtrace-kokkos
+voxtrace: $(BUILD)/voxTrace
+voxtrace-kokkos: $(BUILD)/voxTraceK
 
 # ── Documentation ─────────────────────────────────────────────────────────────
 # Doxygen extracts the in-source API docs to XML; Sphinx + Breathe render the

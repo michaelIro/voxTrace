@@ -44,11 +44,22 @@
 // (Debug.hpp); profile=1 prints phase timings, counters, CPU/memory usage
 // (Profiler.hpp).
 //
+// GPU-READY DISPATCH (Phase 1): the two hot loops are explicit Kokkos functors
+// (BeamKernel, ScanKernel) — not lambdas, so nvcc's extended-lambda limits
+// never apply — that run the ENTIRE per-photon chain (primary optic, voxel
+// walk, emission, self-absorption, secondary optic, detector) in device code:
+// every helper on that path is KOKKOS_INLINE_FUNCTION with global-namespace
+// math, all shared arrays travel through DeviceBuffer (Kokkos::View + host
+// mirror; plain vector in host-only builds), functors capture trivially
+// copyable state by value, and debug output uses device-safe printf via a
+// value-captured vtdbg::Ctx. On the local OpenMP backend the deep copies are
+// no-ops; under a CUDA/HIP Kokkos install the same source moves the buffers
+// to the GPU and launches there (PolyCap keeps its double trace state —
+// native on those GPUs). Per-ray RNG streams make results identical at any
+// thread count. Only the fit (ensmallen) and file IO stay host-side.
+//
 // Build: make test5           (host-only, serial)
-//        make test5-kokkos    (Kokkos/OpenMP build → build/src/Test5k; the
-//                              beam trace and the scan run as parallel_for;
-//                              per-ray RNG streams keep results identical to
-//                              the serial build at any thread count)
+//        make test5-kokkos    (Kokkos build → build/src/Test5k)
 // Plot:  python3 src/tests/plot_recon.py
 //
 // The per-photon chain (steps 1-7 below) is identical to Test-3.
@@ -76,24 +87,29 @@
 #include "SpectrumLoss.hpp"
 #include "ResponseMatrix.hpp"
 #include "Debug.hpp"
+#include "DeviceBuffer.hpp"
 #include "Profiler.hpp"
 #include "io/SetupIO.hpp"
 #include "../api/OptimizerAPI.hpp"
 
 namespace {
 
+constexpr double VT_PI_D = 3.14159265358979323846;
+constexpr double VT_2PI_D = 6.28318530717958647692;
+
 struct Vec3 {
     double x = 0, y = 0, z = 0;
-    Vec3 operator+(Vec3 o) const { return {x+o.x, y+o.y, z+o.z}; }
-    Vec3 operator-(Vec3 o) const { return {x-o.x, y-o.y, z-o.z}; }
-    Vec3 operator*(double s) const { return {x*s, y*s, z*s}; }
+    KOKKOS_INLINE_FUNCTION Vec3 operator+(Vec3 o) const { return {x+o.x, y+o.y, z+o.z}; }
+    KOKKOS_INLINE_FUNCTION Vec3 operator-(Vec3 o) const { return {x-o.x, y-o.y, z-o.z}; }
+    KOKKOS_INLINE_FUNCTION Vec3 operator*(double s) const { return {x*s, y*s, z*s}; }
 };
-double dot(Vec3 a, Vec3 b) { return a.x*b.x + a.y*b.y + a.z*b.z; }
-Vec3   cross(Vec3 a, Vec3 b) { return {a.y*b.z-a.z*b.y, a.z*b.x-a.x*b.z, a.x*b.y-a.y*b.x}; }
-Vec3   norm(Vec3 a) { double n = std::sqrt(dot(a,a)); return {a.x/n, a.y/n, a.z/n}; }
+KOKKOS_INLINE_FUNCTION double dot(Vec3 a, Vec3 b) { return a.x*b.x + a.y*b.y + a.z*b.z; }
+KOKKOS_INLINE_FUNCTION Vec3   cross(Vec3 a, Vec3 b) { return {a.y*b.z-a.z*b.y, a.z*b.x-a.x*b.z, a.x*b.y-a.y*b.x}; }
+KOKKOS_INLINE_FUNCTION Vec3   norm(Vec3 a) { double n = sqrt(dot(a,a)); return {a.x/n, a.y/n, a.z/n}; }
 
 // Maps between the sample frame and one optic's frame (optic axis = +z); the
 // optic-frame plane z = zFoc maps to the confocal point C in the sample frame.
+// Constructed on the host, used (trivially copied) inside kernels.
 struct OpticFrame {
     Vec3 C, axis, u, v;
     double zFoc;
@@ -102,18 +118,18 @@ struct OpticFrame {
         u = norm(cross(v, axis));
         v = cross(axis, u);
     }
-    void toOptic(Vec3 p, Vec3 d, Vec3& po, Vec3& doo) const {
+    KOKKOS_INLINE_FUNCTION void toOptic(Vec3 p, Vec3 d, Vec3& po, Vec3& doo) const {
         Vec3 r = p - C;
         po = {dot(r,u), dot(r,v), zFoc + dot(r,axis)};
         doo = {dot(d,u), dot(d,v), dot(d,axis)};
     }
-    void toSample(Vec3 po, Vec3 doo, Vec3& p, Vec3& d) const {
+    KOKKOS_INLINE_FUNCTION void toSample(Vec3 po, Vec3 doo, Vec3& p, Vec3& d) const {
         p = C + u*po.x + v*po.y + axis*(po.z - zFoc);
         d = u*doo.x + v*doo.y + axis*doo.z;
     }
 };
 
-Ray makeRay(Vec3 p, Vec3 d, double energy_keV) {
+KOKKOS_INLINE_FUNCTION Ray makeRay(Vec3 p, Vec3 d, double energy_keV) {
     Ray ray;
     ray.setStartCoordinates((float)p.x, (float)p.y, (float)p.z);
     ray.setEndCoordinates((float)d.x, (float)d.y, (float)d.z);
@@ -127,29 +143,32 @@ Ray makeRay(Vec3 p, Vec3 d, double energy_keV) {
 
 // Deterministic per-ray RNG stream: every (seed, index) pair gets its own
 // xorshift64* state via splitmix64, so serial and parallel runs — at any
-// thread count — draw identical numbers for the same ray.
-uint64_t splitmix(uint64_t z) {
+// thread count, on any backend — draw identical numbers for the same ray.
+KOKKOS_INLINE_FUNCTION uint64_t splitmix(uint64_t z) {
     z += 0x9E3779B97F4A7C15ULL;
     z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9ULL;
     z = (z ^ (z >> 27)) * 0x94D049BB133111EBULL;
     return z ^ (z >> 31);
 }
-RNG makeRng(uint64_t seed, uint64_t idx) { return RNG(splitmix(seed ^ splitmix(idx))); }
+KOKKOS_INLINE_FUNCTION RNG makeRng(uint64_t seed, uint64_t idx) {
+    return RNG(splitmix(seed ^ splitmix(idx)));
+}
 
-// Run body(i) for i in [0, n) — Kokkos::parallel_for in the Kokkos build,
-// a plain loop in the host-only build.
+// Run body(i) for i in [0, n) — Kokkos::parallel_for in the Kokkos build
+// (the functor is copied to the device), a plain loop in the host-only build.
 template <class Body>
-void forRange(long n, const Body& body) {
+void forRange(const char* name, long n, const Body& body) {
 #ifndef VOXTRACE_HOST_ONLY
-    Kokkos::parallel_for("voxTrace::forRange", Kokkos::RangePolicy<>(0, n),
-                         [&](long i) { body(i); });
+    Kokkos::parallel_for(name, Kokkos::RangePolicy<>(0, n), body);
     Kokkos::fence();
 #else
+    (void)name;
     for (long i = 0; i < n; ++i) body(i);
 #endif
 }
 
 // ── the sample data model: Sample grid + Voxel/Material/ChemElement arrays ────
+// Inside kernels the pointers refer to device memory (DeviceBuffer::device()).
 struct Grid {
     Sample sample;
     const Voxel*       voxels;
@@ -160,15 +179,17 @@ struct Grid {
 // Walk the ray from a sample-surface entry point through the voxel grid and
 // sample the first interaction (optical depth ~ −ln U). Returns true and sets
 // the interaction point @p P, its material index and its voxel index, or
-// false if the ray escaped. @p dbgId enables the level-3 voxel-walk dump.
-bool sampleInteraction(const Grid& g, Vec3 entry, Vec3 dir, float E,
-                       double xi, Vec3& P, int& matIdx, int& voxIdx, long dbgId = -1) {
+// false if the ray escaped. @p dbg/@p dbgId drive the level-3 voxel-walk dump.
+KOKKOS_INLINE_FUNCTION
+bool sampleInteraction(const Grid& g, Vec3 entry, Vec3 dir, float E, double xi,
+                       Vec3& P, int& matIdx, int& voxIdx,
+                       const vtdbg::Ctx& dbg, long dbgId) {
     Ray r = makeRay(entry, dir, E);
     int vox = g.sample.getVoxelIdx((float)entry.x, (float)entry.y, (float)entry.z);
-    double tau = -std::log(xi > 0 ? xi : 1e-30), acc = 0;
+    double tau = -log(xi > 0 ? xi : 1e-30), acc = 0;
     while (vox >= 0) {
         const Voxel& v = g.voxels[vox];
-        if (vtdbg::on(3, dbgId)) vtdbg::voxel(dbgId, "walk-in", vox, v);
+        if (dbg.on(3, dbgId)) vtdbg::voxel(dbgId, "walk-in", vox, v);
         double len = v.intersect(r);                                   // path through voxel [cm]
         double mu  = g.mats[v.getMaterialIdx()].CS_Tot_Lin(E, g.elems); // 1/cm
         if (acc + mu*len >= tau) {
@@ -186,6 +207,7 @@ bool sampleInteraction(const Grid& g, Vec3 entry, Vec3 dir, float E,
 
 // Total optical depth from @p P along @p dir to the edge of the sample (the
 // emitted photon's self-absorption on the way out), walking the voxel grid.
+KOKKOS_INLINE_FUNCTION
 double opticalDepthOut(const Grid& g, Vec3 P, Vec3 dir, float E) {
     Ray r = makeRay(P, dir, E);
     int vox = g.sample.getVoxelIdx((float)P.x, (float)P.y, (float)P.z);
@@ -204,6 +226,168 @@ struct ExitRay { Vec3 pos, dir; double w; };     // primary-optic exit ray (opti
 // One detected photon: scan position, voxel it was emitted from, detector
 // channel it was recorded in, and its Monte-Carlo weight.
 struct Event { int pos; int vox; int ch; float w; };
+
+// ── beam kernel: one source photon through the primary optic ─────────────────
+// Writes the focused exit ray — or a w = −1 sentinel — into its slot.
+struct BeamKernel {
+    PolyCap    primary;
+    double     srcR;
+    double     energy;
+    uint64_t   seed;
+    long       base;        // chunk offset (slot i ↔ primary photon base+i)
+    ExitRay*   slots;       // device
+    vtdbg::Ctx dbg;
+
+    KOKKOS_INLINE_FUNCTION void operator()(long i) const {
+        slots[i].w = -1.0;
+        RNG rng = makeRng(seed, (uint64_t)(base + i));
+        double rr = sqrtf(rng.frand()) * srcR, ra = VT_2PI_D * rng.frand();
+        Ray p = makeRay({rr*cos(ra), rr*sin(ra), 0}, {0,0,1}, energy);
+        primary.trace(p);
+        if (p.getIAFlag()) {
+            slots[i] = {{p.getStartX(), p.getStartY(), p.getStartZ()},
+                        {p.getDirX(),   p.getDirY(),   p.getDirZ()}, p.getProb()};
+            if (dbg.on(2, base + i)) vtdbg::ray(base + i, "beam-exit", p);
+        }
+    }
+};
+
+// ── scan kernel: one (scan position, beam ray) sample of the full chain ──────
+// Steps (1)-(7) are identical to Test-3, with two switchable behaviours:
+// vr=true aims the emitted photon at the secondary window and multiplies
+// importance weights; vr=false emits isotropically and replaces every weight
+// by a Bernoulli survival draw, so each detected count is one real photon.
+// Writes the detected Event — or a ch = −1 sentinel — into its slot.
+struct ScanKernel {
+    Grid        grid;           // device pointers
+    PolyCap     secondary;
+    Detector    detector;
+    const ChemElement* detElems;   // device
+    const ExitRay*     beam;       // device
+    Event*             slots;      // device
+    OpticFrame  primFrame, secFrame;
+    Vec3        secWinCtr, Epol, d_sec;
+    double      energy, rWin, eBin;
+    double      x0, y0, z0, LX, LY;
+    int         nBin, di;
+    bool        vr, usePol;
+    uint64_t    scanSeed;
+    long        beamN;
+    vtdbg::Ctx  dbg;
+
+    KOKKOS_INLINE_FUNCTION void operator()(long bi) const {
+        slots[bi] = Event{0, 0, -1, 0.f};
+        RNG rng = makeRng(scanSeed, (uint64_t)di*beamN + bi);
+        const ExitRay& er = beam[bi];
+        double wBeam = er.w;
+        if (!vr) {                                            // analog: Bernoulli beam weight
+            if (rng.frand() >= wBeam) return;
+            wBeam = 1.0;
+        }
+
+        // (1) primary exit ray → sample frame → surface entry
+        Vec3 ps, ds;
+        primFrame.toSample(er.pos, er.dir, ps, ds);
+        if (ds.z <= 0) return;
+        double t = (z0 - ps.z) / ds.z;
+        if (t < 0) return;
+        Vec3 entry = ps + ds * t;
+        if (entry.x <= x0 || entry.x >= x0 + LX ||
+            entry.y <= y0 || entry.y >= y0 + LY) return;
+        if (dbg.on(2, bi))
+            VT_DBG(bi, "surface-entry", "pos %d: (%.5f %.5f) dir=(%+.4f %+.4f %+.4f)",
+                   di, entry.x, entry.y, ds.x, ds.y, ds.z);
+
+        // (2) walk the voxel grid to the first interaction point
+        Vec3 P; int matIdx, voxIdx;
+        if (!sampleInteraction(grid, entry, ds, (float)energy, rng.frand(),
+                               P, matIdx, voxIdx, dbg, bi)) return;
+        const Material& mat = grid.mats[matIdx];
+        if (dbg.on(2, bi))
+            VT_DBG(bi, "interaction", "pos %d: P=(%.5f %.5f %.5f) voxel %d",
+                   di, P.x, P.y, P.z, voxIdx);
+
+        // (3) emission direction: aimed at the secondary window (importance
+        //     sampling) or isotropic (brute force)
+        Vec3 eDir;
+        double wEmit = 1.0;
+        if (vr) {
+            double ar = sqrtf(rng.frand()) * rWin, aa = VT_2PI_D * rng.frand();
+            Vec3   aim  = secWinCtr + secFrame.u*(ar*cos(aa)) + secFrame.v*(ar*sin(aa));
+            eDir = aim - P;
+            double r2 = dot(eDir, eDir);
+            eDir = norm(eDir);
+            wEmit = (VT_PI_D * rWin * rWin * fabs(dot(eDir, d_sec))) / (4.0*VT_PI_D*r2);
+        } else {
+            double cth = 2.0*rng.frand() - 1.0, phi = VT_2PI_D * rng.frand();
+            double sth = sqrt(fmax(0.0, 1.0 - cth*cth));
+            eDir = {sth*cos(phi), sth*sin(phi), cth};
+        }
+        if (eDir.z >= 0) return;                              // must travel out (−z)
+
+        // (4) the interaction: element, channel, emitted energy (scatter
+        //     carries the polarization-dependent azimuthal weight if enabled)
+        int ei   = mat.getInteractingElementIdx((float)energy, rng.frand(), grid.elems);
+        const ChemElement& el = grid.elems[ei];
+        int type = el.getInteractionType((float)energy, rng.frand());
+        double cth = fmax(-1.0, fmin(1.0, dot(ds, eDir)));    // cos(scatter angle)
+        double th  = acos(cth);
+        double Ef, wPol = 1.0;
+        if (type == 0) {                                      // photoelectric → fluorescence
+            int shell = el.getExcitedShell((float)energy, rng.frand());
+            if (rng.frand() >= el.Fluor_Y(shell)) return;     // Auger
+            Ef = el.Line_Energy(el.getTransition(shell, rng.frand()));
+        } else {                                              // scatter
+            Ef = (type == 1) ? energy
+                             : el.getComptEnergy((float)energy, (float)th);
+            if (usePol) {
+                Vec3   sperp = eDir - ds*cth;
+                Vec3   eperp = Epol - ds*dot(Epol, ds);
+                double sl = sqrt(dot(sperp,sperp)), el2 = sqrt(dot(eperp,eperp));
+                double cphi = (sl > 1e-12 && el2 > 1e-12) ? dot(sperp,eperp)/(sl*el2) : 1.0;
+                double phi  = acos(fmax(-1.0, fmin(1.0, cphi)));
+                wPol = (type == 1) ? el.polFactorRayl((float)th, (float)phi)
+                                   : el.polFactorCompt((float)energy, (float)th, (float)phi);
+            }
+        }
+        if (Ef < 0.8) return;
+        if (dbg.on(2, bi))
+            VT_DBG(bi, "emission", "pos %d: type=%d Z=%d Ef=%.3f keV wPol=%.3f",
+                   di, type, grid.elems[ei].Z(), Ef, wPol);
+
+        // (5) self-absorption on the way out (weight or Bernoulli survival)
+        double tauOut = opticalDepthOut(grid, P, eDir, (float)Ef);
+        double wSelf = 1.0;
+        if (vr) wSelf = exp(-tauOut);
+        else if (rng.frand() >= exp(-tauOut)) return;
+
+        // (6) secondary polycap — only confocal-volume photons survive
+        Vec3 po, doo;
+        secFrame.toOptic(P, eDir, po, doo);
+        Ray sray = makeRay(po, doo, Ef);
+        secondary.trace(sray);
+        if (!sray.getIAFlag()) return;
+        double wSec = 1.0;
+        if (vr) wSec = sray.getProb();
+        else if (rng.frand() >= sray.getProb()) return;
+        if (dbg.on(2, bi)) vtdbg::ray(bi, "secondary-exit", sray);
+
+        // (7) Si(Li) detector response → measured channel + event record
+        float wDet;
+        float Emeas = detector.detect((float)Ef, rng, detElems, wDet);
+        if (wDet <= 0.f) return;
+        if (!vr) { if (rng.frand() >= wDet) return; wDet = 1.f; }
+
+        double w = wBeam * wEmit * wPol * wSelf * wSec * wDet;
+        int b = (int)(Emeas / eBin);
+        if (b >= 0 && b < nBin) {
+            slots[bi] = Event{di, voxIdx, b, (float)w};
+            if (dbg.on(1, bi))
+                VT_DBG(bi, "detected", "pos %d: E=%.3f keV ch=%d w=%.3e voxel %d",
+                       di, (double)Emeas, b, w, voxIdx);
+        }
+    }
+};
 
 }  // namespace
 
@@ -234,8 +418,8 @@ int main(int argc, char* argv[]) {
         std::fprintf(stderr, "%s\n", e.what());
         return 1;
     }
-    vtdbg::level = cfg.debug;
-    vtdbg::only  = cfg.debugRay;
+    vtdbg::cfg.level = cfg.debug;
+    vtdbg::cfg.only  = cfg.debugRay;
     std::filesystem::create_directories("test-data/out");
 
     const int    N_POS = (int)sc.points.size();
@@ -291,9 +475,21 @@ int main(int argc, char* argv[]) {
         }
         voxels[(size_t)i*yN*zN + j*zN + k].setNN(nn);
     }
+
+    // ── Si(Li) detector: a Si crystal + Be window, reusing ChemElement physics ─
+    std::vector<ChemElement> detElems{ ChemElement(14), ChemElement(4) };   // Si, Be
+    Detector detector = Detector::make(/*siIdx*/0, /*beIdx*/1, /*thickness*/0.30f,
+                                       /*beWin*/0.0025f, /*deadLayer*/1e-4f,
+                                       /*fano*/0.114f, /*noiseFWHM*/0.080f);
+
+    // ── shared arrays → device (no-op copies on host backends) ───────────────
+    DeviceBuffer<Voxel>       voxBuf ("voxels",       voxels);
+    DeviceBuffer<Material>    matBuf ("materials",    mats);
+    DeviceBuffer<ChemElement> elemBuf("elements",     elems);
+    DeviceBuffer<ChemElement> detBuf ("det-elements", detElems);
     Grid grid{ Sample((float)x0,(float)y0,(float)z0, (float)sd.LX,(float)sd.LY,(float)sd.LZ,
                       (float)sd.vx,(float)sd.vy,(float)sd.vz, xN,yN,zN),
-               voxels.data(), mats.data(), elems.data() };
+               voxBuf.device(), matBuf.device(), elemBuf.device() };
 
     // decoded voxel-centre depth (grid layout: vox = i*yN*zN + j*zN + k)
     auto zOfVox = [&](int vox) { return z0 + ((vox % zN) + 0.5) * VOX; };
@@ -306,14 +502,8 @@ int main(int argc, char* argv[]) {
         return w;
     };
 
-    // ── Si(Li) detector: a Si crystal + Be window, reusing ChemElement physics ─
-    std::vector<ChemElement> detElems{ ChemElement(14), ChemElement(4) };   // Si, Be
-    Detector detector = Detector::make(/*siIdx*/0, /*beIdx*/1, /*thickness*/0.30f,
-                                       /*beWin*/0.0025f, /*deadLayer*/1e-4f,
-                                       /*fano*/0.114f, /*noiseFWHM*/0.080f);
-
     // ── confocal geometry (Capillaries.txt: bench position + tilt angle) ─────
-    const double A = bm.angleDeg * M_PI / 180.0;
+    const double A = bm.angleDeg * VT_PI_D / 180.0;
     const Vec3 d_prim = norm({ std::cos(A), 0,  std::sin(A)});  // into the sample (+z)
     const Vec3 d_sec  = norm({ std::cos(A), 0, -std::sin(A)});  // out of the sample (−z)
     const Vec3 C0     = {bm.posX, bm.posY, 0};                  // scan origin on the surface
@@ -337,23 +527,19 @@ int main(int argc, char* argv[]) {
     {
         VT_PROFILE("beam-trace");
         const long CHUNK = 2000000;
-        std::vector<ExitRay> slots;
+        DeviceBuffer<ExitRay> chunkBuf("beam-chunk", (size_t)std::min(CHUNK, (long)cfg.nPrimary));
         for (long base = 0; base < cfg.nPrimary; base += CHUNK) {
             long n = std::min(CHUNK, cfg.nPrimary - base);
-            slots.assign(n, ExitRay{{}, {}, -1.0});
-            forRange(n, [&](long i) {
-                RNG rng = makeRng(cfg.seed, base + i);
-                double rr = std::sqrt(rng.frand()) * srcR, ra = 2*M_PI*rng.frand();
-                Ray p = makeRay({rr*std::cos(ra), rr*std::sin(ra), 0}, {0,0,1}, bm.energyKeV);
-                primary.trace(p);
-                if (p.getIAFlag()) {
-                    slots[i] = {{p.getStartX(), p.getStartY(), p.getStartZ()},
-                                {p.getDirX(),   p.getDirY(),   p.getDirZ()}, p.getProb()};
-                    if (vtdbg::on(2, base + i)) vtdbg::ray(base + i, "beam-exit", p);
-                }
-            });
-            for (const ExitRay& er : slots)
-                if (er.w >= 0) beam.push_back(er);
+            BeamKernel bk{
+                .primary = primary, .srcR = srcR, .energy = bm.energyKeV,
+                .seed = cfg.seed, .base = base, .slots = chunkBuf.device(),
+                .dbg = vtdbg::cfg,
+            };
+            forRange("voxTrace::beam", n, bk);
+            chunkBuf.toHost();
+            const ExitRay* er = chunkBuf.host();
+            for (long i = 0; i < n; ++i)
+                if (er[i].w >= 0) beam.push_back(er[i]);
         }
     }
     const long beamN = (long)beam.size();
@@ -361,19 +547,16 @@ int main(int argc, char* argv[]) {
     vtprof::count("beam-rays", beamN);
     std::printf("  primary photons  = %ld   transmitted = %ld (%.2f%%)\n",
                 cfg.nPrimary, beamN, 100.0*beamN/cfg.nPrimary);
+    if (beamN == 0) { std::printf("No beam — check the optic descriptor.\n"); return 1; }
+    DeviceBuffer<ExitRay> beamBuf("beam", beam);
 
     // ── one full confocal scan → list of detected-photon events ───────────────
-    // Steps (1)-(7) are identical to Test-3, with two switchable behaviours:
-    // variance_reduction=1 aims the emitted photon at the secondary window and
-    // multiplies importance weights; =0 emits isotropically and replaces every
-    // weight by a Bernoulli survival draw, so each detected count is one real
-    // photon. The focused beam is shared between scans; every (position, beam
-    // ray) pair has its own RNG stream, so results are independent of the
-    // execution order (serial or Kokkos-parallel).
+    // Per position, ScanKernel runs the whole chain for every beam ray in
+    // parallel; the host compacts the slot array into the event list.
+    DeviceBuffer<Event> slotsBuf("event-slots", (size_t)beamN);
     auto scanTrace = [&](uint64_t scanSeed, const char* phaseTag, const char* countTag) {
         VT_PROFILE(phaseTag);
         std::vector<Event> events;
-        std::vector<Event> slots;
         for (int di = 0; di < N_POS; ++di) {
             Vec3 C = C0 + Vec3{sc.points[di][0], sc.points[di][1], sc.points[di][2]};
             OpticFrame primFrame(C, d_prim,  pc.length + FOCAL);
@@ -381,120 +564,21 @@ int main(int argc, char* argv[]) {
             Vec3 secWinCtr = C + d_sec * FOCAL;                       // secondary entrance centre
             Vec3 Epol = primFrame.u*srcPol.x + primFrame.v*srcPol.y + primFrame.axis*srcPol.z;
 
-            slots.assign(beamN, Event{0, 0, -1, 0.f});
-            forRange(beamN, [&](long bi) {
-                RNG rng = makeRng(scanSeed, (uint64_t)di*beamN + bi);
-                const ExitRay& er = beam[bi];
-                double wBeam = er.w;
-                if (!VR) {                                            // analog: Bernoulli beam weight
-                    if (rng.frand() >= wBeam) return;
-                    wBeam = 1.0;
-                }
-
-                // (1) primary exit ray → sample frame → surface entry
-                Vec3 ps, ds;
-                primFrame.toSample(er.pos, er.dir, ps, ds);
-                if (ds.z <= 0) return;
-                double t = (z0 - ps.z) / ds.z;
-                if (t < 0) return;
-                Vec3 entry = ps + ds * t;
-                if (entry.x <= x0 || entry.x >= x0 + sd.LX ||
-                    entry.y <= y0 || entry.y >= y0 + sd.LY) return;
-                if (vtdbg::on(2, bi))
-                    vtdbg::msg(bi, "surface-entry", "pos %d: (%.5f %.5f) dir=(%+.4f %+.4f %+.4f)",
-                               di, entry.x, entry.y, ds.x, ds.y, ds.z);
-
-                // (2) walk the voxel grid to the first interaction point
-                Vec3 P; int matIdx, voxIdx;
-                if (!sampleInteraction(grid, entry, ds, (float)bm.energyKeV, rng.frand(),
-                                       P, matIdx, voxIdx, bi)) return;
-                const Material& mat = grid.mats[matIdx];
-                if (vtdbg::on(2, bi))
-                    vtdbg::msg(bi, "interaction", "pos %d: P=(%.5f %.5f %.5f) voxel %d",
-                               di, P.x, P.y, P.z, voxIdx);
-
-                // (3) emission direction: aimed at the secondary window (importance
-                //     sampling) or isotropic (brute force)
-                Vec3 eDir;
-                double wEmit = 1.0;
-                if (VR) {
-                    double ar = std::sqrt(rng.frand()) * R_WIN, aa = 2*M_PI*rng.frand();
-                    Vec3   aim  = secWinCtr + secFrame.u*(ar*std::cos(aa)) + secFrame.v*(ar*std::sin(aa));
-                    eDir = aim - P;
-                    double r2 = dot(eDir, eDir);
-                    eDir = norm(eDir);
-                    wEmit = (M_PI * R_WIN * R_WIN * std::fabs(dot(eDir, d_sec))) / (4.0*M_PI*r2);
-                } else {
-                    double cth = 2.0*rng.frand() - 1.0, phi = 2*M_PI*rng.frand();
-                    double sth = std::sqrt(std::fmax(0.0, 1.0 - cth*cth));
-                    eDir = {sth*std::cos(phi), sth*std::sin(phi), cth};
-                }
-                if (eDir.z >= 0) return;                              // must travel out (−z)
-
-                // (4) the interaction: element, channel, emitted energy (scatter
-                //     carries the polarization-dependent azimuthal weight if enabled)
-                int ei   = mat.getInteractingElementIdx((float)bm.energyKeV, rng.frand(), grid.elems);
-                const ChemElement& el = grid.elems[ei];
-                int type = el.getInteractionType((float)bm.energyKeV, rng.frand());
-                double cth = std::fmax(-1.0, std::fmin(1.0, dot(ds, eDir)));   // cos(scatter angle)
-                double th  = std::acos(cth);
-                double Ef, wPol = 1.0;
-                if (type == 0) {                                     // photoelectric → fluorescence
-                    int shell = el.getExcitedShell((float)bm.energyKeV, rng.frand());
-                    if (rng.frand() >= el.Fluor_Y(shell)) return;    // Auger
-                    Ef = el.Line_Energy(el.getTransition(shell, rng.frand()));
-                } else {                                             // scatter
-                    Ef = (type == 1) ? bm.energyKeV
-                                     : el.getComptEnergy((float)bm.energyKeV, (float)th);
-                    if (usePol) {
-                        Vec3   sperp = eDir - ds*cth;
-                        Vec3   eperp = Epol - ds*dot(Epol, ds);
-                        double sl = std::sqrt(dot(sperp,sperp)), el2 = std::sqrt(dot(eperp,eperp));
-                        double cphi = (sl > 1e-12 && el2 > 1e-12) ? dot(sperp,eperp)/(sl*el2) : 1.0;
-                        double phi  = std::acos(std::fmax(-1.0, std::fmin(1.0, cphi)));
-                        wPol = (type == 1) ? el.polFactorRayl((float)th, (float)phi)
-                                           : el.polFactorCompt((float)bm.energyKeV, (float)th, (float)phi);
-                    }
-                }
-                if (Ef < 0.8) return;
-                if (vtdbg::on(2, bi))
-                    vtdbg::msg(bi, "emission", "pos %d: type=%d Z=%d Ef=%.3f keV wPol=%.3f",
-                               di, type, uz[ei], Ef, wPol);
-
-                // (5) self-absorption on the way out (weight or Bernoulli survival)
-                double tauOut = opticalDepthOut(grid, P, eDir, (float)Ef);
-                double wSelf = 1.0;
-                if (VR) wSelf = std::exp(-tauOut);
-                else if (rng.frand() >= std::exp(-tauOut)) return;
-
-                // (6) secondary polycap — only confocal-volume photons survive
-                Vec3 po, doo;
-                secFrame.toOptic(P, eDir, po, doo);
-                Ray sray = makeRay(po, doo, Ef);
-                secondary.trace(sray);
-                if (!sray.getIAFlag()) return;
-                double wSec = 1.0;
-                if (VR) wSec = sray.getProb();
-                else if (rng.frand() >= sray.getProb()) return;
-                if (vtdbg::on(2, bi)) vtdbg::ray(bi, "secondary-exit", sray);
-
-                // (7) Si(Li) detector response → measured channel + event record
-                float wDet;
-                float Emeas = detector.detect((float)Ef, rng, detElems.data(), wDet);
-                if (wDet <= 0.f) return;
-                if (!VR) { if (rng.frand() >= wDet) return; wDet = 1.f; }
-
-                double w = wBeam * wEmit * wPol * wSelf * wSec * wDet;
-                int b = (int)(Emeas / EBIN);
-                if (b >= 0 && b < NBIN) {
-                    slots[bi] = Event{di, voxIdx, b, (float)w};
-                    if (vtdbg::on(1, bi))
-                        vtdbg::msg(bi, "detected", "pos %d: E=%.3f keV ch=%d w=%.3e voxel %d",
-                                   di, Emeas, b, w, voxIdx);
-                }
-            });
-            for (const Event& e : slots)
-                if (e.ch >= 0) events.push_back(e);
+            ScanKernel k{
+                .grid = grid, .secondary = secondary, .detector = detector,
+                .detElems = detBuf.device(), .beam = beamBuf.device(), .slots = slotsBuf.device(),
+                .primFrame = primFrame, .secFrame = secFrame,
+                .secWinCtr = secWinCtr, .Epol = Epol, .d_sec = d_sec,
+                .energy = bm.energyKeV, .rWin = R_WIN, .eBin = EBIN,
+                .x0 = x0, .y0 = y0, .z0 = z0, .LX = sd.LX, .LY = sd.LY,
+                .nBin = NBIN, .di = di, .vr = VR, .usePol = usePol,
+                .scanSeed = scanSeed, .beamN = beamN, .dbg = vtdbg::cfg,
+            };
+            forRange("voxTrace::scan", beamN, k);
+            slotsBuf.toHost();
+            const Event* se = slotsBuf.host();
+            for (long bi = 0; bi < beamN; ++bi)
+                if (se[bi].ch >= 0) events.push_back(se[bi]);
         }
         vtprof::count(countTag, (long)events.size());
         return events;

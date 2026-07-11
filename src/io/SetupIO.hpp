@@ -300,6 +300,25 @@ struct SetupDescr {
     long   debugRay = -1;           // restrict debug to one beam-ray index
     int    profile = 1;             // print the profiler report
 
+    // the mounted stages: source[,primary][,sample][,secondary][,detector]
+    std::vector<std::string> chain = {"source","primary","sample","secondary","detector"};
+    int    fit = 1;                 // 0 = simulate spectra only, 1 = also optimize
+    double detDistance = 1.0;       // [cm] bare detector aperture (chains w/o secondary)
+    double detRadius   = 0.3;       // [cm]
+    std::string measured;           // CSV of measured spectra ("" = synthetic phantom)
+
+    // Si(Li) detector response (Detector::make)
+    double detThickness = 0.30;     // active Si [cm]
+    double detBeWindow  = 0.0025;   // Be window [cm]
+    double detDeadLayer = 1e-4;     // Si dead layer [cm]
+    double detFano      = 0.114;
+    double detNoiseFWHM = 0.080;    // electronic noise FWHM [keV]
+
+    bool has(const char* stage) const {
+        for (const auto& s : chain) if (s == stage) return true;
+        return false;
+    }
+
     struct Roi   { std::string name; double energyKeV; float weight; };
     struct Layer { double z0um, z1um, w; };
     std::vector<Roi>   rois;        // for lossMode 1
@@ -324,6 +343,26 @@ inline void applyKey(SetupDescr& c, const std::string& key, const std::string& v
     else if (key == "debug")              c.debug = std::atoi(val.c_str());
     else if (key == "debug_ray")          c.debugRay = std::atol(val.c_str());
     else if (key == "profile")            c.profile = std::atoi(val.c_str());
+    else if (key == "chain") {                       // comma- or space-separated stages
+        c.chain.clear();
+        std::string tok;
+        for (char ch : val) {
+            if (ch == ',' || ch == ' ' || ch == '\t') {
+                if (!tok.empty()) c.chain.push_back(tok);
+                tok.clear();
+            } else tok += ch;
+        }
+        if (!tok.empty()) c.chain.push_back(tok);
+    }
+    else if (key == "fit")                c.fit = std::atoi(val.c_str());
+    else if (key == "det_distance_cm")    c.detDistance = std::atof(val.c_str());
+    else if (key == "det_radius_cm")      c.detRadius = std::atof(val.c_str());
+    else if (key == "measured")           c.measured = val;
+    else if (key == "det_thickness_cm")   c.detThickness = std::atof(val.c_str());
+    else if (key == "det_be_window_cm")   c.detBeWindow = std::atof(val.c_str());
+    else if (key == "det_dead_layer_cm")  c.detDeadLayer = std::atof(val.c_str());
+    else if (key == "det_fano")           c.detFano = std::atof(val.c_str());
+    else if (key == "det_noise_fwhm_keV") c.detNoiseFWHM = std::atof(val.c_str());
     else if (key == "roi") {
         SetupDescr::Roi r; vs >> r.name >> r.energyKeV >> r.weight;
         c.rois.push_back(r);
@@ -344,6 +383,27 @@ inline void applyOverride(SetupDescr& c, const std::string& token) {
     std::string key = stripComment(token.substr(0, eq));
     std::string val = stripComment(token.substr(eq + 1));
     applyKey(c, key, val);
+}
+
+/// Measured spectra CSV: header line, then one row per energy with the energy
+/// [keV] in column 0 and one counts column per scan position. Counts are
+/// rebinned onto the (nBin, eBin) grid, so any calibration works.
+inline std::vector<std::vector<double>> loadMeasured(const std::string& path,
+                                                     int nPos, int nBin, double eBin) {
+    std::ifstream in(path);
+    if (!in) throw std::runtime_error("SetupIO: cannot open " + path);
+    std::vector<std::vector<double>> spec(nPos, std::vector<double>(nBin, 0.0));
+    std::string raw;
+    std::getline(in, raw);                                       // header
+    while (std::getline(in, raw)) {
+        std::vector<double> v = numbersOn(stripComment(raw));
+        if (v.size() < 2) continue;
+        int ch = (int)(v[0] / eBin);
+        if (ch < 0 || ch >= nBin) continue;
+        int cols = (int)v.size() - 1 < nPos ? (int)v.size() - 1 : nPos;
+        for (int d = 0; d < cols; ++d) spec[d][ch] += v[1 + d];
+    }
+    return spec;
 }
 
 inline SetupDescr loadSetup(const std::string& path) {
