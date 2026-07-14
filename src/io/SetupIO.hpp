@@ -6,9 +6,14 @@
  * A simulation directory describes one experiment; the loaders here turn its
  * txt files into plain structs the tests build the trace chain from:
  *
- *   Polycapillary.txt  optic descriptor (polycap-library format `value; //…`)
- *   Source.txt         source geometry / polarisation (same format)
- *   Capillaries.txt    beam energy + bench geometry   (`value   # …`)
+ *   Primary_Polycapillary.txt    optic descriptor (polycap-library format
+ *   Secondary_Polycapillary.txt  `value; //…`); legacy fallback: one shared
+ *                                Polycapillary.txt used for both optics
+ *   Source.txt         source geometry / polarisation (same format); the beam
+ *                      energy is the maximum of its energy grid
+ *   Placement.txt      bench geometry per optic, µm/° (`value   # …`);
+ *                      legacy fallback: Capillaries.txt (which also carried
+ *                      the beam energy)
  *   Sample.txt         voxel-grid geometry, µm        (`value   # …`)
  *   Materials.txt      per-voxel element composition
  *   Simulation.txt     scan path: confocal positions, µm offsets
@@ -22,6 +27,7 @@
  * `key=value` syntax (see applyOverride).
  */
 
+#include <algorithm>
 #include <array>
 #include <cstdlib>
 #include <fstream>
@@ -148,6 +154,7 @@ struct SourceDescr {
     double distance = 0, radiusX = 0, radiusY = 0;
     double divX = 0, divY = 0, shiftX = 0, shiftY = 0;
     double polFactor = 1.0;
+    double energyKeV = 0;   // beam energy = max of the source energy grid (0 = absent)
 };
 
 inline SourceDescr loadSource(const std::string& path) {
@@ -160,16 +167,35 @@ inline SourceDescr loadSource(const std::string& path) {
     s.divX     = t.scalars[3]; s.divY    = t.scalars[4];
     s.shiftX   = t.scalars[5]; s.shiftY  = t.scalars[6];
     s.polFactor = t.scalars[7];
+    if (!t.arrays.empty())
+        for (double e : t.arrays[0]) s.energyKeV = std::max(s.energyKeV, e);
     return s;
 }
 
-// ── Capillaries.txt — beam energy + bench geometry ────────────────────────────
+// ── Placement.txt — bench geometry (legacy: Capillaries.txt, incl. energy) ────
 
 struct BeamDescr {
-    double energyKeV = 17.4;
+    double energyKeV = 0;                  // legacy Capillaries.txt only (else 0)
     double posX = 0, posY = 0, posZ = 0;   // scan origin on the sample surface [cm]
-    double angleDeg  = 45.0;               // optic tilt against the surface (x-z plane)
+    double angleDeg    = 45.0;             // excitation-arm tilt (x-z plane)
+    double angleSecDeg = 45.0;             // detection-arm tilt
 };
+
+/// Placement.txt: primary block x,y,z,distToDetector,angle — secondary block
+/// x,y,z,distToDetector,angle,distToPrimary. All µm / °, no energy.
+inline BeamDescr loadPlacement(const std::string& path) {
+    Txt t = scanTxt(path);
+    if (t.scalars.size() < 11)
+        throw std::runtime_error("SetupIO: bad placement file " + path);
+    BeamDescr b;
+    const double UM = 1e-4;
+    b.posX = t.scalars[0]*UM;
+    b.posY = t.scalars[1]*UM;
+    b.posZ = t.scalars[2]*UM;
+    b.angleDeg    = t.scalars[4];
+    b.angleSecDeg = t.scalars[9];
+    return b;
+}
 
 inline BeamDescr loadBeam(const std::string& path) {
     Txt t = scanTxt(path);
@@ -182,6 +208,7 @@ inline BeamDescr loadBeam(const std::string& path) {
     b.posY = t.scalars[5]*UM;
     b.posZ = t.scalars[6]*UM;
     b.angleDeg = t.scalars[8];
+    b.angleSecDeg = t.scalars.size() > 13 ? t.scalars[13] : b.angleDeg;
     return b;
 }
 

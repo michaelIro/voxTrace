@@ -1,0 +1,18 @@
+# Placement: bench geometry of the beamline components, in um and deg
+# The optics' own physics live in Primary_/Secondary_Polycapillary.txt;
+# the beam energy is the maximum of the Source.txt energy grid.
+
+# Primary Polycapillary Placement
+150.0f		# X
+150.0f		# Y
+0.0f		# Z
+5100.0f		# Distance to Detector
+45.0f		# Angle
+
+# Secondary Polycapillary Placement
+150.0f		# X
+150.0f		# Y
+0.0f		# Z
+4900.0f		# Distance to Detector
+45.0f		# Angle
+950.0f		# Distance to Primary Polycapillary

@@ -1,8 +1,10 @@
 // voxTrace — the configurable µXRF beamline simulator.
 //
 // One executable, no hardcoded experiment: a simulation directory describes
-// the instrument (Polycapillary.txt, Source.txt, Capillaries.txt, Sample.txt,
-// Materials.txt, Simulation.txt) and the run (Setup.txt — statistics, physics
+// the instrument (Primary_/Secondary_Polycapillary.txt, Source.txt,
+// Placement.txt, Sample.txt, Materials.txt, Simulation.txt — legacy
+// Polycapillary.txt/Capillaries.txt still load) and the run (Setup.txt —
+// statistics, physics
 // switches like variance_reduction/polarization, loss, optimizer, detector
 // response, and WHICH STAGES ARE MOUNTED):
 //
@@ -62,11 +64,21 @@ struct Config {
     vtio::SetupDescr   run;
     vtio::SourceDescr  so;
     vtio::BeamDescr    bm;
-    vtio::PolyCapDescr pc;                    // valid if primary || secondary
+    vtio::PolyCapDescr pcPrim;                // valid if primary
+    vtio::PolyCapDescr pcSec;                 // valid if secondary
     vtio::SampleDescr  sd;                    // valid if sample
     vtio::ScanDescr    sc;                    // valid if sample
+    double energyKeV;                         // beam energy (Source.txt energy grid)
     bool primary, sample, secondary, detector;
 };
+
+// First existing file among @p names in @p dir ("" if none) — lets the new
+// per-optic descriptors coexist with the legacy shared files.
+std::string pickFile(const std::string& dir, std::initializer_list<const char*> names) {
+    for (const char* n : names)
+        if (std::filesystem::exists(dir + "/" + n)) return dir + "/" + n;
+    return "";
+}
 
 Config loadConfig(int argc, char* argv[]) {
     VT_PROFILE("load-config");
@@ -86,8 +98,29 @@ Config loadConfig(int argc, char* argv[]) {
     if (C.secondary && !C.sample)   throw std::runtime_error("a secondary optic needs a sample");
 
     C.so = vtio::loadSource(C.dir + "/Source.txt");
-    C.bm = vtio::loadBeam  (C.dir + "/Capillaries.txt");
-    if (C.primary || C.secondary) C.pc = vtio::loadPolyCap(C.dir + "/Polycapillary.txt");
+
+    // bench geometry: Placement.txt, or the legacy Capillaries.txt
+    std::string plc = pickFile(C.dir, {"Placement.txt", "Capillaries.txt"});
+    if (plc.empty()) throw std::runtime_error("no Placement.txt / Capillaries.txt in " + C.dir);
+    C.bm = plc.find("Placement.txt") != std::string::npos ? vtio::loadPlacement(plc)
+                                                          : vtio::loadBeam(plc);
+
+    // beam energy: an explicit legacy Capillaries.txt value wins (it is the
+    // tube line); otherwise the maximum of the Source.txt energy grid
+    C.energyKeV = C.bm.energyKeV > 0 ? C.bm.energyKeV : C.so.energyKeV;
+    if (C.energyKeV <= 0) throw std::runtime_error("no beam energy in Source.txt");
+
+    // per-optic descriptors, falling back to one shared Polycapillary.txt
+    if (C.primary) {
+        std::string p = pickFile(C.dir, {"Primary_Polycapillary.txt", "Polycapillary.txt"});
+        if (p.empty()) throw std::runtime_error("no primary optic descriptor in " + C.dir);
+        C.pcPrim = vtio::loadPolyCap(p);
+    }
+    if (C.secondary) {
+        std::string p = pickFile(C.dir, {"Secondary_Polycapillary.txt", "Polycapillary.txt"});
+        if (p.empty()) throw std::runtime_error("no secondary optic descriptor in " + C.dir);
+        C.pcSec = vtio::loadPolyCap(p);
+    }
     if (C.sample) {
         C.sd = vtio::loadSample(C.dir);
         C.sc = vtio::loadScan(C.dir + "/Simulation.txt");
@@ -159,7 +192,7 @@ SampleStage buildSample(const vtio::SampleDescr& sd) {
 // ── source [+ primary optic] → focused / parallel beam ───────────────────────
 std::vector<vt::ExitRay> traceBeam(const Config& C, const PolyCap& primary) {
     VT_PROFILE("beam-trace");
-    const double srcR = C.primary ? std::min(C.pc.rExtUp, C.so.radiusX) : C.so.radiusX;
+    const double srcR = C.primary ? std::min(C.pcPrim.rExtUp, C.so.radiusX) : C.so.radiusX;
     std::vector<vt::ExitRay> beam;
     const long CHUNK = 2000000;
     DeviceBuffer<vt::ExitRay> slots("beam-chunk", (size_t)std::min(CHUNK, (long)C.run.nPrimary));
@@ -167,7 +200,7 @@ std::vector<vt::ExitRay> traceBeam(const Config& C, const PolyCap& primary) {
         long n = std::min(CHUNK, C.run.nPrimary - base);
         vt::BeamKernel bk{
             .primary = primary, .hasOptic = C.primary, .srcR = srcR,
-            .energy = C.bm.energyKeV, .seed = C.run.seed, .base = base,
+            .energy = C.energyKeV, .seed = C.run.seed, .base = base,
             .slots = slots.device(), .dbg = vtdbg::cfg,
         };
         vt::forRange("voxTrace::beam", n, bk);
@@ -193,9 +226,9 @@ int beamReport(const Config& C, const std::vector<vt::ExitRay>& beam) {
     std::printf("  RMS divergence   = %.3f mrad\n", 1e3*std::sqrt(div2/std::fmax(wSum,1e-30)));
 
     // weighted radial profile in the focal plane (or the exit plane, bare source)
-    const double zProf = C.primary ? C.pc.focalDown : 0.0;
+    const double zProf = C.primary ? C.pcPrim.focalDown : 0.0;
     std::vector<double> prof(200, 0.0);
-    const double RMAX = C.primary ? 4.0*C.pc.rCapDown + 20e-4 : 1.2*C.so.radiusX;
+    const double RMAX = C.primary ? 4.0*C.pcPrim.rCapDown + 20e-4 : 1.2*C.so.radiusX;
     double r50 = 0, wTot = 0;
     std::vector<std::pair<double,double>> rw;
     rw.reserve(beam.size());
@@ -258,7 +291,7 @@ struct ScanRunner {
                 .beam = beamBuf.device(), .slots = slots.device(),
                 .primFrame = primFrame, .secFrame = secFrame,
                 .aimCtr = P0 + d_sec*aimDist, .Epol = Epol, .d_sec = d_sec,
-                .energy = C.bm.energyKeV, .rWin = rWin, .eBin = C.run.eBin,
+                .energy = C.energyKeV, .rWin = rWin, .eBin = C.run.eBin,
                 .x0 = C.sd.x0, .y0 = C.sd.y0, .z0 = C.sd.z0, .LX = C.sd.LX, .LY = C.sd.LY,
                 .nBin = C.run.nBin, .di = di, .vr = C.run.varianceReduction,
                 .usePol = usePol, .scanSeed = seed, .beamN = beamN, .dbg = vtdbg::cfg,
@@ -516,8 +549,8 @@ int main(int argc, char* argv[]) {
                                         : "BRUTE FORCE analog MC");
 
     // ── source [→ primary optic]: the beam, traced once and reused ───────────
-    PolyCap primary   = C.primary   ? C.pc.build() : PolyCap();
-    PolyCap secondary = C.secondary ? C.pc.reversed().build() : PolyCap();
+    PolyCap primary   = C.primary   ? C.pcPrim.build() : PolyCap();
+    PolyCap secondary = C.secondary ? C.pcSec.reversed().build() : PolyCap();
     std::vector<vt::ExitRay> beam = traceBeam(C, primary);
     std::printf("  primary photons  = %ld   beam rays = %zu (%.2f%%)\n",
                 C.run.nPrimary, beam.size(), 100.0*beam.size()/C.run.nPrimary);
@@ -538,20 +571,21 @@ int main(int argc, char* argv[]) {
                                        (float)C.run.detDeadLayer, (float)C.run.detFano,
                                        (float)C.run.detNoiseFWHM);
     DeviceBuffer<vt::ExitRay> beamBuf("beam", beam);
-    const double A = C.bm.angleDeg * vt::PI_D / 180.0;
+    const double A  = C.bm.angleDeg    * vt::PI_D / 180.0;
+    const double A2 = C.bm.angleSecDeg * vt::PI_D / 180.0;
     ScanRunner T{
         .C = C, .S = S, .secondary = secondary, .detector = detector,
         .detBuf = detBuf, .beamBuf = beamBuf, .beamN = (long)beam.size(),
         .d_prim = vt::norm({std::cos(A), 0,  std::sin(A)}),
-        .d_sec  = vt::norm({std::cos(A), 0, -std::sin(A)}),
+        .d_sec  = vt::norm({std::cos(A2), 0, -std::sin(A2)}),
         .C0 = {C.bm.posX, C.bm.posY, 0},
-        .zFocPrim = C.primary ? C.pc.length + C.pc.focalDown : 1.0,   // bare beam: 1 cm standoff
-        .aimDist = C.secondary ? C.pc.focalDown : C.run.detDistance,
-        .rWin    = C.secondary ? C.pc.rExtDown  : C.run.detRadius,
+        .zFocPrim = C.primary ? C.pcPrim.length + C.pcPrim.focalDown : 1.0,   // bare beam: 1 cm standoff
+        .aimDist = C.secondary ? C.pcSec.focalDown : C.run.detDistance,
+        .rWin    = C.secondary ? C.pcSec.rExtDown  : C.run.detRadius,
         .usePol  = C.run.polarization && C.so.polFactor > 0.0,
     };
     std::printf("  sample           = %dx%dx%d voxels   scan = %zu positions   E = %.1f keV\n",
-                S.xN, S.yN, S.zN, C.sc.points.size(), C.bm.energyKeV);
+                S.xN, S.yN, S.zN, C.sc.points.size(), C.energyKeV);
 
     // ── simulate: the response trace (and the measurement) ───────────────────
     std::vector<vt::Event> evFit = T.run(C.run.seed ^ 0x7265636FULL, "scan-response", "events-response");
