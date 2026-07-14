@@ -193,6 +193,25 @@ SampleStage buildSample(const vtio::SampleDescr& sd) {
 std::vector<vt::ExitRay> traceBeam(const Config& C, const PolyCap& primary) {
     VT_PROFILE("beam-trace");
     const double srcR = C.primary ? std::min(C.pcPrim.rExtUp, C.so.radiusX) : C.so.radiusX;
+
+    // spectrum source: normalized cumulative probabilities for the dice throw
+    const int specN = (int)C.so.specE.size();
+    DeviceBuffer<double> specE("spec-energies", std::max(specN, 1));
+    DeviceBuffer<double> specCdf("spec-cdf", std::max(specN, 1));
+    if (specN > 1) {
+        double sum = 0;
+        for (double w : C.so.specW) sum += std::max(w, 0.0);
+        double acc = 0;
+        for (int i = 0; i < specN; ++i) {
+            acc += std::max(C.so.specW[i], 0.0) / std::fmax(sum, 1e-300);
+            specE.host()[i]   = C.so.specE[i];
+            specCdf.host()[i] = acc;
+        }
+        specCdf.host()[specN - 1] = 1.0;
+        specE.toDevice();
+        specCdf.toDevice();
+    }
+
     std::vector<vt::ExitRay> beam;
     const long CHUNK = 2000000;
     DeviceBuffer<vt::ExitRay> slots("beam-chunk", (size_t)std::min(CHUNK, (long)C.run.nPrimary));
@@ -200,7 +219,11 @@ std::vector<vt::ExitRay> traceBeam(const Config& C, const PolyCap& primary) {
         long n = std::min(CHUNK, C.run.nPrimary - base);
         vt::BeamKernel bk{
             .primary = primary, .hasOptic = C.primary, .srcR = srcR,
-            .energy = C.energyKeV, .seed = C.run.seed, .base = base,
+            .energy = C.energyKeV,
+            .specE = specN > 1 ? specE.device() : nullptr,
+            .specCdf = specN > 1 ? specCdf.device() : nullptr,
+            .specN = specN > 1 ? specN : 0,
+            .seed = C.run.seed, .base = base,
             .slots = slots.device(), .dbg = vtdbg::cfg,
         };
         vt::forRange("voxTrace::beam", n, bk);
@@ -251,11 +274,11 @@ int beamReport(const Config& C, const std::vector<vt::ExitRay>& beam) {
     for (int b = 0; b < 200; ++b)
         fp << (b + 0.5)*(RMAX/200)*1e4 << "," << prof[b] << "\n";
     std::ofstream fr("test-data/out/beam_rays.csv");
-    fr << "x_um,y_um,dir_x,dir_y,dir_z,weight\n";
+    fr << "x_um,y_um,dir_x,dir_y,dir_z,weight,energy_keV\n";
     for (size_t i = 0; i < beam.size() && i < 200000; ++i)
         fr << beam[i].pos.x*1e4 << "," << beam[i].pos.y*1e4 << ","
            << beam[i].dir.x << "," << beam[i].dir.y << "," << beam[i].dir.z << ","
-           << beam[i].w << "\n";
+           << beam[i].w << "," << beam[i].e << "\n";
     std::printf("\nBeam profile → test-data/out/beam_profile.csv\n");
     std::printf("Exit rays    → test-data/out/beam_rays.csv\n");
     return 0;
@@ -543,6 +566,11 @@ int main(int argc, char* argv[]) {
                 C.sample ? " → sample" : "",
                 C.secondary ? " → secondary polycap" : (C.sample ? " → aperture" : ""),
                 C.detector ? " → detector" : "");
+    if (C.so.specE.size() > 1)
+        std::printf("  source           = spectrum (%zu energies, %.1f keV max, dice-sampled)\n",
+                    C.so.specE.size(), C.energyKeV);
+    else
+        std::printf("  source           = monochromatic %.1f keV\n", C.energyKeV);
     std::printf("  switches         = polarization %s | %s\n",
                 C.run.polarization ? "ON" : "OFF",
                 C.run.varianceReduction ? "importance sampling (variance reduction)"

@@ -155,6 +155,10 @@ struct SourceDescr {
     double divX = 0, divY = 0, shiftX = 0, shiftY = 0;
     double polFactor = 1.0;
     double energyKeV = 0;   // beam energy = max of the source energy grid (0 = absent)
+
+    // spectrum source: a second `{…}` array of per-energy weights turns the
+    // energy grid into a sampled emission spectrum (mono/uniform otherwise)
+    std::vector<double> specE, specW;
 };
 
 inline SourceDescr loadSource(const std::string& path) {
@@ -169,6 +173,11 @@ inline SourceDescr loadSource(const std::string& path) {
     s.polFactor = t.scalars[7];
     if (!t.arrays.empty())
         for (double e : t.arrays[0]) s.energyKeV = std::max(s.energyKeV, e);
+    if (t.arrays.size() >= 2 && t.arrays[1].size() == t.arrays[0].size() &&
+        t.arrays[0].size() > 1) {
+        s.specE = t.arrays[0];
+        s.specW = t.arrays[1];
+    }
     return s;
 }
 

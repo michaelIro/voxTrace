@@ -172,7 +172,7 @@ double opticalDepthOut(const Grid& g, Vec3 P, Vec3 dir, float E) {
     return total;
 }
 
-struct ExitRay { Vec3 pos, dir; double w; };     // beam ray leaving the source stage (optic frame)
+struct ExitRay { Vec3 pos, dir; double w, e; };  // beam ray leaving the source stage (optic frame); e in keV
 
 // One detected photon: scan position, voxel it was emitted from, detector
 // channel it was recorded in, and its Monte-Carlo weight.
@@ -185,26 +185,43 @@ struct BeamKernel {
     PolyCap    primary;     // ignored when !hasOptic
     bool       hasOptic;
     double     srcR;
-    double     energy;
+    double     energy;      // fixed beam energy when no spectrum table is set
+    const double* specE   = nullptr;   // device: spectrum energies [keV]
+    const double* specCdf = nullptr;   // device: cumulative probabilities (last = 1)
+    int        specN = 0;
     uint64_t   seed;
     long       base;        // chunk offset (slot i ↔ primary photon base+i)
     ExitRay*   slots;       // device
     vtdbg::Ctx dbg;
 
+    // spectrum sampling: throw a die into the cumulative-probability slots
+    KOKKOS_INLINE_FUNCTION double sampleEnergy(RNG& rng) const {
+        if (specN < 2) return energy;
+        double u = rng.frand();
+        int lo = 0, hi = specN - 1;
+        while (lo < hi) {
+            int mid = (lo + hi) >> 1;
+            if (specCdf[mid] < u) lo = mid + 1;
+            else                  hi = mid;
+        }
+        return specE[lo];
+    }
+
     KOKKOS_INLINE_FUNCTION void operator()(long i) const {
         slots[i].w = -1.0;
         RNG rng = makeRng(seed, (uint64_t)(base + i));
+        double e = sampleEnergy(rng);
         double rr = sqrtf(rng.frand()) * srcR, ra = TWO_PI_D * rng.frand();
         Vec3 p0 = {rr*cos(ra), rr*sin(ra), 0};
         if (!hasOptic) {
-            slots[i] = {p0, {0, 0, 1}, 1.0};
+            slots[i] = {p0, {0, 0, 1}, 1.0, e};
             return;
         }
-        Ray p = makeRay(p0, {0,0,1}, energy);
+        Ray p = makeRay(p0, {0,0,1}, e);
         primary.trace(p);
         if (p.getIAFlag()) {
             slots[i] = {{p.getStartX(), p.getStartY(), p.getStartZ()},
-                        {p.getDirX(),   p.getDirY(),   p.getDirZ()}, p.getProb()};
+                        {p.getDirX(),   p.getDirY(),   p.getDirZ()}, p.getProb(), e};
             if (dbg.on(2, base + i)) vtdbg::ray(base + i, "beam-exit", p);
         }
     }
@@ -239,6 +256,8 @@ struct ScanKernel {
         slots[bi] = Event{0, 0, -1, 0.f};
         RNG rng = makeRng(scanSeed, (uint64_t)di*beamN + bi);
         const ExitRay& er = beam[bi];
+        // per-ray beam energy (spectrum source); kernel-wide value as fallback
+        const double energy = er.e > 0 ? er.e : this->energy;
         double wBeam = er.w;
         if (!vr) {                                            // analog: Bernoulli beam weight
             if (rng.frand() >= wBeam) return;
