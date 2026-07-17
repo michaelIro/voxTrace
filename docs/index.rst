@@ -16,6 +16,15 @@ silicon.
 
 .. toctree::
    :maxdepth: 2
+   :caption: Trace walkthroughs
+
+   hardware-primer
+   walkthrough-cmxrf
+   walkthrough-muxrf
+   walkthrough-xrf
+
+.. toctree::
+   :maxdepth: 2
    :caption: Internals
 
    architecture
