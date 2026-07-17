@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 300" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#334155">
+  <defs>
+    <marker id="da" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 z" fill="#d97706"/></marker>
+    <marker id="dr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 z" fill="#dc2626"/></marker>
+  </defs>
+  <!-- layers -->
+  <rect x="150" y="60" width="14" height="170" fill="#fde68a" stroke="#d97706"/>
+  <rect x="170" y="60" width="8" height="170" fill="#e2e8f0" stroke="#94a3b8"/>
+  <rect x="182" y="60" width="180" height="170" fill="#dbeafe" stroke="#64748b"/>
+  <text x="157" y="250" text-anchor="middle" font-size="11">Be window</text>
+  <text x="174" y="268" text-anchor="middle" font-size="11">dead layer</text>
+  <text x="272" y="250" text-anchor="middle" font-size="11">active Si crystal</text>
+  <!-- incoming photon -->
+  <line x1="30" y1="140" x2="248" y2="140" stroke="#d97706" stroke-width="2.5" marker-end="url(#da)"/>
+  <text x="30" y="126" fill="#b45309" font-size="12">fluorescence photon, energy E</text>
+  <!-- absorption star -->
+  <g transform="translate(258,140)">
+    <path d="M0,-9 L2.5,-2.5 L9,0 L2.5,2.5 L0,9 L-2.5,2.5 L-9,0 L-2.5,-2.5 Z" fill="#d97706"/>
+  </g>
+  <text x="258" y="168" text-anchor="middle" font-size="11" fill="#b45309">absorbed at depth z</text>
+  <!-- escape branch -->
+  <line x1="264" y1="132" x2="330" y2="70" stroke="#dc2626" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#dr)"/>
+  <text x="338" y="66" fill="#dc2626" font-size="12">Si Kα may escape (1.74 keV)</text>
+  <text x="338" y="82" fill="#dc2626" font-size="12">→ escape peak at E − 1.74 keV</text>
+  <!-- histogram -->
+  <g transform="translate(470,60)">
+    <line x1="0" y1="170" x2="250" y2="170" stroke="#334155" stroke-width="1.5"/>
+    <line x1="0" y1="170" x2="0" y2="20" stroke="#334155" stroke-width="1.5"/>
+    <!-- escape peak -->
+    <path d="M60,170 C67,150 73,150 80,170" fill="#fca5a5" stroke="#dc2626"/>
+    <!-- main gaussian -->
+    <path d="M150,170 C165,55 185,55 200,170" fill="#fcd9a8" stroke="#d97706"/>
+    <text x="175" y="45" text-anchor="middle" font-size="11" fill="#b45309">peak at E, width =</text>
+    <text x="175" y="60" text-anchor="middle" font-size="11" fill="#b45309">detector resolution</text>
+    <text x="70" y="145" text-anchor="middle" font-size="11" fill="#dc2626">escape</text>
+    <text x="125" y="192" text-anchor="middle" font-size="11">measured energy → channel b</text>
+  </g>
+  <text x="380" y="290" text-anchor="middle" font-size="12" fill="#64748b">detect(): window/dead-layer transmission × crystal absorption = efficiency wDet, then escape dice and Gaussian broadening</text>
+</svg>

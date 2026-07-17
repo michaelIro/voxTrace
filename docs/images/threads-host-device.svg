@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 300" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#334155">
+  <defs>
+    <marker id="ac" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 z" fill="#0891b2"/></marker>
+    <marker id="ag" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 z" fill="#64748b"/></marker>
+  </defs>
+  <!-- host box -->
+  <rect x="20" y="30" width="270" height="230" rx="10" fill="#f1f5f9" stroke="#94a3b8"/>
+  <text x="155" y="55" text-anchor="middle" font-weight="bold">HOST — the CPU program</text>
+  <text x="40" y="90">1. read the txt files</text>
+  <text x="40" y="115">2. build objects (optics, sample, …)</text>
+  <text x="40" y="140">3. launch the kernel</text>
+  <text x="40" y="195">4. collect surviving photons</text>
+  <text x="40" y="220">5. sum spectra, fit, write CSV</text>
+  <!-- device box -->
+  <rect x="440" y="30" width="300" height="230" rx="10" fill="#ecfeff" stroke="#0891b2"/>
+  <text x="590" y="55" text-anchor="middle" font-weight="bold" fill="#0e7490">DEVICE — CPU cores or GPU</text>
+  <text x="590" y="76" text-anchor="middle" fill="#0e7490">one thread = one photon</text>
+  <g stroke="#0891b2" stroke-width="2">
+    <line x1="470" y1="100" x2="590" y2="100" marker-end="url(#ac)"/>
+    <line x1="470" y1="125" x2="710" y2="125" marker-end="url(#ac)"/>
+    <line x1="470" y1="150" x2="540" y2="150" marker-end="url(#ac)"/>
+    <line x1="470" y1="175" x2="680" y2="175" marker-end="url(#ac)"/>
+    <line x1="470" y1="200" x2="620" y2="200" marker-end="url(#ac)"/>
+  </g>
+  <text x="595" y="104" font-size="11" fill="#dc2626">✕ absorbed</text>
+  <text x="715" y="129" font-size="11" fill="#0e7490">✓</text>
+  <text x="545" y="154" font-size="11" fill="#dc2626">✕ missed</text>
+  <text x="685" y="179" font-size="11" fill="#0e7490">✓</text>
+  <text x="625" y="204" font-size="11" fill="#dc2626">✕ Auger</text>
+  <text x="590" y="240" text-anchor="middle" font-size="12" fill="#0e7490">threads that die early just stop — that is cheap</text>
+  <!-- DeviceBuffer arrows -->
+  <g stroke="#64748b" stroke-width="2">
+    <line x1="295" y1="120" x2="435" y2="120" marker-end="url(#ag)"/>
+    <line x1="435" y1="185" x2="295" y2="185" marker-end="url(#ag)"/>
+  </g>
+  <text x="365" y="110" text-anchor="middle" font-size="12">DeviceBuffer::toDevice()</text>
+  <text x="365" y="205" text-anchor="middle" font-size="12">DeviceBuffer::toHost()</text>
+  <text x="365" y="285" text-anchor="middle" font-size="12" fill="#64748b">all data crosses the host↔device boundary through these two explicit copies</text>
+</svg>

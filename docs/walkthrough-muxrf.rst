@@ -72,6 +72,13 @@ the Si(Li) detector response, is unchanged.
 What that means physically
 --------------------------
 
+
+.. figure:: images/collection-comparison.svg
+   :width: 94%
+   :alt: Confocal collection versus a bare detector aperture
+
+   What the secondary optic bought: confocal collection sees only the probe volume; a bare aperture sees the entire excited column.
+
 The secondary optic was the *confocal filter*: it accepted only photons born
 near its focal spot. Without it, the detector sees fluorescence from the
 **entire illuminated column** — every voxel the focused beam excites on its

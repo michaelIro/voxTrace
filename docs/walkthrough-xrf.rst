@@ -63,6 +63,13 @@ From surface entry onward the trace is exactly the µXRF one:
 What that means physically
 --------------------------
 
+
+.. figure:: images/collection-comparison.svg
+   :width: 94%
+   :alt: Confocal collection versus a bare detector aperture
+
+   For orientation: XRF shares the collection side of micro-XRF (right panel) - a bare aperture seeing the whole excited volume - and adds a flood beam instead of a focused spot.
+
 This is classic bulk XRF: a wide beam, no lateral or depth selectivity, the
 whole illuminated volume contributes. It is the configuration to use as a
 sanity baseline — count rates are highest, geometry effects are smallest, and

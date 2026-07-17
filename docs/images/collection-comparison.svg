@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 320" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#334155">
+  <line x1="380" y1="15" x2="380" y2="295" stroke="#e2e8f0" stroke-width="2"/>
+  <!-- LEFT: confocal -->
+  <text x="190" y="30" text-anchor="middle" font-weight="bold">CMXRF: confocal optic</text>
+  <rect x="60" y="180" width="260" height="100" fill="#f5ead9" stroke="#a07c33"/>
+  <!-- beam cone -->
+  <path d="M300,60 L185,210 L330,90 Z" fill="#0891b2" opacity="0.15"/>
+  <line x1="315" y1="70" x2="190" y2="205" stroke="#0891b2" stroke-width="2"/>
+  <!-- acceptance cone -->
+  <path d="M80,60 L185,210 L50,90 Z" fill="#d97706" opacity="0.15"/>
+  <line x1="185" y1="205" x2="70" y2="70" stroke="#d97706" stroke-width="2"/>
+  <ellipse cx="186" cy="207" rx="18" ry="13" fill="#16a34a" opacity="0.4" stroke="#16a34a"/>
+  <text x="190" y="250" text-anchor="middle" font-size="12" fill="#15803d">only the probe volume is seen</text>
+  <text x="190" y="300" text-anchor="middle" font-size="12" fill="#64748b">depth-selective, low count rate</text>
+  <!-- RIGHT: bare aperture -->
+  <text x="570" y="30" text-anchor="middle" font-weight="bold">µXRF / XRF: bare detector aperture</text>
+  <rect x="440" y="180" width="260" height="100" fill="#f5ead9" stroke="#a07c33"/>
+  <!-- beam entering, excited column -->
+  <path d="M685,60 L560,210 L710,90 Z" fill="#0891b2" opacity="0.15"/>
+  <line x1="698" y1="70" x2="565" y2="205" stroke="#0891b2" stroke-width="2"/>
+  <path d="M565,182 L540,255 L590,255 Z" fill="#0891b2" opacity="0.3"/>
+  <!-- wide acceptance wedge -->
+  <path d="M455,55 L575,225 L430,105 Z" fill="#d97706" opacity="0.12"/>
+  <line x1="470" y1="66" x2="470" y2="96" stroke="#d97706" stroke-width="6"/>
+  <text x="425" y="48" font-size="11" fill="#b45309">large aperture</text>
+  <text x="565" y="272" text-anchor="middle" font-size="12" fill="#0e7490">the whole excited column contributes</text>
+  <text x="570" y="300" text-anchor="middle" font-size="12" fill="#64748b">no depth selection, high count rate</text>
+</svg>

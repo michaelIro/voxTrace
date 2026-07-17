@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 320" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#334155">
+  <defs>
+    <marker id="cc" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 z" fill="#0891b2"/></marker>
+    <marker id="ca" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 z" fill="#d97706"/></marker>
+    <marker id="cr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 z" fill="#dc2626"/></marker>
+  </defs>
+  <!-- sample -->
+  <rect x="120" y="170" width="520" height="120" fill="#f5ead9" stroke="#a07c33"/>
+  <text x="630" y="280" text-anchor="end" font-size="12" fill="#a07c33">sample</text>
+  <line x1="120" y1="170" x2="640" y2="170" stroke="#a07c33" stroke-width="2.5"/>
+  <!-- excitation cone from upper right -->
+  <path d="M620,40 L370,205 L660,70 Z" fill="#0891b2" opacity="0.15"/>
+  <line x1="640" y1="55" x2="378" y2="200" stroke="#0891b2" stroke-width="2" marker-end="url(#cc)"/>
+  <text x="600" y="32" fill="#0e7490" font-size="12">excitation beam (primary optic)</text>
+  <!-- acceptance cone to upper left -->
+  <path d="M140,40 L370,205 L100,70 Z" fill="#d97706" opacity="0.15"/>
+  <line x1="365" y1="198" x2="130" y2="60" stroke="#d97706" stroke-width="2" marker-end="url(#ca)"/>
+  <text x="60" y="32" fill="#b45309" font-size="12">acceptance of the secondary optic</text>
+  <!-- probe volume -->
+  <ellipse cx="370" cy="200" rx="26" ry="18" fill="#16a34a" opacity="0.35" stroke="#16a34a"/>
+  <text x="370" y="245" text-anchor="middle" font-size="12" fill="#15803d" font-weight="bold">probe volume = overlap of both foci</text>
+  <!-- accepted photon -->
+  <circle cx="372" cy="196" r="4" fill="#15803d"/>
+  <!-- rejected photon deeper on the beam path -->
+  <circle cx="480" cy="145" r="4" fill="#dc2626"/>
+  <line x1="480" y1="145" x2="330" y2="80" stroke="#dc2626" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#cr)"/>
+  <text x="335" y="112" fill="#dc2626" font-size="12">born outside the overlap —</text>
+  <text x="335" y="128" fill="#dc2626" font-size="12">rejected by the optic (step 6)</text>
+  <text x="380" y="312" text-anchor="middle" font-size="12" fill="#64748b">scanning the sample through the overlap in z is what produces the depth-resolved signal</text>
+</svg>

@@ -65,6 +65,13 @@ Every run has two sides:
   ``src/core/Beamline.hpp``, ``PolyCap.hpp``, the sample and detector classes
   is device-capable code, marked ``KOKKOS_INLINE_FUNCTION``.
 
+
+.. figure:: images/threads-host-device.svg
+   :width: 94%
+   :alt: Host and device: the host prepares and collects, the device runs one photon per thread
+
+   The division of labour: the host prepares objects and collects results; the device runs one photon per thread, and threads that die early simply stop.
+
 A GPU has its **own memory**, so every object a kernel touches must be copied
 over before launch. voxTrace funnels all of that through one class,
 ``DeviceBuffer`` — the *only* place data crosses the host/device boundary:

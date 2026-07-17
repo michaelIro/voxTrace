@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 320" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#334155">
+  <defs>
+    <marker id="pc" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 z" fill="#0891b2"/></marker>
+    <marker id="pr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 z" fill="#dc2626"/></marker>
+  </defs>
+  <!-- optic body: tapered bundle, entrance left (tall), exit right (small) -->
+  <path d="M200,60 L520,120 L520,200 L200,260 Z" fill="#e2e8f0" stroke="#94a3b8" stroke-width="2"/>
+  <!-- inner channels -->
+  <g stroke="#cbd5e1" stroke-width="1.5" fill="none">
+    <path d="M200,95  C320,110 440,130 520,140"/>
+    <path d="M200,130 C320,140 440,150 520,155"/>
+    <path d="M200,160 C320,160 440,160 520,160"/>
+    <path d="M200,190 C320,180 440,170 520,165"/>
+    <path d="M200,225 C320,210 440,190 520,180"/>
+  </g>
+  <text x="360" y="25" text-anchor="middle" font-weight="bold">polycapillary optic (bundle of hollow glass channels)</text>
+  <!-- (a) misses aperture -->
+  <line x1="40" y1="48" x2="300" y2="48" stroke="#dc2626" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#pr)"/>
+  <text x="310" y="52" fill="#dc2626" font-size="12">a) misses the aperture — discarded</text>
+  <!-- (b) hits glass between channels -->
+  <line x1="40" y1="112" x2="196" y2="112" stroke="#dc2626" stroke-width="2" marker-end="url(#pr)"/>
+  <circle cx="201" cy="112" r="4" fill="#dc2626"/>
+  <text x="46" y="100" fill="#dc2626" font-size="12">b) hits the glass wall between channels</text>
+  <!-- (c) absorbed after some bounces -->
+  <polyline points="40,160 205,160 260,152 315,163 360,155" fill="none" stroke="#dc2626" stroke-width="2"/>
+  <text x="368" y="150" fill="#dc2626" font-size="14" font-weight="bold">✕</text>
+  <text x="382" y="152" fill="#dc2626" font-size="12">c) weight below threshold — absorbed</text>
+  <!-- (d) transmitted -->
+  <polyline points="40,205 202,205 265,196 330,200 395,190 460,186 520,172" fill="none" stroke="#0891b2" stroke-width="2.5"/>
+  <line x1="520" y1="172" x2="640" y2="160" stroke="#0891b2" stroke-width="2.5" marker-end="url(#pc)"/>
+  <circle cx="660" cy="158" r="5" fill="#0891b2"/>
+  <text x="672" y="162" fill="#0e7490" font-size="12">focus</text>
+  <text x="470" y="235" fill="#0e7490" font-size="12">d) guided by grazing reflections — transmitted</text>
+  <text x="380" y="300" text-anchor="middle" font-size="12" fill="#64748b">only (d) writes an exit ray into its slot; (a)–(c) leave the “nothing here” sentinel (w = −1)</text>
+</svg>

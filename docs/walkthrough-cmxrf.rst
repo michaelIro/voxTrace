@@ -112,6 +112,13 @@ ways to die:
                                       { ray.setIAFlag(false); return; }  // hits the glass wall
                                                                          // between channels
 
+
+.. figure:: images/polycap-fates.svg
+   :width: 94%
+   :alt: Four fates of a photon at a polycapillary optic
+
+   The four fates of a source photon at the optic: miss the aperture, hit the glass between channels, be absorbed mid-flight, or be guided to the focus. Only the last writes an exit ray.
+
 A photon that makes it into an open channel then enters the **reflection
 loop**: the code finds the next point where its straight path meets the
 channel wall, and applies one reflection there:
@@ -124,6 +131,13 @@ channel wall, and applies one reflection there:
 
    ph.weight *= (Rs*frac_s + Rp*frac_p) * dw;       // pay the reflection toll
    if (ph.weight < PC_WMIN) return false;           // → absorbed
+
+
+.. figure:: images/wall-reflection.svg
+   :width: 94%
+   :alt: One grazing-incidence reflection at the capillary wall
+
+   One wall reflection: the photon is mirrored, and its weight pays the Fresnel reflectivity times a roughness (Debye-Waller) factor. A small part of the wave refracts into the glass and is lost - that is where the transmission goes.
 
 Each bounce multiplies the photon's *weight* — its survival probability — by
 the Fresnel reflectivity of glass at that grazing angle and energy, times a
@@ -203,6 +217,13 @@ voxel, honouring each voxel's own material:
    }
    return false;                             // passed straight through → discarded
 
+
+.. figure:: images/voxel-walk.svg
+   :width: 94%
+   :alt: The voxel walk: paying optical depth voxel by voxel until the budget is spent
+
+   The voxel walk: each photon draws an attenuation budget and pays it off through every voxel it crosses - each voxel with its own material. Where the budget runs out, it interacts; photons that cross the whole sample are discarded.
+
 This is the voxel walk: ``getNN`` follows the precomputed 27-neighbour table,
 so stepping across the grid costs one array lookup per voxel. A photon that
 crosses the whole sample without interacting is discarded.
@@ -219,6 +240,13 @@ modes split (the ``vr`` switch — *variance reduction*):
    } else {    // analog MC: emit isotropically, let geometry decide
        eDir = random direction on the sphere;
    }
+
+
+.. figure:: images/emission-modes.svg
+   :width: 94%
+   :alt: Analog isotropic emission versus importance-sampled aimed emission
+
+   The two Monte-Carlo modes: analog emission is isotropic and mostly wasted; importance sampling always aims at the collection window but carries the honest solid-angle weight.
 
 Real fluorescence is emitted in all directions, but almost none of those
 directions reach the tiny secondary optic. *Importance sampling* cheats
@@ -244,6 +272,13 @@ type:
        Ef = (type == 1) ? energy                      // Rayleigh: same energy
                         : el.getComptEnergy(energy, th);   // Compton: shifted
    }
+
+
+.. figure:: images/atom-fluorescence.svg
+   :width: 94%
+   :alt: Photoelectric excitation followed by fluorescence or Auger emission
+
+   The photoelectric branch: the beam photon ejects a K-shell electron; the atom relaxes by emitting a characteristic K-alpha photon (probability = fluorescence yield) - or an Auger electron, ending the story.
 
 Photoelectric absorption excites a shell; the atom relaxes either by emitting
 a characteristic fluorescence photon (**this is the signal** — e.g. Cu Kα at
@@ -278,6 +313,13 @@ as in stage 1, in reverse mounting:
    if (!sray.getIAFlag()) return;                   // rejected by the optic
    wSec = sray.getProb();
 
+
+.. figure:: images/confocal-volume.svg
+   :width: 94%
+   :alt: The confocal probe volume as the overlap of excitation and acceptance cones
+
+   The confocal principle: only fluorescence born in the overlap of the excitation focus and the acceptance of the secondary optic survives step (6).
+
 This is the step that makes the setup *confocal*: the secondary optic only
 accepts photons coming from near its focal spot. Fluorescence born outside the
 overlap of the two foci is geometrically rejected here, which is why scanning
@@ -292,6 +334,13 @@ the sample through the focus produces a depth-resolved signal.
    double w = wBeam * wEmit * wPol * wSelf * wSec * wDet;
    int b = (int)(Emeas / eBin);
    slots[bi] = Event{di, voxIdx, b, (float)w};
+
+
+.. figure:: images/detector-response.svg
+   :width: 94%
+   :alt: The Si(Li) detector response: window, dead layer, absorption, escape peak, broadening
+
+   The detector model: transmission through Be window and dead layer, absorption in the Si crystal, a possible Si escape peak, and Gaussian resolution broadening into the measured channel.
 
 ``detect()`` plays the detector physics: transmission through the Be window
 and dead layer, absorption in the active crystal (the efficiency ``wDet``),
