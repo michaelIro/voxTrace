@@ -299,6 +299,12 @@ struct ScanRunner {
     bool usePol;
 
     std::vector<vt::Event> run(uint64_t seed, const char* phaseTag, const char* countTag) {
+        return C.run.varianceReduction ? runVR(seed, phaseTag, countTag)
+                                       : runAnalog(seed, phaseTag, countTag);
+    }
+
+    // variance reduction: one weighted, aimed sample per (position, beam ray)
+    std::vector<vt::Event> runVR(uint64_t seed, const char* phaseTag, const char* countTag) {
         VT_PROFILE(phaseTag);
         std::vector<vt::Event> events;
         for (int di = 0; di < (int)C.sc.points.size(); ++di) {
@@ -316,7 +322,7 @@ struct ScanRunner {
                 .aimCtr = P0 + d_sec*aimDist, .Epol = Epol, .d_sec = d_sec,
                 .energy = C.energyKeV, .rWin = rWin, .eBin = C.run.eBin,
                 .x0 = C.sd.x0, .y0 = C.sd.y0, .z0 = C.sd.z0, .LX = C.sd.LX, .LY = C.sd.LY,
-                .nBin = C.run.nBin, .di = di, .vr = C.run.varianceReduction,
+                .nBin = C.run.nBin, .di = di,
                 .usePol = usePol, .scanSeed = seed, .beamN = beamN, .dbg = vtdbg::cfg,
             };
             vt::forRange("voxTrace::scan", beamN, k);
@@ -325,6 +331,55 @@ struct ScanRunner {
                 if (slots.host()[bi].ch >= 0) events.push_back(slots.host()[bi]);
         }
         vtprof::count(countTag, (long)events.size());
+        return events;
+    }
+
+    // brute force: every thread respawns candidates until it has ONE detected
+    // photon (full analog transport, any interaction order). Events carry
+    // weight 1/attempts(position), so positions stay mutually normalised.
+    std::vector<vt::Event> runAnalog(uint64_t seed, const char* phaseTag, const char* countTag) {
+        VT_PROFILE(phaseTag);
+        const long target = C.run.nDetected > 0 ? C.run.nDetected
+                          : (C.sc.nRays > 0 ? C.sc.nRays : 30000);
+        DeviceBuffer<vt::Event> eslots("analog-slots", (size_t)target);
+        DeviceBuffer<long>      att   ("analog-attempts", (size_t)target);
+        std::vector<vt::Event> events;
+        long attAll = 0, missAll = 0;
+        for (int di = 0; di < (int)C.sc.points.size(); ++di) {
+            vt::Vec3 P0 = C0 + vt::Vec3{C.sc.points[di][0], C.sc.points[di][1], C.sc.points[di][2]};
+            vt::OpticFrame primFrame(P0, d_prim, zFocPrim);
+            vt::OpticFrame secFrame (P0, d_sec, -aimDist);
+
+            vt::AnalogKernel k{
+                .grid = S.grid, .secondary = secondary, .hasSecondary = C.secondary,
+                .detector = detector, .detElems = detBuf.device(),
+                .beam = beamBuf.device(), .slots = eslots.device(), .attempts = att.device(),
+                .primFrame = primFrame, .secFrame = secFrame,
+                .aimCtr = P0 + d_sec*aimDist, .d_sec = d_sec,
+                .energy = C.energyKeV, .rWin = rWin, .eBin = C.run.eBin,
+                .x0 = C.sd.x0, .y0 = C.sd.y0, .z0 = C.sd.z0, .LX = C.sd.LX, .LY = C.sd.LY,
+                .nBin = C.run.nBin, .di = di, .maxGen = C.run.maxGenerations,
+                .beamN = beamN, .nTarget = target, .maxAttempts = C.run.maxAttempts,
+                .scanSeed = seed, .dbg = vtdbg::cfg,
+            };
+            vt::forRange("voxTrace::analog", target, k);
+            eslots.toHost();
+            att.toHost();
+            long attSum = 0;
+            for (long s = 0; s < target; ++s) attSum += att.host()[s];
+            const float wEv = (float)(1.0 / (double)attSum);   // per-candidate rate
+            for (long s = 0; s < target; ++s) {
+                vt::Event e = eslots.host()[s];
+                if (e.ch >= 0) { e.w = wEv; events.push_back(e); }
+                else ++missAll;
+            }
+            attAll += attSum;
+        }
+        if (missAll)
+            std::printf("  WARNING: %ld slots hit max_attempts=%ld undetected — raise it "
+                        "or lower n_detected\n", missAll, C.run.maxAttempts);
+        vtprof::count(countTag, (long)events.size());
+        vtprof::count("analog-attempts", attAll);
         return events;
     }
 };
@@ -575,6 +630,13 @@ int main(int argc, char* argv[]) {
                 C.run.polarization ? "ON" : "OFF",
                 C.run.varianceReduction ? "importance sampling (variance reduction)"
                                         : "BRUTE FORCE analog MC");
+    if (!C.run.varianceReduction && C.sample) {
+        std::printf("  analog mode      = respawn until %ld detected/position (≤%ld attempts, "
+                    "≤%d interaction orders)%s\n",
+                    C.run.nDetected > 0 ? C.run.nDetected : (long)(C.sc.nRays > 0 ? C.sc.nRays : 30000),
+                    C.run.maxAttempts, C.run.maxGenerations,
+                    C.run.polarization ? " — polarization azimuth not modulated in analog transport" : "");
+    }
 
     // ── source [→ primary optic]: the beam, traced once and reused ───────────
     PolyCap primary   = C.primary   ? C.pcPrim.build() : PolyCap();

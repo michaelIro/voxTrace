@@ -332,6 +332,11 @@ struct SetupDescr {
     double lambda = 0.05;           // Tikhonov strength
     bool   polarization = true;     // scatter polarization weights on/off
     bool   varianceReduction = true;// importance sampling vs brute-force analog MC
+
+    // brute-force (analog) mode only
+    long   nDetected = 0;           // detected photons per position (0 → Simulation.txt nRays)
+    long   maxAttempts = 1000000;   // respawn cap per detected-photon slot
+    int    maxGenerations = 8;      // interaction-order cap per photon
     int    debug = 0;               // vtdbg level (0 = off)
     long   debugRay = -1;           // restrict debug to one beam-ray index
     int    profile = 1;             // print the profiler report
@@ -376,6 +381,9 @@ inline void applyKey(SetupDescr& c, const std::string& key, const std::string& v
     else if (key == "lambda")             c.lambda = std::atof(val.c_str());
     else if (key == "polarization")       c.polarization = std::atoi(val.c_str()) != 0;
     else if (key == "variance_reduction") c.varianceReduction = std::atoi(val.c_str()) != 0;
+    else if (key == "n_detected")         c.nDetected = std::atol(val.c_str());
+    else if (key == "max_attempts")       c.maxAttempts = std::atol(val.c_str());
+    else if (key == "max_generations")    c.maxGenerations = std::atoi(val.c_str());
     else if (key == "debug")              c.debug = std::atoi(val.c_str());
     else if (key == "debug_ray")          c.debugRay = std::atol(val.c_str());
     else if (key == "profile")            c.profile = std::atoi(val.c_str());

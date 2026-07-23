@@ -13,6 +13,7 @@ silicon.
    introduction
    installation
    use
+   cost-vs-accuracy
 
 .. toctree::
    :maxdepth: 2

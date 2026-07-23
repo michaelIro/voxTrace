@@ -15,7 +15,7 @@
  * detector), 3 = + the voxel walk. Combine level 3 with `debug_ray` to follow
  * ONE photon through the whole instrument.
  *
- * Device-safe by construction: the settings travel in a small @ref Ctx that
+ * Device-safe by construction: the settings travel in a small vtdbg::Ctx that
  * kernels capture BY VALUE (device code cannot read host globals), and every
  * line is a single plain `printf` — supported in CUDA/HIP device code — whose
  * prefix and body format are merged at compile time by @ref VT_DBG, so lines

@@ -1,28 +1,57 @@
 Installation
 ============
-voxTrace is a CUDA C++ package that can theoretically be run on 
-various plattforms after modification of the MAKEFILE. voxTrace was 
-developed and tested on Ubuntu 20.04 and 22.04. as well as almalinux on a HPC.
-Depending on whether you have admin rights or not the installation varies slightly. 
-For ease of use the option HPC=true can be set to store multiple paths for your 
-local machine and your HPC without changing the MAKEFILE. Default for HPC is false.
+voxTrace is a C++20 package built with a plain Makefile. It is developed and
+tested on macOS (Apple Silicon, Homebrew) and Linux (Ubuntu 20.04/22.04,
+AlmaLinux on an HPC cluster). The option ``HPC=true`` stores a second set of
+library paths for a cluster so the Makefile never needs editing; default is
+``false``.
 
-A reproducible code ocean capsule can be found
+Dependencies
+------------
 
-Linux
-------
-This installation assumes a fresh install of Ubuntu 20.04 or Ubuntu 22.04. with admin rights.
+Required:
 
-* Run the script pre-install.sh to install all dependencies or install them manually
-* Install `CUDA 12.1`_ 
-* Run make fast to compile the code
-* Create the dirs ./test-data/simulation/nist-1107/post-sample and ./test-data/simulation/nist-1107/detector
-* Run the SampleTracer with run ./build/src/SampleTracer ./test-data/simulation/nist-1107
-* Run the CapillaryTracer with run ./build/src/CapillaryTracer ./test-data/simulation/nist-1107
+* `XrayLib`_ — X-ray interaction data (the only dependency of the trace core)
+* `Armadillo`_, `Ensmallen`_, `GSL`_ — used by the optimizer layer (the fit)
 
-Modify the Capillaries.txt, Sample.txt, Simulation.txt and Polycapillary.txt to your needs.
-You can use the Jupyter-UI to create your own Materials.txt.
-For further assistance please write to michael.iro@tuwien.ac.at
+Optional:
+
+* `Kokkos`_ (OpenMP or CUDA/HIP build) — for the parallel/GPU-ready binaries;
+  the host-only serial build needs no Kokkos at all
+* `polycap`_ — **only** for the validation test ``make test2``, which compares
+  voxTrace's own polycapillary implementation against the reference library;
+  the app itself never uses it
+
+On macOS: ``brew install xraylib armadillo ensmallen gsl libomp`` (plus a
+Kokkos install for the parallel build). On Ubuntu the same packages are
+available via apt/pip or built from source; ``pre-install.sh`` shows one
+working recipe.
+
+Building and first runs
+-----------------------
+
+.. code-block:: bash
+
+   make voxtrace              # host-only serial app        → build/src/voxTrace
+   make voxtrace-kokkos       # Kokkos (OpenMP/CUDA) app    → build/src/voxTraceK
+   make test2 test4           # validation: polycap reference, XRR physics
+
+   # beam characterisation: source + primary optic only
+   ./build/src/voxTrace test-data/simulation/beam-pc236
+
+   # full confocal chain + voxel-weight reconstruction
+   ./build/src/voxTrace test-data/simulation/nist-1107-recon
+
+   # any Setup.txt key can be overridden on the command line
+   ./build/src/voxTrace test-data/simulation/nist-1107-recon \
+        chain=source,primary,sample,detector variance_reduction=0 fit=0
+
+A simulation directory (``Polycapillary.txt``, ``Source.txt``,
+``Capillaries.txt``, ``Sample.txt``, ``Materials.txt``, ``Simulation.txt``,
+``Setup.txt``) fully describes an experiment — copy one of the examples under
+``test-data/simulation/`` and modify it to your needs. For a CUDA build,
+install Kokkos with the CUDA backend and build with
+``make voxtrace-kokkos KOKKOS_INSTALL=<prefix> KOKKOS_CXX=<prefix>/bin/nvcc_wrapper``.
 
 Building the documentation
 --------------------------
@@ -36,25 +65,23 @@ pages in ``docs/`` by Doxygen + Sphinx/Breathe. To build it locally:
 
 A short statement by the author, concerning licencing:
 -------------------------------------------------------
-This codes is supposed to be free to use, without any warranty from my side. 
-I therefore chose the `MIT Licence`_. Nevertheless, before 
-using/redistributing this code in a commercial way you should notice that some 
-of the packages this code naturally depends on have different licences:
+This code is supposed to be free to use, without any warranty from my side.
+I therefore chose the `MIT Licence`_. Nevertheless, before
+using/redistributing this code in a commercial way you should notice that
+some of the packages this code depends on have different licences:
 
+* `XrayLib`_: a library for interactions of X-rays with matter
 * `Armadillo`_: a C++ library for linear algebra & scientific computing
 * `Ensmallen`_: a flexible C++ library for efficient numerical optimization
-* `GSL`_ - GNU Scientific Library (for flobal optimization algorithms)
-* `SciPlot`_: a C++ scientific plotiing library powerd by gnupolot
-* `XrayLib`_: a library for interactions of X-rays with matter
-* `Shadow3`_: an open source ray tracing code for modeling optical systems
-* `PolyCap`_: a C library to calculate X-ray transmission through polycapillaries
+* `GSL`_ — GNU Scientific Library (gradient-free optimization algorithms)
+* `Kokkos`_ (optional): performance-portable parallel programming model
+* `polycap`_ (optional, validation only): X-ray transmission through
+  polycapillaries
 
 .. _Armadillo: https://arma.sourceforge.net/
 .. _Ensmallen: https://ensmallen.org/
 .. _GSL: https://www.gnu.org/software/gsl/
-.. _SciPlot: https://sciplot.github.io/
 .. _XrayLib: https://github.com/tschoonj/xraylib/wiki
-.. _Shadow3: https://github.com/oasys-kit/shadow3
-.. _PolyCap: https://github.com/PieterTack/polycap
-.. _CUDA 12.1: https://developer.nvidia.com/cuda-downloads
+.. _polycap: https://github.com/PieterTack/polycap
+.. _Kokkos: https://kokkos.org/
 .. _MIT Licence: https://michaeliro.github.io/voxTrace/licence.html

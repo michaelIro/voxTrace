@@ -6,18 +6,22 @@
  * Everything a beamline simulation shares, independent of which stages are
  * mounted: double-precision vector geometry (Vec3, OpticFrame), per-ray RNG
  * streams, the voxel-grid walk (Grid, sampleInteraction, opticalDepthOut) and
- * the two Kokkos functors —
+ * the three Kokkos functors —
  *
- *   BeamKernel  source → [primary polycap] → focused/parallel exit ray
- *   ScanKernel  exit ray → sample → emission → [secondary polycap | detector
- *               aperture] → detector → detected Event
+ *   BeamKernel    source → [primary polycap] → focused/parallel exit ray
+ *   ScanKernel    VARIANCE REDUCTION: one aimed interaction per beam ray,
+ *                 importance weights — fast, first-order (single scatter)
+ *   AnalogKernel  BRUTE FORCE: full analog transport — a photon may scatter,
+ *                 be photo-absorbed and re-emerge as fluorescence, scatter
+ *                 again (any order); every survival is a Bernoulli draw and
+ *                 each thread RESPAWNS candidates from the source in a while
+ *                 loop until its slot holds one detected photon
  *
- * Optional stages are runtime flags: `BeamKernel.hasOptic = false` emits the
- * bare parallel source beam; `ScanKernel.hasSecondary = false` aims emitted
- * photons at a bare detector aperture disk instead of the confocal optic.
- * `vr` switches importance sampling (aimed emission, multiplied weights)
- * against brute-force analog MC (isotropic emission, Bernoulli survival,
- * unit-weight counts). `usePol` toggles the scatter polarization weights.
+ * Optional stages are runtime flags: `hasOptic = false` emits the bare
+ * parallel source beam; `hasSecondary = false` collects on a bare detector
+ * aperture disk instead of the confocal optic. `usePol` toggles the scatter
+ * polarization weights (ScanKernel only — the analog θ tables from xraylib
+ * are unpolarized, so AnalogKernel has no azimuthal modulation).
  *
  * GPU-ready by construction (see Test-5 "Phase 1"): explicit functors (no
  * extended-lambda limits under nvcc), trivially copyable state captured by
@@ -56,6 +60,16 @@ struct Vec3 {
 KOKKOS_INLINE_FUNCTION double dot(Vec3 a, Vec3 b) { return a.x*b.x + a.y*b.y + a.z*b.z; }
 KOKKOS_INLINE_FUNCTION Vec3   cross(Vec3 a, Vec3 b) { return {a.y*b.z-a.z*b.y, a.z*b.x-a.x*b.z, a.x*b.y-a.y*b.x}; }
 KOKKOS_INLINE_FUNCTION Vec3   norm(Vec3 a) { double n = sqrt(dot(a,a)); return {a.x/n, a.y/n, a.z/n}; }
+
+// Tilt direction @p d by polar angle @p theta at azimuth @p phi about itself —
+// the analog scattering update (basis-built rotation, no trig identities).
+KOKKOS_INLINE_FUNCTION Vec3 rotate(Vec3 d, double theta, double phi) {
+    Vec3 a = (fabs(d.z) < 0.9) ? Vec3{0, 0, 1} : Vec3{1, 0, 0};
+    Vec3 u = norm(cross(a, d));
+    Vec3 v = cross(d, u);
+    double st = sin(theta);
+    return norm(d*cos(theta) + (u*cos(phi) + v*sin(phi))*st);
+}
 
 // Maps between the sample frame and one optic's frame (optic axis = +z); the
 // optic-frame plane z = zFoc maps to the target point C in the sample frame.
@@ -227,13 +241,13 @@ struct BeamKernel {
     }
 };
 
-// ── scan kernel: one (scan position, beam ray) sample of the full chain ──────
-// surface entry → voxel walk → emission → self-absorption → [secondary optic
-// or bare detector aperture] → detector. vr=true aims the emitted photon at
-// the collection window and multiplies importance weights; vr=false emits
-// isotropically and replaces every weight by a Bernoulli survival draw, so
-// each detected count is one real photon. Writes the detected Event — or a
-// ch = −1 sentinel — into its slot.
+// ── scan kernel (variance reduction): one aimed sample per beam ray ──────────
+// surface entry → voxel walk → single interaction → emission AIMED at the
+// collection window (solid-angle importance weight) → self-absorption as a
+// weight → [secondary optic | aperture] → detector, all multiplied into one
+// event weight. First-order by construction (the emitted photon does not
+// interact again), which is what makes the reconstruction fit linear. Writes
+// the detected Event — or a ch = −1 sentinel — into its slot.
 struct ScanKernel {
     Grid        grid;           // device pointers
     PolyCap     secondary;      // ignored when !hasSecondary
@@ -247,7 +261,7 @@ struct ScanKernel {
     double      energy, rWin, eBin;    // rWin = window/aperture radius
     double      x0, y0, z0, LX, LY;
     int         nBin, di;
-    bool        vr, usePol;
+    bool        usePol;
     uint64_t    scanSeed;
     long        beamN;
     vtdbg::Ctx  dbg;
@@ -258,11 +272,7 @@ struct ScanKernel {
         const ExitRay& er = beam[bi];
         // per-ray beam energy (spectrum source); kernel-wide value as fallback
         const double energy = er.e > 0 ? er.e : this->energy;
-        double wBeam = er.w;
-        if (!vr) {                                            // analog: Bernoulli beam weight
-            if (rng.frand() >= wBeam) return;
-            wBeam = 1.0;
-        }
+        const double wBeam = er.w;
 
         // (1) beam exit ray → sample frame → surface entry
         Vec3 ps, ds;
@@ -286,22 +296,14 @@ struct ScanKernel {
             VT_DBG(bi, "interaction", "pos %d: P=(%.5f %.5f %.5f) voxel %d",
                    di, P.x, P.y, P.z, voxIdx);
 
-        // (3) emission direction: aimed at the collection window (importance
-        //     sampling) or isotropic (brute force)
-        Vec3 eDir;
-        double wEmit = 1.0;
-        if (vr) {
-            double ar = sqrtf(rng.frand()) * rWin, aa = TWO_PI_D * rng.frand();
-            Vec3   aim  = aimCtr + secFrame.u*(ar*cos(aa)) + secFrame.v*(ar*sin(aa));
-            eDir = aim - P;
-            double r2 = dot(eDir, eDir);
-            eDir = norm(eDir);
-            wEmit = (PI_D * rWin * rWin * fabs(dot(eDir, d_sec))) / (4.0*PI_D*r2);
-        } else {
-            double cth = 2.0*rng.frand() - 1.0, phi = TWO_PI_D * rng.frand();
-            double sth = sqrt(fmax(0.0, 1.0 - cth*cth));
-            eDir = {sth*cos(phi), sth*sin(phi), cth};
-        }
+        // (3) emission direction, aimed at the collection window (importance
+        //     sampling over its solid angle)
+        double ar = sqrtf(rng.frand()) * rWin, aa = TWO_PI_D * rng.frand();
+        Vec3   aim  = aimCtr + secFrame.u*(ar*cos(aa)) + secFrame.v*(ar*sin(aa));
+        Vec3   eDir = aim - P;
+        double r2   = dot(eDir, eDir);
+        eDir = norm(eDir);
+        double wEmit = (PI_D * rWin * rWin * fabs(dot(eDir, d_sec))) / (4.0*PI_D*r2);
         if (eDir.z >= 0) return;                              // must travel out (−z)
 
         // (4) the interaction: element, channel, emitted energy (scatter
@@ -334,15 +336,11 @@ struct ScanKernel {
             VT_DBG(bi, "emission", "pos %d: type=%d Z=%d Ef=%.3f keV wPol=%.3f",
                    di, type, grid.elems[ei].Z(), Ef, wPol);
 
-        // (5) self-absorption on the way out (weight or Bernoulli survival)
-        double tauOut = opticalDepthOut(grid, P, eDir, (float)Ef);
-        double wSelf = 1.0;
-        if (vr) wSelf = exp(-tauOut);
-        else if (rng.frand() >= exp(-tauOut)) return;
+        // (5) self-absorption on the way out, as a weight
+        double wSelf = exp(-opticalDepthOut(grid, P, eDir, (float)Ef));
 
-        // (6) collection: secondary polycap (confocal selection) or bare
-        //     detector aperture (importance aim needs no further check; brute
-        //     force must hit the aperture disk geometrically)
+        // (6) collection: secondary polycap (confocal selection, transmission
+        //     as a weight) — the aimed emission needs no aperture check
         double wSec = 1.0;
         if (hasSecondary) {
             Vec3 po, doo;
@@ -350,23 +348,14 @@ struct ScanKernel {
             Ray sray = makeRay(po, doo, Ef);
             secondary.trace(sray);
             if (!sray.getIAFlag()) return;
-            if (vr) wSec = sray.getProb();
-            else if (rng.frand() >= sray.getProb()) return;
+            wSec = sray.getProb();
             if (dbg.on(2, bi)) vtdbg::ray(bi, "secondary-exit", sray);
-        } else if (!vr) {
-            double tn = dot(eDir, d_sec);
-            if (tn <= 0) return;
-            double tt = dot(aimCtr - P, d_sec) / tn;
-            if (tt <= 0) return;
-            Vec3 miss = P + eDir*tt - aimCtr;
-            if (dot(miss, miss) > rWin*rWin) return;
         }
 
         // (7) Si(Li) detector response → measured channel + event record
         float wDet;
         float Emeas = detector.detect((float)Ef, rng, detElems, wDet);
         if (wDet <= 0.f) return;
-        if (!vr) { if (rng.frand() >= wDet) return; wDet = 1.f; }
 
         double w = wBeam * wEmit * wPol * wSelf * wSec * wDet;
         int b = (int)(Emeas / eBin);
@@ -376,6 +365,134 @@ struct ScanKernel {
                 VT_DBG(bi, "detected", "pos %d: E=%.3f keV ch=%d w=%.3e voxel %d",
                        di, (double)Emeas, b, w, voxIdx);
         }
+    }
+};
+
+// ── analog kernel (brute force): respawn until one photon is detected ────────
+// No tricks: each thread owns one DETECTED-photon slot. It draws candidate
+// photons — a beam ray, thinned by a Bernoulli on its optic-transmission
+// weight — and transports each through the sample with full analog physics:
+// free flight to the sampled interaction point, then photoelectric absorption
+// (→ isotropic fluorescence, or death by Auger), Rayleigh or Compton scatter
+// (θ from the tabulated distributions, Compton energy shift), and the NEW
+// photon continues — scatter → excitation → fluorescence → scatter → ... to
+// any order up to maxGen. Self-absorption needs no weight: the free-flight
+// sampling IS the attenuation. A photon that escapes the sample is detected
+// if it passes the secondary optic (Bernoulli on its transmission) or hits
+// the bare aperture disk, and survives the detector-efficiency draw; it is
+// attributed to the voxel of its LAST interaction. If the candidate dies
+// anywhere, the thread respawns the next one — a while loop until the slot is
+// filled or maxAttempts is exhausted (slot stays a ch = −1 sentinel). The
+// attempt count per slot is stored for absolute normalisation; expect
+// attempts/event ≈ 1/p(detect) — see the docs section "Computational cost vs.
+// physical accuracy" before running this on a laptop.
+struct AnalogKernel {
+    Grid        grid;           // device pointers
+    PolyCap     secondary;      // ignored when !hasSecondary
+    bool        hasSecondary;
+    Detector    detector;
+    const ChemElement* detElems;   // device
+    const ExitRay*     beam;       // device
+    Event*             slots;      // device (one per wanted detected photon)
+    long*              attempts;   // device (candidates consumed per slot)
+    OpticFrame  primFrame, secFrame;
+    Vec3        aimCtr, d_sec;
+    double      energy, rWin, eBin;
+    double      x0, y0, z0, LX, LY;
+    int         nBin, di, maxGen;
+    long        beamN, nTarget, maxAttempts;
+    uint64_t    scanSeed;
+    vtdbg::Ctx  dbg;
+
+    KOKKOS_INLINE_FUNCTION void operator()(long s) const {
+        slots[s] = Event{0, 0, -1, 0.f};
+        RNG rng = makeRng(scanSeed, (uint64_t)di*nTarget + s);
+        long tries = 0;
+        while (tries < maxAttempts) {
+            ++tries;
+            if (transportOne(rng, s)) break;               // slot filled → done
+        }
+        attempts[s] = tries;
+    }
+
+    // One candidate from source to (maybe) detector. Returns true on detection.
+    KOKKOS_INLINE_FUNCTION bool transportOne(RNG& rng, long s) const {
+        // spawn: pick a beam ray, Bernoulli-thin by its transmission weight
+        const ExitRay& er = beam[(long)(rng.next64() % (uint64_t)beamN)];
+        if (rng.frand() >= er.w) return false;
+        double E = er.e > 0 ? er.e : energy;
+        Vec3 P, d;
+        primFrame.toSample(er.pos, er.dir, P, d);
+        if (d.z <= 0) return false;
+        double t = (z0 - P.z) / d.z;
+        if (t < 0) return false;
+        P = P + d * t;                                     // surface entry
+        if (P.x <= x0 || P.x >= x0 + LX || P.y <= y0 || P.y >= y0 + LY) return false;
+
+        // analog transport: interactions of any order until the photon escapes
+        int lastVox = -1;
+        bool escaped = false;
+        for (int gen = 0; gen < maxGen; ++gen) {
+            Vec3 Q; int matIdx, voxIdx;
+            if (!sampleInteraction(grid, P, d, (float)E, rng.frand(),
+                                   Q, matIdx, voxIdx, dbg, -1)) {
+                escaped = true;                            // left the sample along d
+                break;
+            }
+            const Material& mat = grid.mats[matIdx];
+            int ei   = mat.getInteractingElementIdx((float)E, rng.frand(), grid.elems);
+            const ChemElement& el = grid.elems[ei];
+            int type = el.getInteractionType((float)E, rng.frand());
+            if (type == 0) {                               // photoelectric
+                int shell = el.getExcitedShell((float)E, rng.frand());
+                if (rng.frand() >= el.Fluor_Y(shell)) return false;   // Auger → photon gone
+                E = el.Line_Energy(el.getTransition(shell, rng.frand()));
+                double cth = 2.0*rng.frand() - 1.0, phi = TWO_PI_D * rng.frand();
+                double sth = sqrt(fmax(0.0, 1.0 - cth*cth));
+                d = {sth*cos(phi), sth*sin(phi), cth};     // isotropic fluorescence
+            } else {                                       // Rayleigh / Compton
+                double th = (type == 1) ? el.getThetaRayl ((float)E, rng.frand())
+                                        : el.getThetaCompt((float)E, rng.frand());
+                if (type == 2) E = el.getComptEnergy((float)E, (float)th);
+                d = rotate(d, th, TWO_PI_D * rng.frand());
+            }
+            if (E < 0.8) return false;
+            P = Q;
+            lastVox = voxIdx;
+            if (dbg.on(2, s))
+                VT_DBG(s, "analog-hit", "pos %d gen %d: type=%d Z=%d → E=%.3f keV voxel %d",
+                       di, gen, type, el.Z(), E, voxIdx);
+        }
+        if (!escaped || lastVox < 0) return false;         // stuck inside / never interacted
+
+        // collection: secondary optic (Bernoulli) or bare aperture disk hit
+        if (hasSecondary) {
+            Vec3 po, doo;
+            secFrame.toOptic(P, d, po, doo);
+            Ray sray = makeRay(po, doo, E);
+            secondary.trace(sray);
+            if (!sray.getIAFlag()) return false;
+            if (rng.frand() >= sray.getProb()) return false;
+        } else {
+            double tn = dot(d, d_sec);
+            if (tn <= 0) return false;
+            double tt = dot(aimCtr - P, d_sec) / tn;
+            if (tt <= 0) return false;
+            Vec3 miss = P + d*tt - aimCtr;
+            if (dot(miss, miss) > rWin*rWin) return false;
+        }
+
+        // detector response — every survival a draw, every count one photon
+        float wDet;
+        float Emeas = detector.detect((float)E, rng, detElems, wDet);
+        if (wDet <= 0.f || rng.frand() >= wDet) return false;
+        int b = (int)(Emeas / eBin);
+        if (b < 0 || b >= nBin) return false;
+        slots[s] = Event{di, lastVox, b, 1.f};
+        if (dbg.on(1, s))
+            VT_DBG(s, "detected", "pos %d: E=%.3f keV ch=%d voxel %d (analog)",
+                   di, (double)Emeas, b, lastVox);
+        return true;
     }
 };
 

@@ -49,25 +49,28 @@ the secondary optic's focal distance and entrance radius:
    .aimDist = C.secondary ? C.pcSec.focalDown : C.run.detDistance,
    .rWin    = C.secondary ? C.pcSec.rExtDown  : C.run.detRadius,
 
-In *importance-sampling* mode (``vr = 1``) nothing else is needed: emission is
-aimed at a random point of that disk and the solid-angle weight ``wEmit``
-already accounts for the geometry — a much larger disk than a polycap
-entrance, so far more photons survive per primary. In *analog* mode the photon
-is emitted isotropically and must hit the disk geometrically:
+In *importance-sampling* mode (``variance_reduction = 1``, ``ScanKernel``)
+nothing else is needed: emission is aimed at a random point of that disk and
+the solid-angle weight ``wEmit`` already accounts for the geometry — a much
+larger disk than a polycap entrance, so far more photons survive per primary.
+In *brute-force* mode (``AnalogKernel``) the photon leaves the sample in
+whatever direction its last interaction gave it and must hit the disk
+geometrically:
 
 .. code-block:: cpp
 
-   } else if (!vr) {                       // bare aperture, brute force
-       double tn = dot(eDir, d_sec);
-       if (tn <= 0) return;                // flying away from the detector
-       double tt = dot(aimCtr - P, d_sec) / tn;
-       Vec3 miss = P + eDir*tt - aimCtr;
-       if (dot(miss, miss) > rWin*rWin) return;   // misses the disk
-   }
+   double tn = dot(d, d_sec);
+   if (tn <= 0) return false;              // flying away from the detector
+   double tt = dot(aimCtr - P, d_sec) / tn;
+   Vec3 miss = P + d*tt - aimCtr;
+   if (dot(miss, miss) > rWin*rWin) return false;   // misses the disk
 
 Step (6) of the confocal chain — ``secondary.trace(sray)`` and its
 transmission weight ``wSec`` — disappears entirely; ``wSec`` stays 1. Step (7),
-the Si(Li) detector response, is unchanged.
+the Si(Li) detector response, is unchanged. Because the aperture disk is so
+much easier to hit than a polycap entrance, this is also the one chain where
+brute force is cheap enough for a laptop — about 6 × 10² candidates per
+detected photon (see :doc:`cost-vs-accuracy`).
 
 What that means physically
 --------------------------

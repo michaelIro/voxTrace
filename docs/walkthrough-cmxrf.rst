@@ -149,9 +149,13 @@ below a threshold the photon is declared absorbed. Two more exits: a hit
 one — no further wall hit, meaning the photon flies out of the exit and its
 position is projected onto the exit plane.
 
-**"Thrown away and respawned."** Note that nothing is literally respawned: of
-the 2 million photons in a chunk, those that die simply leave their ``w = -1``
-sentinel, and the host keeps the survivors:
+**"Thrown away and respawned."** In *this* stage nothing is literally
+respawned: of the 2 million photons in a chunk, those that die simply leave
+their ``w = -1`` sentinel, and the host keeps the survivors. (Literal
+respawning does exist in voxTrace — in brute-force mode the *scan* stage's
+``AnalogKernel`` keeps drawing fresh candidates in a while loop until each
+thread has one detected photon; see
+:doc:`cost-vs-accuracy`.)
 
 .. code-block:: cpp
 
@@ -229,18 +233,16 @@ so stepping across the grid costs one array lookup per voxel. A photon that
 crosses the whole sample without interacting is discarded.
 
 **(3) Which way does the new photon fly?** Here voxTrace's two Monte-Carlo
-modes split (the ``vr`` switch — *variance reduction*):
+modes part ways (the ``variance_reduction`` switch). This walkthrough follows
+``ScanKernel`` — the importance-sampling mode — which always aims the emitted
+photon at a random point of the collection window and carries the honest
+solid-angle weight:
 
 .. code-block:: cpp
 
-   if (vr) {   // importance sampling: aim at the collection window, carry a weight
-       Vec3 aim = aimCtr + secFrame.u*(ar*cos(aa)) + secFrame.v*(ar*sin(aa));
-       eDir  = norm(aim - P);
-       wEmit = (PI_D*rWin*rWin*fabs(dot(eDir, d_sec))) / (4.0*PI_D*r2);
-   } else {    // analog MC: emit isotropically, let geometry decide
-       eDir = random direction on the sphere;
-   }
-
+   Vec3 aim = aimCtr + secFrame.u*(ar*cos(aa)) + secFrame.v*(ar*sin(aa));
+   eDir  = norm(aim - P);
+   wEmit = (PI_D*rWin*rWin*fabs(dot(eDir, d_sec))) / (4.0*PI_D*r2);
 
 .. figure:: images/emission-modes.svg
    :width: 94%
@@ -252,10 +254,16 @@ Real fluorescence is emitted in all directions, but almost none of those
 directions reach the tiny secondary optic. *Importance sampling* cheats
 honestly: it always aims at a random point on the collection window and
 multiplies the photon's weight by the (small) probability that isotropic
-emission would have gone there. *Analog* mode emits truly isotropically and
-throws the photon away if it misses — physically literal, statistically far
-more expensive. Both modes discard photons emitted downward into the sample
-half-space that can never exit (``eDir.z >= 0``).
+emission would have gone there — exact for this single interaction, and the
+reason the reconstruction fit stays linear. Photons emitted downward into the
+sample half-space that can never exit are discarded (``eDir.z >= 0``).
+
+The physically literal alternative lives in its own kernel:
+``AnalogKernel`` (``variance_reduction = 0``) emits isotropically, lets the
+photon scatter, fluoresce and scatter again to any interaction order, decides
+every survival with a Bernoulli draw, and respawns candidates until each
+thread has one detected photon. What that costs and when it is worth it is
+the subject of :doc:`cost-vs-accuracy`.
 
 **(4) What kind of interaction?** The element is chosen with probability
 proportional to its share of the interaction cross-section, then the physics
